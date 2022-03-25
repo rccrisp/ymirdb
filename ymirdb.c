@@ -37,6 +37,8 @@ bool isnumber(char s[]){
     return true;
 }
 
+
+
 node * list_init(){
 	node * head = malloc(sizeof(node));
 	head->next = NULL;
@@ -76,6 +78,7 @@ void list_free(node * head){
 	while(iter->next){
 		node * current = iter;
 		iter = iter->next;
+		free(iter->item.values);
 		free(current);
 	}
 
@@ -209,7 +212,7 @@ void command_set(char command[], node * head){
 }
 
 void command_push(){
-	printf("pushes values to the front\n");
+	
 }
 
 void command_append(){
@@ -287,6 +290,7 @@ void command_type(){
 int command_interpreter(char command[], node * head){
 
 	if(strncasecmp(command,"bye",3)==0){
+		list_free(head);
 		command_bye();
 		return -1;
 	}else if(strncasecmp(command,"help",4)==0){
