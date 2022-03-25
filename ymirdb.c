@@ -132,7 +132,7 @@ void command_get(char * line, node * head){
 		printf("%d", this_entry.values[i].value);
 		printf("]\n");
 	}else{
-		printf("Key not found\n");
+		printf("no such key\n");
 	}
 
 	return;
@@ -210,7 +210,7 @@ void command_set(char command[], node * head){
 	this_entry.length = length_of_line-1; // update this later to include entries
 
 	list_add(head,this_entry);
-
+	printf("ok\n\n");
 	return;
 
 
