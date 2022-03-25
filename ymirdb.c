@@ -57,14 +57,9 @@ void list_add(node * head, entry this_entry){
 	return;
 }
 
-void list_delete(node** head, node* n){
-	if(n==*head){
-		(*head) = (*head)->next;
-		free(n);
-		return;
-	}
+void list_delete(node* head, node* n){
 
-	node * prev_node = *head;
+	node * prev_node = head;
 	while(prev_node->next!=n){
 		prev_node = prev_node->next;
 	}
@@ -139,32 +134,29 @@ void command_get(char * line, node * head){
 
 }
 
-struct entry * command_del(char * line, struct entry *all_entries){
-	// char * this_key = strtok(line, " ");
-	// struct entry * an_entry;
-	// bool found = false;
-	// for(int i = 0; i < sizeof(all_entries); i++){
-	// 	an_entry = all_entries[i];
-	// 	if(strcmp(this_key,an_entry->key)){
-	// 		free(an_entry);
-	// 		all_entries[i] = NULL;
-	// 		found = true;
-	// 		break;
-	// 	}
-	// }
+void command_del(char * line, node * head){
+	char * key_to_find = strtok(line, " \n");
+	bool found = false;
+	// head is always NULL entry
+	node * iter = head->next;
+	entry this_entry;
+	while(iter){
+		this_entry = iter->item;
+		if(strcmp(this_entry.key,key_to_find) == 0){
+			found = true;
+			break;
+		}
+		iter = iter->next;
+	}
 
-	// if(!found){
-	// 	printf("Key Not Found");
-	// 	return NULL;
-	// }
-
-	// // sort entries to hopefully end up with null value at the end of the allocated
-	// // memory CHECK THIS!!!
-	// qsort(all_entries,sizeof(all_entries),sizeof(struct entry *), cmpfunc);
-
-	// // shrink all_entries to remove deleted entry
-	// all_entries = realloc(all_entries, sizeof(all_entries) - sizeof(struct entry *));
-	return all_entries;
+	
+	if(found){
+		list_delete(head, iter);
+		free(this_entry.values);
+		printf("ok\n\n");
+	}else{
+		printf("not permitted\n");
+	}
 }
 
 void command_purge(){
@@ -309,7 +301,8 @@ int command_interpreter(char command[], node * head){
 		char * line = &command[0]+4;
 		command_get(line,head);
 	}else if(strncasecmp(command,"del",3)==0){
-
+		char * line = &command[0]+4;
+		command_del(line,head);
 	}else if(strncasecmp(command,"purge",5)==0){
 		command_purge();
 	}else if(strncasecmp(command,"set",3)==0){
