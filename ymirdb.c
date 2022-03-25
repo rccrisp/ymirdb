@@ -27,16 +27,64 @@
 // ...
 //
 
-int isnumber(char s[]){
+bool isnumber(char s[]){
     for (int i = 0; s[i]!= '\0'; i++){
-        if (isdigit(s[i]) == 0)
-              return 0;
+        if (isdigit(s[i]) == 0 && s[i]!= '\n'){
+			return false;
+		}
+              
     }
-    return 1;
+    return true;
 }
 
-int cmpfunc(const void* a,const void* b){
-	return (*(int*)b-*(int*)a);
+node * list_init(){
+	node * head = malloc(sizeof(node));
+	head->next = NULL;
+	return head;
+}
+
+void list_add(node * head, entry this_entry){
+	node * last_node = head;
+	while(last_node->next){
+		last_node = last_node->next;
+	}
+	
+	node * new_node = malloc(sizeof(node));
+	new_node->item = this_entry;
+	new_node->next = NULL;
+	last_node->next = new_node;
+
+	return;
+}
+
+void list_delete(node** head, node* n){
+	if(n==*head){
+		(*head) = (*head)->next;
+		free(n);
+		return;
+	}
+
+	node * prev_node = *head;
+	while(prev_node->next!=n){
+		prev_node = prev_node->next;
+	}
+	prev_node->next = n->next;
+	free(n);
+}
+
+node * list_next(node * n){
+	return n->next;
+}
+
+void list_free(node * head){
+	node * iter = head;
+	while(iter->next){
+		node * current = iter;
+		iter = iter->next;
+		free(current);
+	}
+
+	return ;
 }
 
 void command_bye() {
@@ -59,26 +107,33 @@ void command_list_snapshots(){
 	printf("displays all snapshots in the database\n");
 }
 
-void command_get(char * line, struct entry * all_entries){
-	// char * this_key = strtok(line, " ");
-	// struct entry an_entry;
-	// bool found = false;
-	// for(int i = 0; i < sizeof(all_entries);i++){
-	// 	an_entry = all_entries[i];
-	// 	printf("find key: %s current key: %s\n", this_key, an_entry.key);
-	// 	if(strcmp(this_key,an_entry.key)){
-	// 		found = true;
-	// 		break;
-	// 	}
-	// }
+void command_get(char * line, node * head){
+	char * key_to_find = strtok(line, " \n");
+	bool found = false;
+	// head is always NULL entry
+	node * iter = head->next;
+	entry this_entry;
+	while(iter){
+		this_entry = iter->item;
+		if(strcmp(this_entry.key,key_to_find) == 0){
+			found = true;
+			break;
+		}
+		iter = iter->next;
+	}
 
-	// if(found){
-	// 	printf("[");
-	// 	for(int i = 0; i < an_entry.length; i++){
-	// 		printf("%d", an_entry.values[i].value);
-	// 	}
-	// 	printf("]\n");
-	// }
+	
+	if(found){
+		printf("[");
+		int i = 0;
+		for(; i < this_entry.length-1; i++){
+			printf("%d ", this_entry.values[i].value);
+		}
+		printf("%d", this_entry.values[i].value);
+		printf("]\n");
+	}else{
+		printf("Key not found\n");
+	}
 
 	return;
 
@@ -116,41 +171,49 @@ void command_purge(){
 	printf("deletes entry from current state and snapshots\n");
 }
 
-void command_set(char * line, struct entry * to_set){
-	char * ptr = &line[0] + 4;
-	if(!isalpha(*ptr)){
-		printf("KEY MUST BE ALPHANUMERIC, BEGININNING WITH AN ALPHABETICAL CHARACTER\n");
+void command_set(char command[], node * head){
+	// dont bother reading first 4 (this is just command set)
+	char * line = command + 4;
+	char * token = strtok(line, " ");
+	char *this_line[MAX_LINE];
+	int length_of_line = 0;
+	for(int i = 0; i < sizeof(this_line); i++){
+		if(token == NULL){
+			break;
+		}
+		this_line[i] = token;
+		token = strtok(NULL," ");
+		length_of_line++;
+	}
+
+	if(sizeof(this_line[0])>MAX_KEY){
 		return;
 	}
 
-	// read the key
-	char this_key[MAX_KEY];
-	char * token = strtok(ptr," ");
-	for(int i = 0; i < sizeof(this_key); i++){
-		this_key[i] = *token;
-		token++;
-	}
+	// initialise entry struct
+	struct entry this_entry;
 
-	struct element this_values[MAX_LINE];
-	struct element *value_ptr = &this_values[0];
-	token = strtok(ptr, " ");
+	// set the key
+	strcpy(this_entry.key,this_line[0]);
+	// printf("%s\n", this_entry.key);
 
-	while(token != NULL){
-		if(isnumber(token) == 1){
-			value_ptr->value = atoi(token);
-		} // else{} for if value is a reference to another entry, deal with later
-		token = strtok(NULL, " ");
+	// set the values
+	this_entry.values = malloc(sizeof(struct element)*(length_of_line-1));
+	struct element * value_ptr = this_entry.values;
+	for(int i = 1; i < length_of_line; i++){
+		if(isnumber(this_line[i])){
+			value_ptr->value = atoi(this_line[i]);
+		}//else{} for case if value is a pointer to another entry
 		value_ptr++;
 	}
+	
+	this_entry.length = length_of_line-1; // update this later to include entries
 
-	int this_length = value_ptr-&this_values[0];
+	list_add(head,this_entry);
 
-	struct entry this_entry;
-	strcpy(this_entry.key,this_key);
-	this_entry.values = malloc(sizeof(struct element)*this_length);
-	this_entry.length = this_length;
-	*to_set = this_entry;
 	return;
+
+
 }
 
 void command_push(){
@@ -229,15 +292,9 @@ void command_type(){
 	printf("displays if the entry of this key is simple or general\n");
 }
 
-int command_interpreter(char * command, struct entry * all_entries, int * ptr_number_of_entries){
+int command_interpreter(char command[], node * head){
 
 	if(strncasecmp(command,"bye",3)==0){
-		for(int i = 0; i < *ptr_number_of_entries;i++){
-			free(all_entries[i].values);
-			all_entries[i].values = NULL;
-		}
-		free(all_entries);
-		all_entries = NULL;
 		command_bye();
 		return -1;
 	}else if(strncasecmp(command,"help",4)==0){
@@ -249,17 +306,14 @@ int command_interpreter(char * command, struct entry * all_entries, int * ptr_nu
 	}else if(strncasecmp(command,"list snapshots",14)==0){
 		command_list_snapshots();
 	}else if(strncasecmp(command,"get",3)==0){
-		// char * line = &command[0]+4;
-		// command_get(line, all_entries);
+		char * line = &command[0]+4;
+		command_get(line,head);
 	}else if(strncasecmp(command,"del",3)==0){
-		// char * line = &command[0]+4;
-		// command_del(line, all_entries);
+
 	}else if(strncasecmp(command,"purge",5)==0){
 		command_purge();
 	}else if(strncasecmp(command,"set",3)==0){
-		all_entries = realloc(all_entries,(*ptr_number_of_entries + 1) + sizeof(struct entry));
-		*ptr_number_of_entries++;
-		command_set(command,all_entries[*ptr_number_of_entries-1]);
+		command_set(command,head);
 	}else if(strncasecmp(command,"push",4)==0){
 		command_push();
 	}else if(strncasecmp(command,"append",6)==0){
@@ -302,16 +356,12 @@ int command_interpreter(char * command, struct entry * all_entries, int * ptr_nu
 		printf("INVALID COMMAND: TYPE HELP FOR A LIST OF VALID COMMANDS\n");
 	}
 
-	free(all_entries);
-	all_entries = NULL;
 	return 0;
 }
 int main(void) {
 
 	char line[MAX_LINE];
-	// create an array of entry structs
-	int number_of_entries = 0;
-	struct entry *all_entries = malloc(sizeof(struct entry));
+	node * head = list_init();
 
 	while (true) {
 		printf("> ");
@@ -326,7 +376,7 @@ int main(void) {
 		// TODO
 		//
 
-		if(command_interpreter(line,all_entries,&number_of_entries) == -1){
+		if(command_interpreter(line, head) == -1){
 			return 0;
 		}
 

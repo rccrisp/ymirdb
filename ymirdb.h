@@ -15,6 +15,9 @@ enum item_type {
 typedef struct element element;
 typedef struct entry entry;
 typedef struct snapshot snapshot;
+typedef struct node node;
+
+
 
 struct element {
   enum item_type type;
@@ -40,6 +43,11 @@ struct entry {
 //   size_t backward_size; 
 //   size_t backward_max; 
 //   entry** backward; // these entries depend on this
+};
+
+struct node {
+	entry item;
+	node * next;
 };
 
 struct snapshot {
