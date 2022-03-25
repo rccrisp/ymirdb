@@ -155,7 +155,7 @@ void command_del(char * line, node * head){
 		free(this_entry.values);
 		printf("ok\n\n");
 	}else{
-		printf("not permitted\n");
+		printf("not permitted\n\n");
 	}
 }
 
