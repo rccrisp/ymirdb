@@ -37,6 +37,23 @@ bool isnumber(char s[]){
     return true;
 }
 
+node * find_key(char * line, node * head){
+	char * key_to_find = strtok(line, " \n");
+	// head is always NULL entry
+	node * iter = head->next;
+	entry this_entry;
+	while(iter){
+		this_entry = iter->item;
+		if(strcmp(this_entry.key,key_to_find) == 0){
+			return iter;
+		}
+		iter = iter->next;
+	}
+
+	return NULL;
+
+}
+
 
 
 node * list_init(){
@@ -106,22 +123,10 @@ void command_list_snapshots(){
 }
 
 void command_get(char * line, node * head){
-	char * key_to_find = strtok(line, " \n");
-	bool found = false;
-	// head is always NULL entry
-	node * iter = head->next;
-	entry this_entry;
-	while(iter){
-		this_entry = iter->item;
-		if(strcmp(this_entry.key,key_to_find) == 0){
-			found = true;
-			break;
-		}
-		iter = iter->next;
-	}
+	node * this = find_key(line,head);
 
-	
-	if(found){
+	if(this!=NULL){
+		entry this_entry = this->item;
 		printf("[");
 		int i = 0;
 		for(; i < this_entry.length-1; i++){
@@ -138,23 +143,11 @@ void command_get(char * line, node * head){
 }
 
 void command_del(char * line, node * head){
-	char * key_to_find = strtok(line, " \n");
-	bool found = false;
-	// head is always NULL entry
-	node * iter = head->next;
-	entry this_entry;
-	while(iter){
-		this_entry = iter->item;
-		if(strcmp(this_entry.key,key_to_find) == 0){
-			found = true;
-			break;
-		}
-		iter = iter->next;
-	}
+	node * this = find_key(line,head);
 
-	
-	if(found){
-		list_delete(head, iter);
+	if(this!=NULL){
+		entry this_entry = this->item;
+		list_delete(head, this);
 		free(this_entry.values);
 		printf("ok\n\n");
 	}else{
