@@ -130,9 +130,9 @@ void command_get(char * line, node * head){
 			printf("%d ", this_entry.values[i].value);
 		}
 		printf("%d", this_entry.values[i].value);
-		printf("]\n");
+		printf("]\n\n");
 	}else{
-		printf("no such key\n");
+		printf("no such key\n\n");
 	}
 
 	return;
