@@ -410,9 +410,8 @@ void command_pluck(char * line, node * head){
 		if(this_entry->length < index || index <= 0){
 			printf("index out of range\n");
 		}else{
-			element * values_to_pluck_from = this_entry->values;
 			printf("%d\n", this_entry->values[index-1].value);
-			this_entry->values = remove_value_from_index(values_to_pluck_from,index,this_entry->length);
+			this_entry->values = remove_value_from_index(this_entry->values,index,this_entry->length);
 			this_entry->length--;
 			this_entry->values = realloc(this_entry->values, sizeof(element)*this_entry->length);
 		}
@@ -436,9 +435,8 @@ void command_pop(char * line, node * head){
 		if(this_entry->length == 0){
 			printf("nil\n");
 		}else{
-			element * values_to_pop_from = this_entry->values;
 			printf("%d\n", this_entry->values[0].value);
-			this_entry->values = remove_value_from_index(values_to_pop_from,1,this_entry->length);
+			this_entry->values = remove_value_from_index(this_entry->values,1,this_entry->length);
 			this_entry->length--;
 			this_entry->values = realloc(this_entry->values, sizeof(element)*this_entry->length);
 		}
