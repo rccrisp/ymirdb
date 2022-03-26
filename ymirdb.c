@@ -39,6 +39,16 @@ bool isnumber(char s[]){
     return true;
 }
 
+void print_values(element * print_values, int number){
+	printf("[");
+	int i = 0;
+	for(; i < number-1; i++){
+		printf("%d ", print_values[i].value);
+	}
+	printf("%d", print_values[i].value);
+	printf("]\n");
+}
+
 // given a character array of values, include these values in the correct key, from a given index
 element * populate_values(element * entry_values, char * new_values[], int index, int size){
 	int j = 1;
@@ -50,6 +60,7 @@ element * populate_values(element * entry_values, char * new_values[], int index
 	}
 	return entry_values;
 }
+
 element * append(element * old_values, int num_old, char * some_values[], int num_new){
 	// find the size of values after including the new values
 	int size_after_append = num_new + num_old;
@@ -113,16 +124,12 @@ node * list_init(){
 	return head;
 }
 
+// push a node to the start of the linked list
 void list_add(node * head, entry this_entry){
-	node * last_node = head;
-	while(last_node->next){
-		last_node = last_node->next;
-	}
-	
 	node * new_node = malloc(sizeof(node));
 	new_node->item = this_entry;
-	new_node->next = NULL;
-	last_node->next = new_node;
+	new_node->next = head->next;
+	head->next = new_node;
 
 	return;
 }
@@ -161,12 +168,31 @@ void command_help() {
 	printf("%s\n", HELP);
 }
 
-void command_list_keys(){
-	printf("displays all keys in current state\n");
+void command_list_keys(node * head){
+	node * iter = head->next;
+	entry this_entry;
+	while(iter){
+		this_entry = iter->item;
+		printf("%s\n",this_entry.key);
+		iter = iter->next;
+	}
+
+	printf("\n");
+	return;
 }
 
-void command_list_entries(){
-	printf("displays all entries in current state\n");
+void command_list_entries(node * head){
+	node * iter = head->next;
+	entry this_entry;
+	while(iter){
+		this_entry = iter->item;
+		printf("%s ",this_entry.key);
+		print_values(this_entry.values, this_entry.length);
+		iter = iter->next;
+	}
+
+	printf("\n");
+	return;
 }
 
 void command_list_snapshots(){
@@ -178,16 +204,12 @@ void command_get(char * line, node * head){
 
 	if(this!=NULL){
 		entry this_entry = this->item;
-		printf("[");
-		int i = 0;
-		for(; i < this_entry.length-1; i++){
-			printf("%d ", this_entry.values[i].value);
-		}
-		printf("%d", this_entry.values[i].value);
-		printf("]\n\n");
+		print_values(this_entry.values, this_entry.length);
 	}else{
-		printf("no such key\n\n");
+		printf("no such key\n");
 	}
+
+	printf("\n");
 
 	return;
 
@@ -254,13 +276,6 @@ void command_set(char command[], node * head){
 		this_entry->length = length_of_line-1;
 
 		this_entry->values = populate_values(this_entry->values,this_line,0,this_entry->length);
-		// int j = 1;
-		// for(int i = 0; i < this_entry->length; i++){
-		// 	if(isnumber(some_values[j])){
-		// 		this_entry->values[i].value = atoi(some_values[j]);
-		// 	}//else{} if it is an entry
-		// 	j++;
-		// }
 	}
 
 		
@@ -415,9 +430,9 @@ int command_interpreter(char command[], node * head){
 	}else if(strncasecmp(command,"help",4)==0){
 		command_help();
 	}else if(strncasecmp(command,"list keys",9)==0){
-		command_list_keys();
+		command_list_keys(head);
 	}else if(strncasecmp(command,"list entries",12)==0){
-		command_list_entries();
+		command_list_entries(head);
 	}else if(strncasecmp(command,"list snapshots",14)==0){
 		command_list_snapshots();
 	}else if(strncasecmp(command,"get",3)==0){
