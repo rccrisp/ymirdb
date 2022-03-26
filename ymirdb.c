@@ -71,12 +71,16 @@ int strip_values(char * line, char * strip_values[]){
 }
 
 void print_values(element * print_values, int number){
+
 	printf("[");
 	int i = 0;
-	for(; i < number-1; i++){
-		printf("%d ", print_values[i].value);
+	if(i<number){
+		for(; i < number-1; i++){
+			printf("%d ", print_values[i].value);
+		}
+		printf("%d", print_values[i].value);
 	}
-	printf("%d", print_values[i].value);
+	
 	printf("]\n");
 }
 
