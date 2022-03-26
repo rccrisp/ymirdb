@@ -39,17 +39,17 @@ bool isnumber(char s[]){
     return true;
 }
 
-element * remove_value_from_index(element * values_to_remove_from, int index, int size_before_remove){
+element * remove_value_from_index(element * these_values, int index, int size_before_remove){
 	int j = 0;
 	for(int i = 0; i < size_before_remove; i++){
 		if(i == index-1){
 			i++;
 		}
-		values_to_remove_from[j].value = values_to_remove_from[i].value;
+		these_values[j].value = these_values[i].value;
 		j++;
 	}
 
-	return values_to_remove_from;
+	return these_values;
 }
 
 int strip_values(char * line, char * strip_values[]){
