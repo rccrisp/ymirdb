@@ -171,12 +171,18 @@ void command_help() {
 void command_list_keys(node * head){
 	node * iter = head->next;
 	entry this_entry;
+	bool empty = true;
 	while(iter){
+		empty = false;
 		this_entry = iter->item;
 		printf("%s\n",this_entry.key);
 		iter = iter->next;
 	}
 
+	if(empty){
+		printf("no keys\n");
+	}
+	
 	printf("\n");
 	return;
 }
@@ -184,11 +190,17 @@ void command_list_keys(node * head){
 void command_list_entries(node * head){
 	node * iter = head->next;
 	entry this_entry;
+	bool empty = true;
 	while(iter){
+		empty = false;
 		this_entry = iter->item;
 		printf("%s ",this_entry.key);
 		print_values(this_entry.values, this_entry.length);
 		iter = iter->next;
+	}
+
+	if(empty){
+		printf("no keys\n");
 	}
 
 	printf("\n");
