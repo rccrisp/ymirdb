@@ -200,7 +200,7 @@ void command_list_entries(node * head){
 	}
 
 	if(empty){
-		printf("no keys\n");
+		printf("no entries\n");
 	}
 
 	printf("\n");
@@ -284,7 +284,7 @@ void command_set(char command[], node * head){
 		list_add(head,this_entry);
 	}else{
 		struct entry * this_entry = &(key_node->item);
-		this_entry = realloc(this_entry,sizeof(element)*(length_of_line-1));
+		this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line-1));
 		this_entry->length = length_of_line-1;
 
 		this_entry->values = populate_values(this_entry->values,this_line,0,this_entry->length);
