@@ -49,6 +49,7 @@ element * remove_value_from_index(element * these_values, int index, int size_be
 		j++;
 	}
 
+	these_values = realloc(these_values, sizeof(element)*(size_before_remove-1));
 	return these_values;
 }
 
@@ -413,7 +414,6 @@ void command_pluck(char * line, node * head){
 			printf("%d\n", this_entry->values[index-1].value);
 			this_entry->values = remove_value_from_index(this_entry->values,index,this_entry->length);
 			this_entry->length--;
-			this_entry->values = realloc(this_entry->values, sizeof(element)*this_entry->length);
 		}
 		
 		
@@ -438,7 +438,6 @@ void command_pop(char * line, node * head){
 			printf("%d\n", this_entry->values[0].value);
 			this_entry->values = remove_value_from_index(this_entry->values,1,this_entry->length);
 			this_entry->length--;
-			this_entry->values = realloc(this_entry->values, sizeof(element)*this_entry->length);
 		}
 		
 		
