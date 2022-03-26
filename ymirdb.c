@@ -39,6 +39,21 @@ bool isnumber(char s[]){
     return true;
 }
 
+element * remove_value_from_index(element * before_pluck, int index, int size_before_pluck){
+	element * after_pluck = malloc(sizeof(element)*(size_before_pluck-1));
+	int j = 0;
+	for(int i = 0; i < size_before_pluck; i++){
+		if(i == index-1){
+			i++;
+		}
+		after_pluck[j].value = before_pluck[i].value;
+		j++;
+	}
+
+	free(before_pluck);
+	return after_pluck;
+}
+
 int strip_values(char * line, char * strip_values[]){
 	char * token = strtok(line, " \n");
 	int number_of_values = -1; // because first value is the key
@@ -356,15 +371,83 @@ void command_append(char * line, node * head){
 }
 
 void command_pick(char * line, node * head){
-	
+	// find the value to pick from this key
+	char *pick_index[MAX_LINE];
+	strip_values(line,pick_index);
+
+	// find the key to pick from from the linked list
+	node * pick_node = find_key(line,head);
+
+	// pick the value from the given index from the key
+	if(pick_node!=NULL){
+		entry this_entry = pick_node->item;
+		int index = atoi(pick_index[1]);
+		if(this_entry.length < index || index <= 0){
+			printf("index out of range\n");
+		}else{
+			printf("%d\n", this_entry.values[index-1].value);
+		}
+		
+		
+	}else{
+		printf("no such key\n");
+	}
+
+	printf("\n");
+	return;
 }
 
-void command_pluck(){
-	printf("displays and removes value at index\n");
+void command_pluck(char * line, node * head){
+	// find the value to pluck from this key
+	char *pluck_index[MAX_LINE];
+	strip_values(line,pluck_index);
+
+	// find the key to pluck from from the linked list
+	node * pluck_node = find_key(line,head);
+
+	// pluck the value from the given index from the key
+	if(pluck_node!=NULL){
+		entry * this_entry = &(pluck_node->item);
+		int index = atoi(pluck_index[1]);
+		if(this_entry->length < index || index <= 0){
+			printf("index out of range\n");
+		}else{
+			printf("%d\n", this_entry->values[index-1].value);
+			this_entry->values = remove_value_from_index(this_entry->values,index,this_entry->length);
+			this_entry->length--;
+		}
+		
+		
+	}else{
+		printf("no such key\n");
+	}
+
+	printf("\n");
+	return;
 }
 
-void command_pop(){
-	printf("displays and removes the front value\n");
+void command_pop(char * line, node * head){
+	// find the key to pop from from the linked list
+	node * pop_node = find_key(line,head);
+
+	// pop the value from the given index from the key
+	if(pop_node!=NULL){
+		entry * this_entry = &(pop_node->item);
+		if(this_entry->length == 0){
+			printf("nil\n");
+		}else{
+			printf("%d\n", this_entry->values[0].value);
+			this_entry->values = remove_value_from_index(this_entry->values,1,this_entry->length);
+			this_entry->length--;
+		}
+		
+		
+	}else{
+		printf("no such key\n");
+	}
+
+	printf("\n");
+	return;
 }
 
 void command_drop(){
@@ -454,11 +537,14 @@ int command_interpreter(char command[], node * head){
 		line = &command[0]+7;
 		command_append(line,head);
 	}else if(strncasecmp(command,"pick",4)==0){
-		// command_pick();
+		line = &command[0]+5;
+		command_pick(line,head);
 	}else if(strncasecmp(command,"pluck",5)==0){
-		command_pluck();
+		line = &command[0]+6;
+		command_pluck(line,head);
 	}else if(strncasecmp(command,"pop",3)==0){
-		command_pop();
+		line = &command[0]+4;
+		command_pop(line,head);
 	}else if(strncasecmp(command,"drop",3)==0){
 		command_drop();
 	}else if(strncasecmp(command,"rollback",8)==0){
