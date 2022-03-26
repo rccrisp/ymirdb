@@ -42,10 +42,13 @@ bool isnumber(char s[]){
 element * remove_value_from_index(element * these_values, int index, int size_before_remove){
 	int j = 0;
 	for(int i = 0; i < size_before_remove; i++){
-		these_values[j].value = these_values[i].value;
-		if(i == index-2){
+		if(i == index-1){
 			i++;
 		}
+		if(i != size_before_remove){
+			these_values[j].value = these_values[i].value;
+		}
+		
 		j++;
 	}
 
