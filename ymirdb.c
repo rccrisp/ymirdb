@@ -39,6 +39,20 @@ bool isnumber(char s[]){
     return true;
 }
 
+int strip_values(char * line, char * strip_values[]){
+	char * token = strtok(line, " \n");
+	int number_of_values = -1; // because first value is the key
+	for(int i = 0; i < MAX_LINE; i++){
+		if(token == NULL){
+			break;
+		}
+		strip_values[i] = token;
+		token = strtok(NULL," ");
+		number_of_values++;
+	}
+	return number_of_values;
+}
+
 void print_values(element * print_values, int number){
 	printf("[");
 	int i = 0;
@@ -247,17 +261,11 @@ void command_purge(){
 void command_set(char command[], node * head){
 	// dont bother reading first 4 (this is just command set)
 	char * line = command + 4;
-	char * token = strtok(line, " ");
+
+	// find the values to push to the key
 	char *this_line[MAX_LINE];
-	int length_of_line = 0;
-	for(int i = 0; i < sizeof(this_line); i++){
-		if(token == NULL){
-			break;
-		}
-		this_line[i] = token;
-		token = strtok(NULL," ");
-		length_of_line++;
-	}
+	int length_of_line = strip_values(line,this_line);
+
 
 	if(sizeof(this_line[0])>MAX_KEY){
 		return;
@@ -275,8 +283,8 @@ void command_set(char command[], node * head){
 		strcpy(this_entry.key,this_line[0]);
 
 		// set the values
-		this_entry.values = malloc(sizeof(struct element)*(length_of_line-1));
-		this_entry.length = length_of_line-1; // update this later to include entries
+		this_entry.values = malloc(sizeof(struct element)*(length_of_line));
+		this_entry.length = length_of_line; // update this later to include entries
 
 		this_entry.values = populate_values(this_entry.values,this_line,0,this_entry.length);
 		
@@ -284,8 +292,8 @@ void command_set(char command[], node * head){
 		list_add(head,this_entry);
 	}else{
 		struct entry * this_entry = &(key_node->item);
-		this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line-1));
-		this_entry->length = length_of_line-1;
+		this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
+		this_entry->length = length_of_line;
 
 		this_entry->values = populate_values(this_entry->values,this_line,0,this_entry->length);
 	}
@@ -299,17 +307,8 @@ void command_set(char command[], node * head){
 
 void command_push(char * line, node * head){
 	// find the values to push to the key
-	char * token = strtok(line, " \n");
 	char *push_values[MAX_LINE];
-	int number_of_values = -1; // because first value is the key
-	for(int i = 0; i < sizeof(push_values); i++){
-		if(token == NULL){
-			break;
-		}
-		push_values[i] = token;
-		token = strtok(NULL," ");
-		number_of_values++;
-	}
+	int number_of_values = strip_values(line,push_values);
 
 
 	// find the key to push to from linked list
@@ -334,17 +333,8 @@ void command_push(char * line, node * head){
 
 void command_append(char * line, node * head){
 	// find the values to append to the key
-	char * token = strtok(line, " \n");
 	char *append_values[MAX_LINE];
-	int number_of_values = -1; // because first value is the key
-	for(int i = 0; i < sizeof(append_values); i++){
-		if(token == NULL){
-			break;
-		}
-		append_values[i] = token;
-		token = strtok(NULL," ");
-		number_of_values++;
-	}
+	int number_of_values = strip_values(line,append_values);
 
 	// find the key to append to from linked list
 	node * append_node = find_key(line,head);
@@ -365,8 +355,8 @@ void command_append(char * line, node * head){
 	}
 }
 
-void command_pick(){
-	printf("displays value at index\n");
+void command_pick(char * line, node * head){
+	
 }
 
 void command_pluck(){
@@ -464,7 +454,7 @@ int command_interpreter(char command[], node * head){
 		line = &command[0]+7;
 		command_append(line,head);
 	}else if(strncasecmp(command,"pick",4)==0){
-		command_pick();
+		// command_pick();
 	}else if(strncasecmp(command,"pluck",5)==0){
 		command_pluck();
 	}else if(strncasecmp(command,"pop",3)==0){
