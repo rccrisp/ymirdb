@@ -565,7 +565,7 @@ void command_sort(char * line, node * head){
 		printf("ok\n");
 		entry entry_to_sort = sort_node->item;
 		element * values_to_sort = entry_to_sort.values;
-		qsort(&values_to_sort->value,entry_to_sort.length,sizeof(element),cmpfunc);
+		qsort(&(values_to_sort->value),entry_to_sort.length,sizeof(element),cmpfunc);
 	}else{
 		printf("no such key\n");
 	}
