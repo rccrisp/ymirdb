@@ -27,6 +27,10 @@
 // ...
 //
 
+int cmpfunc(const void * a, const void * b){
+	return (*(int*)a- *(int*)b);
+}
+
 bool isnumber(char s[]){
     for (int i = 0; s[i]!= '\0'; i++){
 		if(i==0 && s[i] == -1){
@@ -37,6 +41,17 @@ bool isnumber(char s[]){
               
     }
     return true;
+}
+
+element * reverse(element * these_values, int number){
+	int hold;
+	for(int i = 0, j = number -1; i < j; i++, j--){
+		hold = these_values[i].value;
+		these_values[i].value = these_values[j].value;
+		these_values[j].value = hold;
+	}
+
+	return these_values;
 }
 
 element * remove_value_from_index(element * these_values, int index, int size_before_remove){
@@ -488,16 +503,91 @@ void command_len(){
 	printf("displays number of values");
 }
 
-void command_rev(){
-	printf("reverses order of values (simple entry only)\n");
+void command_rev(char * line, node * head){
+	// find the key to sort from from the linked list
+	node * rev_node = find_key(line,head);
+
+	if(rev_node!=NULL){
+		printf("ok\n");
+		entry entry_to_rev = rev_node->item;
+		element * values_to_rev = entry_to_rev.values;
+		values_to_rev = reverse(values_to_rev, entry_to_rev.length);
+
+	}else{
+		printf("no such key\n");
+	}
+
+	printf("\n");
+	return;
 }
 
-void command_uniq(){
-	printf("removes repeated adjacent values (simple entry only)\n");
+element * uniq(element * these_values, size_t * size){
+	// element * unique_values = malloc(sizeof(element)*number);
+	// unique_values[0].value = these_values[0].value;
+	// int hold = these_values[0].value;
+	// int new_length = 0;
+	// for(int i = 1; i < number; i++){
+	// 	if(hold != these_values[i].value]){
+	// 		unique_values[i].value = these_values[i].value;
+	// 		hold = these_values[i].value;
+	// 		new_length++;
+	// 	}
+	// }
+
+	// these_values = realloc(these_values,sizeof(element)*new_length);
+	// these_values = unique_values
+
+	int hold = these_values[0].value;
+	int new_length = 1;
+	int i,j;
+	for(i = 1, j = 1; i < *size; i++){
+		if(hold != these_values[i].value){
+			new_length++;
+			hold = these_values[i].value;
+			these_values[j].value = these_values[i].value;
+			j++;
+		}
+	}
+
+	these_values = realloc(these_values,sizeof(element)*new_length);
+	*size = new_length;
+	return these_values;
 }
 
-void command_sort(){
-	printf("sorts values in ascending order (simple entry only)\n");
+void command_uniq(char * line, node * head){
+	// find the key to use from from the linked list
+	node * uniq_node = find_key(line,head);
+
+	if(uniq_node!=NULL){
+		printf("ok\n");
+		entry * entry_to_uniq = &(uniq_node->item);
+		element * values_to_uniq = entry_to_uniq->values;
+		values_to_uniq = uniq(values_to_uniq, &(entry_to_uniq->length));
+
+	}else{
+		printf("no such key\n");
+	}
+
+	printf("\n");
+	return;
+}
+
+void command_sort(char * line, node * head){
+	// find the key to sort from from the linked list
+	node * sort_node = find_key(line,head);
+
+	if(sort_node!=NULL){
+		printf("ok\n");
+		entry entry_to_sort = sort_node->item;
+		element * values_to_sort = entry_to_sort.values;
+		qsort(&values_to_sort->value,entry_to_sort.length,sizeof(element),cmpfunc);
+	}else{
+		printf("no such key\n");
+	}
+
+	printf("\n");
+	return;
+	
 }
 
 void command_forward(){
@@ -568,11 +658,14 @@ int command_interpreter(char command[], node * head){
 	}else if(strncasecmp(command,"len",3)==0){
 		command_len();
 	}else if(strncasecmp(command,"rev",3)==0){
-		command_rev();
+		line = &command[0]+4;
+		command_rev(line,head);
 	}else if(strncasecmp(command,"uniq",4)==0){
-		command_uniq();
+		line = &command[0]+4;
+		command_uniq(line,head);
 	}else if(strncasecmp(command,"sort",4)==0){
-		command_sort();
+		line = &command[0]+5;
+		command_sort(line,head);
 	}else if(strncasecmp(command,"forward",7)==0){
 		command_forward();
 	}else if(strncasecmp(command,"backward",8)==0){
