@@ -40,14 +40,14 @@ bool isnumber(char s[]){
 }
 
 element * remove_value_from_index(element * these_values, int index, int size_before_remove){
-	int j = 0;
-	for(int i = 0; i < size_before_remove; i++){
-		if(i == index-1){
-			i++;
-		}
-		these_values[j].value = these_values[i].value;
-		j++;
-	}
+	// int j = 0;
+	// for(int i = 0; i < size_before_remove; i++){
+	// 	if(i == index-1){
+	// 		i++;
+	// 	}
+	// 	these_values[j].value = these_values[i].value;
+	// 	j++;
+	// }
 
 	these_values = realloc(these_values, sizeof(element)*(size_before_remove-1));
 	return these_values;
