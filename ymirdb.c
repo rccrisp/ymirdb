@@ -29,12 +29,41 @@
 
 bool isnumber(char s[]){
     for (int i = 0; s[i]!= '\0'; i++){
-        if (isdigit(s[i]) == 0 && s[i]!= '\n'){
+		if(i==0 && s[i] == -1){
+			continue;
+		}else if(isdigit(s[i]) == 0 && s[i]!= '\n'){
 			return false;
 		}
               
     }
     return true;
+}
+
+element * push(element * old_values, int num_old, char * some_values[], int num_new){
+	int size_after_push = num_new + num_old;
+	element * new_values = malloc(sizeof(element)*size_after_push);
+	element * ptr = new_values;
+	for(int i = 0; i < num_new; i++){
+		if(isnumber(some_values[num_new-i])){
+			ptr->value = atoi(some_values[num_new-i]);
+		}//else{} if it is an entry
+		
+		ptr++;
+	}
+
+	for(int i = 0; i < num_old; i++){
+		ptr->value = old_values[i].value;
+		ptr++;
+	}
+
+	old_values = realloc(old_values,sizeof(element)*size_after_push);
+	for(int i = 0; i < size_after_push; i++){
+		old_values[i].value = new_values[i].value;
+	}
+
+	free(new_values);
+
+	return old_values;
 }
 
 node * find_key(char * line, node * head){
@@ -201,32 +230,6 @@ void command_set(char command[], node * head){
 
 }
 
-element * push(element * old_values, int num_old, char * some_values[], int num_new){
-	int size_after_push = num_new + num_old;
-	element * new_values = malloc(sizeof(element)*size_after_push);
-	element * ptr = new_values;
-	for(int i = 0; i < num_new; i++){
-		if(isnumber(some_values[num_new-i])){
-			ptr->value = atoi(some_values[num_new-i]);
-		}//else{} if it is an entry
-		
-		ptr++;
-	}
-
-	for(int i = 0; i < num_old; i++){
-		ptr->value = old_values[i].value;
-		ptr++;
-	}
-
-	old_values = realloc(old_values,sizeof(element)*size_after_push);
-	for(int i = 0; i < size_after_push; i++){
-		old_values[i].value = new_values[i].value;
-	}
-
-
-	return old_values;
-}
-
 void command_push(char * line, node * head){
 	// find the values to push to the key
 	char * token = strtok(line, " \n");
@@ -261,8 +264,51 @@ void command_push(char * line, node * head){
 	}
 }
 
-void command_append(){
-	printf("appends values to the back\n");
+element * append(element * old_values, int num_old, char * some_values[], int num_new){
+	int size_after_append = num_new + num_old;
+	old_values = realloc(old_values,sizeof(element)*size_after_append);
+	int j = 1;
+	for(int i = num_old; i < size_after_append; i++){
+		if(isnumber(some_values[num_new])){
+			old_values[i].value = atoi(some_values[j]);
+		}//else{} if it is an entry
+		j++;
+	}
+
+	return old_values;
+}
+
+void command_append(char * line, node * head){
+	// find the values to append to the key
+	char * token = strtok(line, " \n");
+	char *append_values[MAX_LINE];
+	int number_of_values = -1; // because first value is the key
+	for(int i = 0; i < sizeof(append_values); i++){
+		if(token == NULL){
+			break;
+		}
+		append_values[i] = token;
+		token = strtok(NULL," ");
+		number_of_values++;
+	}
+
+	// find the key to append to from linked list
+	node * append_node = find_key(line,head);
+
+	// append the values into the key
+	if(append_node!=NULL){
+		// 
+		entry * entry_to_append_to = &(append_node->item);
+		element ** values_to_append_to = &(entry_to_append_to->values);
+		int number_of_old_values = entry_to_append_to->length;
+		entry_to_append_to->values = append(*values_to_append_to,number_of_old_values,append_values,number_of_values);
+		entry_to_append_to->length = number_of_values + number_of_old_values;
+		
+		printf("ok\n\n");
+		
+	}else{
+		printf("no such key\n\n");
+	}
 }
 
 void command_pick(){
@@ -334,7 +380,7 @@ void command_type(){
 }
 
 int command_interpreter(char command[], node * head){
-
+	char * line;
 	if(strncasecmp(command,"bye",3)==0){
 		list_free(head);
 		command_bye();
@@ -348,20 +394,21 @@ int command_interpreter(char command[], node * head){
 	}else if(strncasecmp(command,"list snapshots",14)==0){
 		command_list_snapshots();
 	}else if(strncasecmp(command,"get",3)==0){
-		char * line = &command[0]+4;
+		line = &command[0]+4;
 		command_get(line,head);
 	}else if(strncasecmp(command,"del",3)==0){
-		char * line = &command[0]+4;
+		line = &command[0]+4;
 		command_del(line,head);
 	}else if(strncasecmp(command,"purge",5)==0){
 		command_purge();
 	}else if(strncasecmp(command,"set",3)==0){
 		command_set(command,head);
 	}else if(strncasecmp(command,"push",4)==0){
-		char * line = &command[0]+5;
+		line = &command[0]+5;
 		command_push(line,head);
 	}else if(strncasecmp(command,"append",6)==0){
-		command_append();
+		line = &command[0]+7;
+		command_append(line,head);
 	}else if(strncasecmp(command,"pick",4)==0){
 		command_pick();
 	}else if(strncasecmp(command,"pluck",5)==0){
