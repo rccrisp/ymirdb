@@ -39,18 +39,18 @@ bool isnumber(char s[]){
     return true;
 }
 
-element * remove_value_from_index(element * values_to_remove_from, int index, int size_before_remove){
+element * remove_value_from_index(element ** values_to_remove_from, int index, int size_before_remove){
 	int j = 0;
 	for(int i = 0; i < size_before_remove; i++){
 		if(i == index-1){
 			i++;
 		}
-		values_to_remove_from[j].value = values_to_remove_from[i].value;
+		values_to_remove_from[j]->value = values_to_remove_from[i]->value;
 		j++;
 	}
 
-	values_to_remove_from = realloc(values_to_remove_from,sizeof(element)*(size_before_remove-1));
-	return values_to_remove_from;
+	*values_to_remove_from = realloc(*values_to_remove_from,sizeof(element)*(size_before_remove-1));
+	return *values_to_remove_from;
 }
 
 int strip_values(char * line, char * strip_values[]){
@@ -413,7 +413,7 @@ void command_pluck(char * line, node * head){
 		}else{
 			element * values_to_pluck_from = this_entry->values;
 			printf("%d\n", this_entry->values[index-1].value);
-			this_entry->values = remove_value_from_index(values_to_pluck_from,index,this_entry->length);
+			this_entry->values = remove_value_from_index(&values_to_pluck_from,index,this_entry->length);
 			this_entry->length--;
 		}
 		
@@ -438,7 +438,7 @@ void command_pop(char * line, node * head){
 		}else{
 			element * values_to_pop_from = this_entry->values;
 			printf("%d\n", this_entry->values[0].value);
-			this_entry->values = remove_value_from_index(values_to_pop_from,1,this_entry->length);
+			this_entry->values = remove_value_from_index(&values_to_pop_from,1,this_entry->length);
 			this_entry->length--;
 		}
 		
