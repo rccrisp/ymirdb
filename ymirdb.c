@@ -54,8 +54,6 @@ node * find_key(char * line, node * head){
 
 }
 
-
-
 node * list_init(){
 	node * head = malloc(sizeof(node));
 	head->next = NULL;
@@ -196,7 +194,6 @@ void command_set(char command[], node * head){
 	}
 	
 	this_entry.length = length_of_line-1; // update this later to include entries
-
 	list_add(head,this_entry);
 	printf("ok\n\n");
 	return;
@@ -204,8 +201,66 @@ void command_set(char command[], node * head){
 
 }
 
-void command_push(){
-	
+element * push(element * old_values, int num_old, char * some_values[], int num_new){
+	int size_after_push = num_new + num_old;
+	element * new_values = malloc(sizeof(element)*size_after_push);
+	element * ptr = new_values;
+	for(int i = 0; i < num_new; i++){
+		if(isnumber(some_values[num_new-i])){
+			ptr->value = atoi(some_values[num_new-i]);
+		}//else{} if it is an entry
+		
+		ptr++;
+	}
+
+	for(int i = 0; i < num_old; i++){
+		ptr->value = old_values[i].value;
+		ptr++;
+	}
+
+	old_values = realloc(old_values,sizeof(element)*size_after_push);
+	for(int i = 0; i < size_after_push; i++){
+		old_values[i].value = new_values[i].value;
+	}
+
+
+	return old_values;
+}
+
+void command_push(char * line, node * head){
+	// find the values to push to the key
+	char * token = strtok(line, " \n");
+	char *push_values[MAX_LINE];
+	int number_of_values = -1; // because first value is the key
+	for(int i = 0; i < sizeof(push_values); i++){
+		if(token == NULL){
+			break;
+		}
+		push_values[i] = token;
+		token = strtok(NULL," ");
+		number_of_values++;
+	}
+
+
+	// find the key to push to from linked list
+	node * push_node = find_key(line,head);
+
+	// push the values into the key
+	if(push_node!=NULL){
+		// 
+		entry * entry_to_push_to = &(push_node->item);
+		element ** values_to_push_to = &(entry_to_push_to->values);
+		int number_of_old_values = entry_to_push_to->length;
+		entry_to_push_to->values = push(*values_to_push_to,number_of_old_values,push_values,number_of_values);
+		entry_to_push_to->length = number_of_values + number_of_old_values;
+		
+		for(int i = 0; i < entry_to_push_to->length; i ++){
+			printf("%d\n", entry_to_push_to->values[i].value);
+		}
+		
+	}else{
+		printf("no such key\n\n");
+	}
 }
 
 void command_append(){
@@ -305,7 +360,8 @@ int command_interpreter(char command[], node * head){
 	}else if(strncasecmp(command,"set",3)==0){
 		command_set(command,head);
 	}else if(strncasecmp(command,"push",4)==0){
-		command_push();
+		char * line = &command[0]+5;
+		command_push(line,head);
 	}else if(strncasecmp(command,"append",6)==0){
 		command_append();
 	}else if(strncasecmp(command,"pick",4)==0){
