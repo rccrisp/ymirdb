@@ -522,20 +522,6 @@ void command_rev(char * line, node * head){
 }
 
 element * uniq(element * these_values, size_t * size){
-	// element * unique_values = malloc(sizeof(element)*number);
-	// unique_values[0].value = these_values[0].value;
-	// int hold = these_values[0].value;
-	// int new_length = 0;
-	// for(int i = 1; i < number; i++){
-	// 	if(hold != these_values[i].value]){
-	// 		unique_values[i].value = these_values[i].value;
-	// 		hold = these_values[i].value;
-	// 		new_length++;
-	// 	}
-	// }
-
-	// these_values = realloc(these_values,sizeof(element)*new_length);
-	// these_values = unique_values
 
 	int hold = these_values[0].value;
 	int new_length = 1;
@@ -563,7 +549,6 @@ void command_uniq(char * line, node * head){
 		entry * entry_to_uniq = &(uniq_node->item);
 		element * values_to_uniq = entry_to_uniq->values;
 		values_to_uniq = uniq(values_to_uniq, &(entry_to_uniq->length));
-
 	}else{
 		printf("no such key\n");
 	}
@@ -579,10 +564,8 @@ void command_sort(char * line, node * head){
 	if(sort_node!=NULL){
 		printf("ok\n");
 		entry entry_to_sort = sort_node->item;
-		if(entry_to_sort.length != 0){
-			element * values_to_sort = entry_to_sort.values;
-			qsort(&values_to_sort->value,entry_to_sort.length,sizeof(element),cmpfunc);
-		}
+		element * values_to_sort = entry_to_sort.values;
+		qsort(&values_to_sort->value,entry_to_sort.length,sizeof(element),cmpfunc);
 	}else{
 		printf("no such key\n");
 	}
