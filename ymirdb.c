@@ -254,9 +254,7 @@ void command_push(char * line, node * head){
 		entry_to_push_to->values = push(*values_to_push_to,number_of_old_values,push_values,number_of_values);
 		entry_to_push_to->length = number_of_values + number_of_old_values;
 		
-		for(int i = 0; i < entry_to_push_to->length; i ++){
-			printf("%d\n", entry_to_push_to->values[i].value);
-		}
+		printf("ok\n\n");
 		
 	}else{
 		printf("no such key\n\n");
