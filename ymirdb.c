@@ -39,6 +39,30 @@ bool isnumber(char s[]){
     return true;
 }
 
+// given a character array of values, include these values in the correct key, from a given index
+element * populate_values(element * entry_values, char * new_values[], int index, int size){
+	int j = 1;
+	for(int i = index; i < size; i++){
+		if(isnumber(new_values[j])){
+			entry_values[i].value = atoi(new_values[j]);
+		}//else{} if it is an entry
+		j++;
+	}
+	return entry_values;
+}
+element * append(element * old_values, int num_old, char * some_values[], int num_new){
+	// find the size of values after including the new values
+	int size_after_append = num_new + num_old;
+
+	// reallocate memory
+	old_values = realloc(old_values,sizeof(element)*size_after_append);
+
+	// populate the values with the new values
+	old_values = populate_values(old_values,some_values,num_old,size_after_append);
+
+	return old_values;
+}
+
 element * push(element * old_values, int num_old, char * some_values[], int num_new){
 	int size_after_push = num_new + num_old;
 	element * new_values = malloc(sizeof(element)*size_after_push);
@@ -205,25 +229,41 @@ void command_set(char command[], node * head){
 		return;
 	}
 
-	// initialise entry struct
-	struct entry this_entry;
+	// see if this key already exists
+	node * key_node = find_key(line,head);
 
-	// set the key
-	strcpy(this_entry.key,this_line[0]);
-	// printf("%s\n", this_entry.key);
+	// if key doesnt exist, make a new key
+	if(key_node==NULL){
+		// initialise entry struct
+		struct entry this_entry;
 
-	// set the values
-	this_entry.values = malloc(sizeof(struct element)*(length_of_line-1));
-	struct element * value_ptr = this_entry.values;
-	for(int i = 1; i < length_of_line; i++){
-		if(isnumber(this_line[i])){
-			value_ptr->value = atoi(this_line[i]);
-		}//else{} for case if value is a pointer to another entry
-		value_ptr++;
+		// set the key
+		strcpy(this_entry.key,this_line[0]);
+
+		// set the values
+		this_entry.values = malloc(sizeof(struct element)*(length_of_line-1));
+		this_entry.length = length_of_line-1; // update this later to include entries
+
+		this_entry.values = populate_values(this_entry.values,this_line,0,this_entry.length);
+		
+		// add this key to the linked list of keys
+		list_add(head,this_entry);
+	}else{
+		struct entry * this_entry = &(key_node->item);
+		this_entry = realloc(this_entry,sizeof(element)*(length_of_line-1));
+		this_entry->length = length_of_line-1;
+
+		this_entry->values = populate_values(this_entry->values,this_line,0,this_entry->length);
+		// int j = 1;
+		// for(int i = 0; i < this_entry->length; i++){
+		// 	if(isnumber(some_values[j])){
+		// 		this_entry->values[i].value = atoi(some_values[j]);
+		// 	}//else{} if it is an entry
+		// 	j++;
+		// }
 	}
-	
-	this_entry.length = length_of_line-1; // update this later to include entries
-	list_add(head,this_entry);
+
+		
 	printf("ok\n\n");
 	return;
 
@@ -264,19 +304,6 @@ void command_push(char * line, node * head){
 	}
 }
 
-element * append(element * old_values, int num_old, char * some_values[], int num_new){
-	int size_after_append = num_new + num_old;
-	old_values = realloc(old_values,sizeof(element)*size_after_append);
-	int j = 1;
-	for(int i = num_old; i < size_after_append; i++){
-		if(isnumber(some_values[num_new])){
-			old_values[i].value = atoi(some_values[j]);
-		}//else{} if it is an entry
-		j++;
-	}
-
-	return old_values;
-}
 
 void command_append(char * line, node * head){
 	// find the values to append to the key
