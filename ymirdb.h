@@ -52,7 +52,7 @@ struct node {
 
 struct snapshot {
   int id;
-  entry* entries;
+  node* entries;
   snapshot* next;
   snapshot* prev;
 };

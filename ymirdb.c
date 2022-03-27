@@ -33,6 +33,20 @@ int cmpfunc(const void * a, const void * b){
 	return (ea->value - eb->value);
 }
 
+snapshot * find_snapshot(char * line, snapshot * head){
+	int snapshot_to_find = atoi(strtok(line, " \n"));
+	// head is always NULL entry
+	snapshot * iter = head->next;
+	while(iter){
+		if(iter->id == snapshot_to_find){
+			return iter;
+		}
+		iter = iter->next;
+	}
+
+	return NULL;
+}
+
 bool isnumber(char s[]){
     for (int i = 0; s[i]!= '\0'; i++){
 		if(i==0 && s[i] == -1){
@@ -193,7 +207,9 @@ void list_delete(node* head, node* n){
 		prev_node = prev_node->next;
 	}
 	prev_node->next = n->next;
+	free(n->item.values);
 	free(n);
+	
 }
 
 node * list_next(node * n){
@@ -201,12 +217,68 @@ node * list_next(node * n){
 }
 
 void list_free(node * head){
-	node * iter = head;
+	node * iter = head->next;
+	node * current;
 	while(iter->next){
-		node * current = iter;
+		current = iter;
 		iter = iter->next;
-		free(iter->item.values);
-		free(current);
+		list_delete(head,current);
+	}
+
+	return ;
+}
+
+snapshot * snapshot_list_init(){
+	snapshot * head = malloc(sizeof(snapshot));
+	head->next = NULL;
+	head->prev = NULL;
+	head->id = 0;
+	return head;
+}
+
+// add a new snapshot 
+int snapshot_list_add(snapshot * head, node * head_entries){
+  	struct snapshot * last_snapshot = head;
+    while (last_snapshot->next) {
+        last_snapshot = last_snapshot->next;
+    }
+
+    struct snapshot * new_snapshot = malloc(sizeof(struct snapshot));
+	new_snapshot->id = last_snapshot->id + 1;
+    new_snapshot->entries = head_entries;
+    new_snapshot->next = NULL;
+	new_snapshot->prev = last_snapshot;
+
+	last_snapshot->next = new_snapshot;
+
+	return new_snapshot->id;
+}
+
+void snapshot_list_delete(snapshot* head, snapshot* n){
+
+	snapshot * prev_snapshot = head;
+	while(prev_snapshot->next!=n){
+		prev_snapshot = prev_snapshot->next;
+	}
+	prev_snapshot->next = n->next;
+	n->next->prev = prev_snapshot;
+	n->next = NULL;
+	n->prev = NULL;
+	list_free(n->entries);
+	free(n);
+}
+
+snapshot * snapshot_list_next(snapshot * n){
+	return n->next;
+}
+
+void snapshot_list_free(snapshot * head){
+	snapshot * iter = head->next;
+	snapshot * current;
+	while(iter->next){
+		current = iter;
+		iter = iter->next;
+		snapshot_list_delete(head,current);
 	}
 
 	return ;
@@ -283,9 +355,7 @@ void command_del(char * line, node * head){
 	node * this = find_key(line,head);
 
 	if(this!=NULL){
-		entry this_entry = this->item;
 		list_delete(head, this);
-		free(this_entry.values);
 		printf("ok\n\n");
 	}else{
 		printf("no such key\n\n");
@@ -477,16 +547,87 @@ void command_drop(){
 	printf("deletes snapshot\n");
 }
 
-void command_rollback(){
-	printf("restores to snapshot and deletes newer snapshots\n");
+void command_rollback(char * line, node * head, snapshot * snapshots){
+	snapshot * this_snapshot = find_snapshot(line,snapshots);
+
+	if(this_snapshot!=NULL){
+		// delete the current state as we are going to replace it
+		list_free(head);
+
+		// set current state to snapshot state
+		node * snapshot_entries = this_snapshot->entries->next;
+		entry * this_entry;
+		while(snapshot_entries){
+			this_entry = malloc(sizeof(element)*(snapshot_entries->item.length));
+			*this_entry = snapshot_entries->item;
+			list_add(head,*this_entry);
+			snapshot_entries = snapshot_entries->next;
+		}
+
+		// delete all newer snapshots
+		this_snapshot = this_snapshot->next;
+		snapshot * holder;
+		while(this_snapshot){
+			holder = this_snapshot->next;
+			list_free(this_snapshot->entries);
+			free(this_snapshot);
+			this_snapshot = holder;
+		}
+		printf("ok\n");
+	}else{
+		printf("no such snapshot\n");
+	}
+	printf("\n");
+
+	return;
 }
 
-void command_checkout(){
-	printf("replaces current state with a copy of snapshot\n");
+void command_checkout(char * line, node * head, snapshot * snapshots){
+	snapshot * this_snapshot = find_snapshot(line,snapshots);
+
+	if(this_snapshot!=NULL){
+		// delete the current state as we are going to replace it
+		list_free(head);
+
+		node * snapshot_entries = this_snapshot->entries->next;
+		entry * this_entry;
+		while(snapshot_entries){
+			this_entry = malloc(sizeof(element)*(snapshot_entries->item.length));
+			*this_entry = snapshot_entries->item;
+			list_add(head,*this_entry);
+			snapshot_entries = snapshot_entries->next;
+		}
+		printf("ok\n");
+	}else{
+		printf("no such snapshot\n");
+	}
+	printf("\n");
+
+	return;
 }
 
-void command_snapshot(){
-	printf("saves the current state as a snapshot\n");
+void command_snapshot(node * head, snapshot * snapshots){
+	node * iter = head->next;
+
+	node * head_snapshots = list_init();
+	entry * current_state_entry;
+	entry this_entry;
+	while(iter){
+		current_state_entry = &(iter->item);
+		strcpy(this_entry.key,current_state_entry->key);
+		this_entry.values = malloc(sizeof(element)*current_state_entry->length);
+		for(int i = 0; i < current_state_entry->length; i++){
+			// will have to change for complex entry
+			this_entry.values[i].value = current_state_entry->values[i].value;
+		}
+		this_entry.length = current_state_entry->length;
+		list_add(head_snapshots,this_entry);
+		iter = iter->next;
+	}
+
+	int id = snapshot_list_add(snapshots,head_snapshots);
+	printf("saved as snapshot %d\n\n",id);
+	return;
 }
 
 void command_min(){
@@ -589,10 +730,13 @@ void command_type(){
 	printf("displays if the entry of this key is simple or general\n");
 }
 
-int command_interpreter(char command[], node * head){
+int command_interpreter(char command[], node * head, snapshot * snapshots){
 	char * line;
 	if(strncasecmp(command,"bye",3)==0){
 		list_free(head);
+		snapshot_list_free(snapshots);
+		free(head);
+		free(snapshots);
 		command_bye();
 		return -1;
 	}else if(strncasecmp(command,"help",4)==0){
@@ -631,11 +775,13 @@ int command_interpreter(char command[], node * head){
 	}else if(strncasecmp(command,"drop",3)==0){
 		command_drop();
 	}else if(strncasecmp(command,"rollback",8)==0){
-		command_rollback();
+		line = &command[0]+9;
+		command_rollback(line,head,snapshots);
 	}else if(strncasecmp(command,"checkout",8)==0){
-		command_checkout();
+		line = &command[0]+9;
+		command_checkout(line,head,snapshots);
 	}else if(strncasecmp(command,"snapshot",8)==0){
-		command_snapshot();
+		command_snapshot(head,snapshots);
 	}else if(strncasecmp(command,"min",3)==0){
 		command_min();
 	}else if(strncasecmp(command,"max",3)==0){
@@ -669,7 +815,7 @@ int main(void) {
 
 	char line[MAX_LINE];
 	node * head = list_init();
-
+	snapshot * snapshots = snapshot_list_init();
 	while (true) {
 		printf("> ");
 
@@ -683,7 +829,7 @@ int main(void) {
 		// TODO
 		//
 
-		if(command_interpreter(line, head) == -1){
+		if(command_interpreter(line, head, snapshots) == -1){
 			return 0;
 		}
 
