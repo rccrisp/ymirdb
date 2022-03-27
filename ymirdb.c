@@ -558,7 +558,7 @@ void command_drop(char * line, snapshot *snapshots){
 	snapshot * this_snapshot = find_snapshot(line,snapshots);
 
 	if(this_snapshot!=NULL){
-		snapshot_list_delete(snapshots,this_snapshots)
+		snapshot_list_delete(snapshots,this_snapshot);
 		printf("ok\n");
 	}else{
 		printf("no such snapshot\n");
