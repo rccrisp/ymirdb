@@ -219,6 +219,9 @@ node * list_next(node * n){
 void list_free(node * head){
 	node * iter = head->next;
 	node * current;
+	if(iter == NULL){
+		return;
+	}
 	while(iter->next){
 		current = iter;
 		iter = iter->next;
@@ -276,6 +279,9 @@ snapshot * snapshot_list_next(snapshot * n){
 void snapshot_list_free(snapshot * head){
 	snapshot * iter = head->next;
 	snapshot * current;
+	if(iter == NULL){
+		return;
+	}
 	while(iter->next){
 		current = iter;
 		iter = iter->next;
