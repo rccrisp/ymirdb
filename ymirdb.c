@@ -331,8 +331,18 @@ void command_list_entries(node * head){
 	return;
 }
 
-void command_list_snapshots(){
-	printf("displays all snapshots in the database\n");
+void command_list_snapshots(snapshot * snapshots){
+	snapshot * iter = snapshots->next;
+	if(iter == NULL){
+		printf("no entries\n");
+	}else{
+		while(iter){
+			printf("%d\n", iter->id);
+			iter = iter->next;
+		}
+	}
+	printf("\n");
+	return ; 
 }
 
 void command_get(char * line, node * head){
@@ -543,8 +553,19 @@ void command_pop(char * line, node * head){
 	return;
 }
 
-void command_drop(){
-	printf("deletes snapshot\n");
+void command_drop(char * line, snapshot *snapshots){
+	// find the snapshot to delete
+	snapshot * this_snapshot = find_snapshot(line,snapshots);
+
+	if(this_snapshot!=NULL){
+		snapshot_list_delete(snapshots,this_snapshots)
+		printf("ok\n");
+	}else{
+		printf("no such snapshot\n");
+	}
+	printf("\n");
+
+	return;
 }
 
 void command_rollback(char * line, node * head, snapshot * snapshots){
@@ -746,7 +767,7 @@ int command_interpreter(char command[], node * head, snapshot * snapshots){
 	}else if(strncasecmp(command,"list entries",12)==0){
 		command_list_entries(head);
 	}else if(strncasecmp(command,"list snapshots",14)==0){
-		command_list_snapshots();
+		command_list_snapshots(snapshots);
 	}else if(strncasecmp(command,"get",3)==0){
 		line = &command[0]+4;
 		command_get(line,head);
@@ -772,8 +793,9 @@ int command_interpreter(char command[], node * head, snapshot * snapshots){
 	}else if(strncasecmp(command,"pop",3)==0){
 		line = &command[0]+4;
 		command_pop(line,head);
-	}else if(strncasecmp(command,"drop",3)==0){
-		command_drop();
+	}else if(strncasecmp(command,"drop",4)==0){
+		line = &command[0]+5;
+		command_drop(line,snapshots);
 	}else if(strncasecmp(command,"rollback",8)==0){
 		line = &command[0]+9;
 		command_rollback(line,head,snapshots);
