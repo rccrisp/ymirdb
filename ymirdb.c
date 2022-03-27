@@ -222,7 +222,7 @@ void list_free(node * head){
 	while(iter->next){
 		current = iter;
 		iter = iter->next;
-		list_delete(head,current);
+		list_delete(current,current);
 	}
 
 	return ;
@@ -278,7 +278,7 @@ void snapshot_list_free(snapshot * head){
 	while(iter->next){
 		current = iter;
 		iter = iter->next;
-		snapshot_list_delete(head,current);
+		snapshot_list_delete(current,current);
 	}
 
 	return ;
