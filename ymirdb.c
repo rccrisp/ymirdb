@@ -550,7 +550,7 @@ void command_uniq(char * line, node * head){
 		printf("ok\n");
 		entry * entry_to_uniq = &(uniq_node->item);
 		element * values_to_uniq = entry_to_uniq->values;
-		values_to_uniq = uniq(values_to_uniq, &(entry_to_uniq->length));
+		 entry_to_uniq->values = uniq(values_to_uniq, &(entry_to_uniq->length));
 	}else{
 		printf("no such key\n");
 	}
