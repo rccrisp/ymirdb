@@ -343,7 +343,7 @@ void command_list_entries(node * head){
 void command_list_snapshots(snapshot * snapshots){
 	snapshot * iter = snapshots->next;
 	if(iter == NULL){
-		printf("no entries\n");
+		printf("no snapshots\n");
 	}else{
 		while(iter){
 			printf("%d\n", iter->id);
