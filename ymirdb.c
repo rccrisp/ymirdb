@@ -231,10 +231,10 @@ void list_add(entry ** last_entry_ptr, entry * new_entry){
 }
 
 void list_delete(entry ** ptr, entry * delete_entry){
-	if(ptr == delete_entry){
+	if(*ptr == delete_entry){
 		*ptr = delete_entry->prev;
 	}else{
-		entry * prev_entry = ptr;
+		entry * prev_entry = *ptr;
 		while(prev_entry->next!=delete_entry){
 			prev_entry = prev_entry->next;
 		}
