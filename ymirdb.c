@@ -201,10 +201,10 @@ void push(entry ** ptr, char * push_values[], int num_new){
 	return ;
 }
 
-entry * find_key(char * line, entry * ptr){
+entry * find_key(char * line, entry ** ptr){
 	char * key_to_find = strtok(line, " \n");
 	// head is always NULL entry
-	entry * iter = ptr;
+	entry * iter = *ptr;
 	while(iter){
 		if(strcmp(iter->key,key_to_find) == 0){
 			return iter;
@@ -372,7 +372,7 @@ void command_list_snapshots(snapshot * snapshots){
 }
 
 void command_get(char * line, entry ** ptr){
-	entry * this_entry = find_key(line,*ptr);
+	entry * this_entry = find_key(line,ptr);
 
 	if(this_entry!=NULL){
 		print_values(this_entry);
@@ -387,7 +387,7 @@ void command_get(char * line, entry ** ptr){
 }
 
 void command_del(char * line, entry ** ptr){
-	entry * this_entry = find_key(line,*ptr);
+	entry * this_entry = find_key(line,ptr);
 
 	if(this_entry!=NULL){
 		list_delete(*ptr,this_entry);
@@ -412,7 +412,7 @@ void command_set(char * line, entry ** ptr){
 	}
 
 	// see if this key already exists
-	entry * this_entry = find_key(line,*ptr);
+	entry * this_entry = find_key(line,ptr);
 
 	// if key doesnt exist, make a new key
 	if(this_entry==NULL){
@@ -452,7 +452,7 @@ void command_push(char * line, entry ** ptr){
 
 
 	// find the key to push to from linked list
-	entry * push_entry = find_key(line,*ptr);
+	entry * push_entry = find_key(line,ptr);
 
 	// push the values into the key
 	if(push_entry!=NULL){
@@ -473,7 +473,7 @@ void command_append(char * line, entry ** ptr){
 	int number_of_values = strip_values(line,append_values);
 
 	// find the key to append to from linked list
-	entry * append_entry = find_key(line,*ptr);
+	entry * append_entry = find_key(line,ptr);
 
 	// append the values into the key
 	if(append_entry!=NULL){
@@ -493,7 +493,7 @@ void command_pick(char * line, entry ** ptr){
 	strip_values(line,pick_index);
 
 	// find the key to pick from from the linked list
-	entry * pick_entry = find_key(line,*ptr);
+	entry * pick_entry = find_key(line,ptr);
 
 	// pick the value from the given index from the key
 	if(pick_entry!=NULL){
@@ -519,7 +519,7 @@ void command_pluck(char * line, entry ** ptr){
 	strip_values(line,pluck_index);
 
 	// find the key to pluck from from the linked list
-	entry * pluck_entry = find_key(line,*ptr);
+	entry * pluck_entry = find_key(line,ptr);
 
 	// pluck the value from the given index from the key
 	if(pluck_entry!=NULL){
@@ -542,7 +542,7 @@ void command_pluck(char * line, entry ** ptr){
 
 void command_pop(char * line, entry ** ptr){
 	// find the key to pop from from the linked list
-	entry * pop_entry = find_key(line,*ptr);
+	entry * pop_entry = find_key(line,ptr);
 
 	// pop the value from the given index from the key
 	if(pop_entry!=NULL){
@@ -679,7 +679,7 @@ void command_len(){
 
 void command_rev(char * line, entry ** ptr){
 	// find the key to sort from from the linked list
-	entry * rev_entry = find_key(line,*ptr);
+	entry * rev_entry = find_key(line,ptr);
 
 	if(rev_entry!=NULL){
 		printf("ok\n");
@@ -695,7 +695,7 @@ void command_rev(char * line, entry ** ptr){
 
 void command_uniq(char * line, entry ** ptr){
 	// find the key to use from from the linked list
-	entry * uniq_entry = find_key(line,*ptr);
+	entry * uniq_entry = find_key(line,ptr);
 
 	if(uniq_entry!=NULL){
 		printf("ok\n");
@@ -711,7 +711,7 @@ void command_uniq(char * line, entry ** ptr){
 
 void command_sort(char * line, entry ** ptr){
 	// find the key to sort from from the linked list
-	entry * sort_entry = find_key(line,*ptr);
+	entry * sort_entry = find_key(line,ptr);
 
 	if(sort_entry!=NULL){
 		printf("ok\n");
