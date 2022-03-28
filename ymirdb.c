@@ -163,6 +163,8 @@ void append(entry ** ptr, char * some_values[], int num_new){
 
 	// reallocate memory
 	this_entry->values = realloc(this_entry->values,sizeof(element)*size_after_append);
+
+	this_entry->length = size_after_append;
 	
 	// populate the values with the new values
 	populate_values(this_entry,some_values,num_old);
