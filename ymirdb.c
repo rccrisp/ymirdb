@@ -238,19 +238,60 @@ bool append(entry ** ptr, char * some_values[], int num_new){
 	
 }
 
-void push(entry ** ptr, char * push_values[], int num_new){
-	entry * this_entry = *ptr;
+bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
+
+	// this is the size of the entry before pushing
 	int num_old = this_entry->length;
+
+	// this is the size after pushing
 	int size_after_push = num_new + num_old;
+
+	// initialise a temp element array to store the new elements
 	element * new_values = malloc(sizeof(element)*size_after_push);
+
+	// initialise a ptr to keep track of where we are
 	element * value_ptr = new_values;
+
+	// intialise a boolean to store whether this is a simple or general entry
+	bool simple = true;
+
+	// create a dummy entry value for if we need to include an entry in the values
+	entry * entry_to_include;
+
+	// loop through the proposed push values and make sure they are all valid
+	int j = 1;
 	for(int i = 0; i < num_new; i++){
-		if(isnumber(push_values[num_new-i])){
-			value_ptr->value = atoi(push_values[num_new-i]);
-		}//else{} if it is an entry
-		
+		// if its a number, add it to the values array
+		if(isnumber(push_values[j])){
+			new_values[i].value = atoi(push_values[j]);
+			new_values[i].type = INTEGER;
+		}else{
+			entry_to_include = find_key(push_values[j],*ptr);
+			// if this isnt a valid key or is a self-reference
+			if(entry_to_include == NULL || entry_to_include == this_entry){
+				free(new_values);
+				return false;
+			}else{
+				new_values[i].entry = entry_to_include;
+				new_values[i].type = ENTRY;
+				simple = false;
+			}
+			
+		}
+		j++;
 		value_ptr++;
 	}
+
+	// if we have gone through all the values, and all are valid, add them to this entry
+	for(int i = 0; i < num_new; i++){
+		this_entry->values[i] = new_values[i];
+		if(new_values[i].type == 1){
+			include_entry_in_values(this_entry,new_values[i].entry);
+		}		
+	}
+
+
+	this_entry->is_simple = simple;
 
 	element * these_values = this_entry->values;
 	for(int i = 0; i < num_old; i++){
@@ -265,7 +306,7 @@ void push(entry ** ptr, char * push_values[], int num_new){
 
 	this_entry->length = size_after_push;
 
-	return ;
+	return true;
 }
 
 
@@ -566,9 +607,12 @@ void command_push(char * line, entry ** ptr){
 	// push the values into the key
 	if(push_entry!=NULL){
 		// 
-		push(&push_entry,push_values,number_of_values);
+		if(push(ptr,push_entry,push_values,number_of_values)){
+			printf("ok\n\n");
+		}else{
+			printf("not permitted\n");
+		}
 		
-		printf("ok\n\n");
 		
 	}else{
 		printf("no such key\n\n");
