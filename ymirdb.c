@@ -259,11 +259,11 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	int j = 1;
 	for(int i = 0; i < num_new; i++){
 		// if its a number, add it to the values array
-		if(isnumber(push_values[j])){
-			new_values[i].value = atoi(push_values[j]);
+		if(isnumber(push_values[num_new-j+1])){
+			new_values[i].value = atoi(push_values[num_new-j+1]);
 			new_values[i].type = INTEGER;
 		}else{
-			entry_to_include = find_key(push_values[j],*ptr);
+			entry_to_include = find_key(push_values[num_new-j+1],*ptr);
 			// if this isnt a valid key or is a self-reference
 			if(entry_to_include == NULL || entry_to_include == this_entry){
 				free(new_values);
