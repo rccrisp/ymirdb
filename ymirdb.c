@@ -182,6 +182,7 @@ void include_entry_in_values(entry * main_entry, entry * sub_entry){
 
 // given a character array of values, include these values in the correct key, from a given index
 bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index){
+	bool simple = true;
 	int size = this_entry->length;
 	element * entry_values = malloc(sizeof(element)*size);
 	entry * entry_to_include;
@@ -199,6 +200,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 			}else{
 				entry_values[i].entry = entry_to_include;
 				entry_values[i].type = ENTRY;
+				simple = false;
 			}
 			
 		}
@@ -215,7 +217,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	}
 
 	free(entry_values);
-
+	this_entry->is_simple = simple;
 	return true;
 }
 
@@ -312,16 +314,17 @@ bool list_delete(entry ** ptr, entry * delete_entry){
 	// if we are deleting the value currently pointed to by the pointer, update the pointer
 	if(*ptr == delete_entry){
 		*ptr = delete_entry->prev;
-	}
-
-	// if we can delete the current entry without causing an invalid state
-	if(delete_entry->is_simple || delete_references(delete_entry)){
+	}else{
 		entry * next_entry = delete_entry->next;
 		entry * prev_entry = delete_entry->prev;
 		if(next_entry!=NULL){
 			next_entry->prev = prev_entry;
 		}
 		prev_entry->next = next_entry;
+	}
+
+	// if we can delete the current entry without causing an invalid state
+	if(delete_entry->is_simple || delete_references(delete_entry)){
 		delete_entry->next = NULL;
 		delete_entry->prev = NULL;
 		free(delete_entry->values);
