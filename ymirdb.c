@@ -123,10 +123,10 @@ int strip_values(char * line, char * strip_values[]){
 	return number_of_values;
 }
 
-void print_values(entry * this_entry){
+void print_values(entry this_entry){
 
-	element * these_values = this_entry->values;
-	int number = this_entry->length;
+	element * these_values = this_entry.values;
+	int number = this_entry.length;
 	printf("[");
 	int i = 0;
 	if(i<number){
@@ -355,7 +355,7 @@ void command_list_entries(entry ** ptr){
 	while(iter){
 		empty = false;
 		printf("%s ",iter->key);
-		print_values(iter);
+		print_values(*iter);
 		iter = iter->prev;
 	}
 
@@ -385,7 +385,7 @@ void command_get(char * line, entry ** ptr){
 	entry * this_entry = find_key(line,*ptr);
 
 	if(this_entry!=NULL){
-		print_values(this_entry);
+		print_values(*this_entry);
 	}else{
 		printf("no such key\n");
 	}
@@ -562,7 +562,6 @@ void command_pop(char * line, entry ** ptr){
 		}else{
 			printf("%d\n", pop_entry->values[0].value);
 			remove_value_from_index(pop_entry,1);
-			pop_entry->length--;
 		}
 		
 		
