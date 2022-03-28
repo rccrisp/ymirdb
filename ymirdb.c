@@ -711,7 +711,7 @@ void command_uniq(char * line, entry ** ptr){
 	if(uniq_entry!=NULL){
 		printf("ok\n");
 		element * values_to_uniq = uniq_entry->values;
-		values_to_uniq = uniq(values_to_uniq, &(uniq_entry->length));
+		uniq_entry->values = uniq(values_to_uniq, &(uniq_entry->length));
 	}else{
 		printf("no such key\n");
 	}
