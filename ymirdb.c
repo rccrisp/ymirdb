@@ -230,9 +230,9 @@ void list_add(entry ** last_entry_ptr, entry * new_entry){
 	return;
 }
 
-void list_delete(entry * ptr, entry * delete_entry){
+void list_delete(entry ** ptr, entry * delete_entry){
 	if(ptr == delete_entry){
-		ptr = delete_entry->prev;
+		*ptr = delete_entry->prev;
 	}else{
 		entry * prev_entry = ptr;
 		while(prev_entry->next!=delete_entry){
@@ -400,7 +400,7 @@ void command_del(char * line, entry ** ptr){
 	entry * this_entry = find_key(line,*ptr);
 
 	if(this_entry!=NULL){
-		list_delete(*ptr,this_entry);
+		list_delete(ptr,this_entry);
 		printf("ok\n\n");
 	}else{
 		printf("no such key\n\n");
