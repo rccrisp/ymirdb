@@ -259,13 +259,12 @@ void push(entry ** ptr, char * push_values[], int num_new){
 	}
 
 	these_values = realloc(these_values,sizeof(element)*size_after_push);
-	for(int i = 0; i < size_after_push; i++){
-		these_values[i].value = new_values[i].value;
-	}
+	memcpy(these_values,new_values, sizeof(element)*size_after_push);
 
 	this_entry->length = size_after_push;
 	free(new_values);
 	this_entry->values = these_values;
+
 	return ;
 }
 
