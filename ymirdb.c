@@ -249,9 +249,6 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	// initialise a temp element array to store the new elements
 	element * new_values = malloc(sizeof(element)*size_after_push);
 
-	// initialise a ptr to keep track of where we are
-	element * value_ptr = new_values;
-
 	// intialise a boolean to store whether this is a simple or general entry
 	bool simple = true;
 
@@ -279,27 +276,24 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 			
 		}
 		j++;
-		value_ptr++;
 	}
 
+	
 	// if we have gone through all the values, and all are valid, add them to this entry
 	for(int i = 0; i < num_new; i++){
 		this_entry->values[i] = new_values[i];
 		if(new_values[i].type == 1){
 			include_entry_in_values(this_entry,new_values[i].entry);
-		}		
+		}	
 	}
 
-
+	// append the old values to the end
+	for(int i = 0; i < size_after_push; i++){
+		this_entry->values[num_new - 1 + i] = new_values[i];
+	}
 	this_entry->is_simple = simple;
-
-	element * these_values = this_entry->values;
-	for(int i = 0; i < num_old; i++){
-		value_ptr->value = these_values[i].value;
-		value_ptr++;
-	}
-
-	this_entry->values = realloc(this_entry->values,sizeof(element)*size_after_push);
+	
+	this_entry->values = realloc(this_entry->values,sizeof(element)*(size_after_push));
 	memcpy(this_entry->values,new_values,sizeof(element)*size_after_push);
 
 	free(new_values);
@@ -606,7 +600,6 @@ void command_push(char * line, entry ** ptr){
 
 	// push the values into the key
 	if(push_entry!=NULL){
-		// 
 		if(push(ptr,push_entry,push_values,number_of_values)){
 			printf("ok\n\n");
 		}else{
