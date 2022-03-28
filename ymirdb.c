@@ -198,7 +198,7 @@ void push(entry ** ptr, char * push_values[], int num_new){
 
 	this_entry->length = size_after_push;
 	free(new_values);
-
+	this_entry->values = these_values;
 	return ;
 }
 
