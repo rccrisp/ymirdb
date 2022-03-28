@@ -225,6 +225,7 @@ void list_add(entry ** last_entry_ptr, entry * new_entry){
 	}
 
 	new_entry->prev = last_entry;
+	new_entry->next = NULL;
 	*last_entry_ptr = new_entry;
 	return;
 }
@@ -252,6 +253,7 @@ void list_free(entry * ptr){
 		current = iter;
 		iter = iter->next;
 		free(current->values);
+		free(current);
 	}
 
 	return ;
@@ -417,8 +419,8 @@ void command_set(char * line, entry ** ptr){
 	// if key doesnt exist, make a new key
 	if(this_entry==NULL){
 		// initialise entry struct
-		entry an_entry;
-		struct entry * this_entry = &an_entry;
+		entry * this_entry = malloc(sizeof(entry));
+		
 
 		// set the key
 		strcpy(this_entry->key,this_line[0]);
@@ -431,6 +433,7 @@ void command_set(char * line, entry ** ptr){
 		
 		// add this key to the linked list of keys
 		list_add(ptr,this_entry);
+		*ptr = this_entry;
 	}else{
 		this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
 		this_entry->length = length_of_line;
