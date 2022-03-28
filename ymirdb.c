@@ -231,17 +231,24 @@ void list_add(entry ** last_entry_ptr, entry * new_entry){
 }
 
 void list_delete(entry * ptr, entry * delete_entry){
-	entry * prev_entry = ptr;
-	while(prev_entry->next!=delete_entry){
-		prev_entry = prev_entry->next;
+	if(ptr == delete_entry){
+		ptr = delete_entry->prev;
+	}else{
+		entry * prev_entry = ptr;
+		while(prev_entry->next!=delete_entry){
+			prev_entry = prev_entry->next;
+		}
+		entry * next_entry = delete_entry->next;
+		prev_entry->next = next_entry;
+		next_entry->prev = prev_entry;
 	}
-	entry * next_entry = delete_entry->next;
-	prev_entry->next = next_entry;
-	next_entry->prev = prev_entry;
+
 	delete_entry->next = NULL;
 	delete_entry->prev = NULL;
 	free(delete_entry->values);
 	free(delete_entry);
+
+	
 }
 
 void list_free(entry * ptr){
