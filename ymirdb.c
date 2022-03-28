@@ -262,9 +262,10 @@ void push(entry ** ptr, char * push_values[], int num_new){
 	for(int i = 0; i < size_after_push; i++){
 		this_entry->values[i].value = new_values[i].value;
 	}
+	
+	free(new_values);
 
 	this_entry->length = size_after_push;
-	free(new_values);
 
 	return ;
 }
