@@ -171,9 +171,9 @@ void include_entry_in_values(entry * main_entry, entry * sub_entry){
 	sub_entry->backward_size++;
 
 	// include the new reference in the reference list
-	main_entry->forward = realloc(main_entry->forward,sizeof(entry)*(main_entry->forward_size));
+	main_entry->forward = realloc(main_entry->forward,sizeof(entry*)*(main_entry->forward_size));
 	main_entry->forward[main_entry->forward_size-1] = sub_entry;
-	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry)*(sub_entry->backward_size));
+	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry*)*(sub_entry->backward_size));
 	sub_entry->backward[sub_entry->backward_size] = main_entry;
 
 	return;
@@ -210,8 +210,8 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	// if we have gone through all the values, and all are valid, add them to this entry
 	for(int i = index; i < size; i++){
 		this_entry->values[i] = entry_values[i];
-		this_entry->forward = malloc(sizeof(entry));
-		this_entry->backward = malloc(sizeof(entry));
+		this_entry->forward = malloc(sizeof(entry*));
+		this_entry->backward = malloc(sizeof(entry*));
 		if(entry_values[i].type == 1){
 			include_entry_in_values(this_entry,entry_values[i].entry);
 		}
