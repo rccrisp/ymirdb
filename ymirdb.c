@@ -204,10 +204,10 @@ void push(entry ** ptr, char * push_values[], int num_new){
 entry * find_key(char * line, entry * ptr){
 	char * key_to_find = strtok(line, " \n");
 	// head is always NULL entry
-	entry iter = *ptr;
+	entry * iter = ptr;
 	while(iter){
 		if(strcmp(iter->key,key_to_find) == 0){
-			return &iter;
+			return iter;
 		}
 		iter = iter->prev;
 	}
