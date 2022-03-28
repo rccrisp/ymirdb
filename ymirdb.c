@@ -241,6 +241,7 @@ void list_delete(entry * ptr, entry * delete_entry){
 	delete_entry->next = NULL;
 	delete_entry->prev = NULL;
 	free(delete_entry->values);
+	free(delete_entry);
 }
 
 void list_free(entry * ptr){
