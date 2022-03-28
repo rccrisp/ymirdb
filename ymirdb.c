@@ -27,10 +27,26 @@
 // ...
 //
 
+
 int cmpfunc(const void * a, const void * b){
 	const element * ea = a;
 	const element * eb = b;
 	return (ea->value - eb->value);
+}
+
+entry * find_key(char * line, entry * ptr){
+	char * key_to_find = strtok(line, " \n");
+	// head is always NULL entry
+	entry * iter = ptr;
+	while(iter){
+		if(strcmp(iter->key,key_to_find) == 0){
+			return iter;
+		}
+		iter = iter->prev;
+	}
+
+	return NULL;
+
 }
 
 snapshot * find_snapshot(char * line, snapshot * head){
@@ -132,29 +148,78 @@ void print_values(entry this_entry){
 	int i = 0;
 	if(i<number){
 		for(; i < number-1; i++){
-			printf("%d ", these_values[i].value);
+			if(these_values[i].type == 0){
+				printf("%d ", these_values[i].value);
+			}else{
+				printf("%s ", these_values[i].entry->key);
+			}
+			
 		}
-		printf("%d", these_values[i].value);
+		if(these_values[i].type == 0){
+			printf("%d", these_values[i].value);
+		}else{
+			printf("%s", these_values[i].entry->key);
+		}
 	}
 	
 	printf("]\n");
 }
 
+void include_entry_in_values(entry * main_entry, entry * sub_entry){
+	// increase the size of the reference tracker
+	main_entry->forward_size++;
+	sub_entry->backward_size++;
+
+	// include the new reference in the reference list
+	main_entry->forward = realloc(main_entry->forward, sizeof(entry*)*(main_entry->forward_size));
+	main_entry->forward[main_entry->forward_size-1] = sub_entry;
+	sub_entry->backward = realloc(sub_entry->backward, sizeof(entry*)*(sub_entry->backward_size));
+	sub_entry->backward[sub_entry->backward_size] = main_entry;
+
+	return;
+
+}
+
 // given a character array of values, include these values in the correct key, from a given index
-void populate_values(entry * this_entry, char * new_values[], int index){
-	element * entry_values = this_entry->values;
+bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index){
 	int size = this_entry->length;
+	element * entry_values = malloc(sizeof(element)*size);
+	entry * entry_to_include;
 	int j = 1;
 	for(int i = index; i < size; i++){
 		if(isnumber(new_values[j])){
 			entry_values[i].value = atoi(new_values[j]);
-		}//else{} if it is an entry
+			entry_values[i].type = INTEGER;
+		}else{
+			entry_to_include = find_key(new_values[j],*ptr);
+			// if this isnt a valid key or is a self-reference
+			if(entry_to_include == NULL || entry_to_include == this_entry){
+				free(entry_values);
+				return false;
+			}else{
+				entry_values[i].entry = entry_to_include;
+				entry_values[i].type = ENTRY;
+			}
+			
+		}
 		j++;
 	}
-	return ;
+
+	// if we have gone through all the values, and all are valid, add them to this entry
+	for(int i = index; i < size; i++){
+		this_entry->values[i] = entry_values[i];
+		if(entry_values[i].type == 1){
+			include_entry_in_values(this_entry,entry_values[i].entry);
+		}
+		
+	}
+
+	free(entry_values);
+
+	return true;
 }
 
-void append(entry ** ptr, char * some_values[], int num_new){
+bool append(entry ** ptr, char * some_values[], int num_new){
 	entry * this_entry = *ptr;
 
 	// find the size of values after including the new values
@@ -165,11 +230,10 @@ void append(entry ** ptr, char * some_values[], int num_new){
 	this_entry->values = realloc(this_entry->values,sizeof(element)*size_after_append);
 
 	this_entry->length = size_after_append;
-	
+
 	// populate the values with the new values
-	populate_values(this_entry,some_values,num_old);
+	return populate_values(ptr,this_entry,some_values,num_old);
 	
-	return ;
 }
 
 void push(entry ** ptr, char * push_values[], int num_new){
@@ -203,20 +267,6 @@ void push(entry ** ptr, char * push_values[], int num_new){
 	return ;
 }
 
-entry * find_key(char * line, entry * ptr){
-	char * key_to_find = strtok(line, " \n");
-	// head is always NULL entry
-	entry * iter = ptr;
-	while(iter){
-		if(strcmp(iter->key,key_to_find) == 0){
-			return iter;
-		}
-		iter = iter->prev;
-	}
-
-	return NULL;
-
-}
 
 // deals with the linked list references when adding a new entry
 void list_add(entry ** last_entry_ptr, entry * new_entry){
@@ -232,23 +282,55 @@ void list_add(entry ** last_entry_ptr, entry * new_entry){
 	return;
 }
 
-void list_delete(entry ** ptr, entry * delete_entry){
-	if(*ptr == delete_entry){
-		*ptr = delete_entry->prev;
-	}else{
-		entry * prev_entry = *ptr;
-		while(prev_entry->next!=delete_entry){
-			prev_entry = prev_entry->next;
-		}
-		entry * next_entry = delete_entry->next;
-		prev_entry->next = next_entry;
-		next_entry->prev = prev_entry;
+bool delete_references(entry * this_entry){
+	if(this_entry->backward_size != 0){
+		return false;
 	}
 
-	delete_entry->next = NULL;
-	delete_entry->prev = NULL;
-	free(delete_entry->values);
-	free(delete_entry);
+	entry * forward_entry;
+	for(int i = 0; i < this_entry->forward_size; i++){
+		forward_entry = this_entry->forward[i];
+		int num_removed = 0;
+		for(int j,k = 0; j < forward_entry->backward_size;j++,k++){
+			if(forward_entry->backward[j] == this_entry){
+				k++;
+				num_removed++;
+			}
+			if(k<forward_entry->backward_size){
+				forward_entry->backward[j] = forward_entry->backward[k];
+			}else{
+				break;
+			}
+		}
+		forward_entry->backward_size = forward_entry->backward_size - num_removed;
+		forward_entry->backward = realloc(forward_entry->backward,sizeof(entry *)*(forward_entry->backward_size));
+	}
+
+	return true;
+}
+
+bool list_delete(entry ** ptr, entry * delete_entry){
+	// if we are deleting the value currently pointed to by the pointer, update the pointer
+	if(*ptr == delete_entry){
+		*ptr = delete_entry->prev;
+	}
+
+	// if we can delete the current entry without causing an invalid state
+	if(delete_entry->is_simple || delete_references(delete_entry)){
+		entry * next_entry = delete_entry->next;
+		entry * prev_entry = delete_entry->prev;
+		if(next_entry!=NULL){
+			next_entry->prev = prev_entry;
+		}
+		prev_entry->next = next_entry;
+		delete_entry->next = NULL;
+		delete_entry->prev = NULL;
+		free(delete_entry->values);
+		free(delete_entry);
+		return true;
+	}else{
+		return false;
+	}
 
 	
 }
@@ -402,8 +484,12 @@ void command_del(char * line, entry ** ptr){
 	entry * this_entry = find_key(line,*ptr);
 
 	if(this_entry!=NULL){
-		list_delete(ptr,this_entry);
-		printf("ok\n\n");
+		if(list_delete(ptr,this_entry)){
+			printf("ok\n\n");
+		}else{
+			printf("not permitted\n\n");
+		}
+		
 	}else{
 		printf("no such key\n\n");
 	}
@@ -426,6 +512,8 @@ void command_set(char * line, entry ** ptr){
 	// see if this key already exists
 	entry * this_entry = find_key(line,*ptr);
 
+	bool valid;
+
 	// if key doesnt exist, make a new key
 	if(this_entry==NULL){
 		// initialise entry struct
@@ -439,20 +527,27 @@ void command_set(char * line, entry ** ptr){
 		this_entry->values = malloc(sizeof(struct element)*(length_of_line));
 		this_entry->length = length_of_line; // update this later to include entries
 
-		populate_values(this_entry,this_line,0);
+		valid = populate_values(ptr,this_entry,this_line,0);
+
+		if(valid){
+			// add this key to the linked list of keys
+			list_add(ptr,this_entry);
+			*ptr = this_entry;
+		}
 		
-		// add this key to the linked list of keys
-		list_add(ptr,this_entry);
-		*ptr = this_entry;
 	}else{
 		this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
 		this_entry->length = length_of_line;
 
-		populate_values(this_entry,this_line,0);
+		valid = populate_values(ptr,this_entry,this_line,0);
 	}
 
-		
-	printf("ok\n\n");
+	if(valid){
+		printf("ok\n\n");
+	}else{
+		printf("not a valid entry\n\n");
+	}
+	
 	return;
 
 
@@ -487,13 +582,19 @@ void command_append(char * line, entry ** ptr){
 
 	// find the key to append to from linked list
 	entry * append_entry = find_key(line,*ptr);
-
+	
+	bool valid;
 	// append the values into the key
 	if(append_entry!=NULL){
 		// 
-		append(&append_entry,append_values,number_of_values);
+		valid = append(&append_entry,append_values,number_of_values);
 		
-		printf("ok\n\n");
+		if(valid){
+			printf("ok\n\n");
+		}else{
+			printf("not a valid entry");
+		}
+		
 		
 	}else{
 		printf("no such key\n\n");
