@@ -291,7 +291,7 @@ bool delete_references(entry * this_entry){
 	for(int i = 0; i < this_entry->forward_size; i++){
 		forward_entry = this_entry->forward[i];
 		int num_removed = 0;
-		for(int j,k = 0; j < forward_entry->backward_size;j++,k++){
+		for(int j = 0, int k = 0; j < forward_entry->backward_size;j++,k++){
 			if(forward_entry->backward[j] == this_entry){
 				k++;
 				num_removed++;
