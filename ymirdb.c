@@ -278,26 +278,25 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 		j++;
 	}
 
-	
+	// append the old values to the end
+	for(int i = 0; i < num_old; i++){
+		new_values[num_new + i] = this_entry->values[i];
+	}
+
+
 	// if we have gone through all the values, and all are valid, add them to this entry
-	for(int i = 0; i < num_new; i++){
+	this_entry->values = realloc(this_entry->values,sizeof(element)*(size_after_push));
+	for(int i = 0; i < size_after_push; i++){
 		this_entry->values[i] = new_values[i];
 		if(new_values[i].type == 1){
 			include_entry_in_values(this_entry,new_values[i].entry);
 		}	
 	}
 
-	// append the old values to the end
-	for(int i = 0; i < size_after_push; i++){
-		this_entry->values[num_new - 1 + i] = new_values[i];
-	}
 	this_entry->is_simple = simple;
-	
-	this_entry->values = realloc(this_entry->values,sizeof(element)*(size_after_push));
-	memcpy(this_entry->values,new_values,sizeof(element)*size_after_push);
 
 	free(new_values);
-
+	
 	this_entry->length = size_after_push;
 
 	return true;
