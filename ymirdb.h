@@ -29,30 +29,25 @@ struct element {
 
 struct entry {
   char key[MAX_KEY];
-//   char is_simple;
+  bool is_simple;
   element * values;
   size_t length;
 
-//   entry* next;
-//   entry* prev;
+  entry* next;
+  entry* prev;
   
-//   size_t forward_size; 
-//   size_t forward_max; 
-//   entry** forward;  // this entry depends on these
+  size_t forward_size; 
+  size_t forward_max; 
+  entry** forward;  // this entry depends on these
     
-//   size_t backward_size; 
-//   size_t backward_max; 
-//   entry** backward; // these entries depend on this
-};
-
-struct node {
-	entry item;
-	node * next;
+  size_t backward_size; 
+  size_t backward_max; 
+  entry** backward; // these entries depend on this
 };
 
 struct snapshot {
   int id;
-  node* entries;
+  entry* entries;
   snapshot* next;
   snapshot* prev;
 };
