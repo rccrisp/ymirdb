@@ -206,7 +206,8 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		}
 		j++;
 	}
-
+	this_entry->backward = NULL;
+	this_entry->forward = NULL;
 	// if we have gone through all the values, and all are valid, add them to this entry
 	for(int i = index; i < size; i++){
 		this_entry->values[i] = entry_values[i];
@@ -568,6 +569,8 @@ void command_set(char * line, entry ** ptr){
 			// add this key to the linked list of keys
 			list_add(ptr,this_entry);
 			*ptr = this_entry;
+		}else{
+			free(this_entry);
 		}
 		
 	}else{
