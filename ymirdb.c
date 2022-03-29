@@ -964,8 +964,6 @@ void command_forward(char * line, entry ** ptr){
 	// count all the forward references to assign the correct amount of memory
 	int total = count_forward_references(this_entry)-1;
 
-	printf("total %d\n", total);
-
 	// initialise an array to store all of the reference value keys
 	char ** reference_keys = malloc(sizeof(char *)*total);
 
