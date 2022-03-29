@@ -618,7 +618,7 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 
 	// if the key doesnt exist in any state
 	if(!is_a_current_key&&!is_a_snapshot_key){
-		printf("no such key\n\n");
+		printf("ok\n\n");
 		return ;
 	}
 
