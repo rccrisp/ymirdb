@@ -969,6 +969,8 @@ void command_forward(char * line, entry ** ptr){
 		printf("%s, ", reference_keys[i]);
 	}
 	printf("%s\n\n", reference_keys[i]);
+
+	free(reference_keys);
 	return;
 	
 }
