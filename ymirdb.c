@@ -210,13 +210,13 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	// if we have gone through all the values, and all are valid, add them to this entry
 	entry * sub_entry;
+	this_entry->forward = malloc(sizeof(entry**));
+	this_entry->backward = malloc(sizeof(entry**));
 	for(int i = index; i < size; i++){
 		this_entry->values[i] = entry_values[i];
 		if(entry_values[i].type == 1){
 			sub_entry = entry_values[i].entry;
 			this_entry->forward_size+=sub_entry->forward_size+1;
-			this_entry->forward = malloc(sizeof(entry**));
-			this_entry->backward = malloc(sizeof(entry**));
 			memcpy(this_entry->forward,&sub_entry, sizeof(entry*));
 			// memcpy(sub_entry->backward,&this_entry,sizeof(entry*));
 		}
