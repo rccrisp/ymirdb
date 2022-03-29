@@ -926,7 +926,7 @@ int forward_references(entry * this_entry, char * reference_keys[], int size){
 		size = forward_references(this_entry->forward[i], reference_keys, size);
 	}
 	size++;
-	*reference_keys = realloc(*reference_keys, sizeof(char *)*(size));
+	reference_keys = realloc(*reference_keys, sizeof(char *)*(size));
 
 	reference_keys[size-1] = this_entry->key;
 
