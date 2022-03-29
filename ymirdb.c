@@ -655,6 +655,7 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 	if(is_a_current_key){
 		// check if current state is valid after removal
 		if(this_entry->backward_size!=0){
+			printf("%d\n",this_entry->backward_size);
 			printf("not permitted\n\n");
 			return;
 		}
