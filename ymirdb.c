@@ -215,6 +215,15 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 	// copy the memory across
 	main_entry->forward[main_entry->forward_size-1] = sub_entry;
 
+	// increase the size of backward references
+	sub_entry->backward_size++;
+
+	// we have a new reference, so reallocate forward memory
+	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry*)*sub_entry->backward_size);
+
+	// copy the memory across
+	sub_entry->backward[sub_entry->backward_size-1] = main_entry;
+
 	return; 
 }
 
@@ -995,8 +1004,77 @@ void command_forward(char * line, entry ** ptr){
 	
 }
 
-void command_backward(){
-	printf("lists all the backward references of this key\n");
+
+int backward_references(entry * this_entry, char ** reference_keys, int size){
+
+	for(int i = 0; i <this_entry->backward_size;i++){
+		size = backward_references(this_entry->backward[i], reference_keys, size);
+	}
+
+	size++;
+	reference_keys[size-1] = this_entry->key;
+
+	return size;
+}
+
+int count_backward_references(entry * this_entry){
+	if(this_entry->backward_size == 0){
+		return 1;
+	}
+	int total = 1;
+	for(int i = 0; i < this_entry->backward_size;i++){
+		total += count_backward_references(this_entry->backward[i]);
+	}
+
+	return total;
+}
+
+void command_backward(char * line, entry ** ptr){
+		// find the key to print all backward references for
+	entry * this_entry = find_key(line,*ptr);
+
+	// if this key doesnt exist
+	if(this_entry == NULL){
+		printf("no such key\n\n");
+		return;
+	}
+
+	// if there are no backward references
+	if(this_entry->backward_size == 0){
+		printf("nil\n\n");
+		return;
+	}
+
+	// count all the backward references to assign the correct amount of memory
+	int total = count_backward_references(this_entry)-1;
+
+	// initialise an array to store all of the reference value keys
+	char ** reference_keys = malloc(sizeof(char *)*total);
+
+	// initialise a count to track how many references we have
+	int size = 0;
+
+	// loop through all the top level backward entries
+	for(int i = 0; i<this_entry->backward_size;i++){
+		size = backward_references(this_entry->backward[i], reference_keys, size);
+	}
+	
+	// sort in lexicographical order
+	qsort(reference_keys,size,sizeof(char*),cmpalpha);
+
+	// print out the references
+	int i = 0;
+
+	for(; i < size-1;i++){
+		// we dont want to print duplicate values
+		if(strcmp(reference_keys[i],reference_keys[i+1])!=0){
+			printf("%s, ", reference_keys[i]);
+		}
+		
+	}
+	printf("%s\n\n", reference_keys[i]);
+
+	free(reference_keys);
 }
 
 void command_type(){
@@ -1076,7 +1154,8 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 		line = &command[0]+8;
 		command_forward(line,entry_ptr);
 	}else if(strncasecmp(command,"backward",8)==0){
-		command_backward();
+		line = &command[0]+9;
+		command_backward(line,entry_ptr);
 	}else if(strncasecmp(command,"type",4)==0){
 		command_type();
 	}else{ 
