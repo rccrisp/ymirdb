@@ -925,7 +925,7 @@ int forward_references(entry * this_entry, char ** reference_keys, int size){
 	for(int i = 0; i <this_entry->forward_size;i++){
 		size = forward_references(this_entry->forward[i], reference_keys, size);
 	}
-	
+
 	size++;
 	reference_keys[size-1] = this_entry->key;
 
@@ -936,13 +936,12 @@ int count_forward_references(entry * this_entry){
 	if(this_entry->forward_size == 0){
 		return 1;
 	}
-
-	int sum = 0;
+	int total = 1;
 	for(int i = 0; i < this_entry->forward_size;i++){
-		sum += count_forward_references(this_entry->forward[i]);
+		total += count_forward_references(this_entry->forward[i]);
 	}
 
-	return sum;
+	return total;
 }
 
 void command_forward(char * line, entry ** ptr){
@@ -963,7 +962,9 @@ void command_forward(char * line, entry ** ptr){
 	}
 
 	// count all the forward references to assign the correct amount of memory
-	int total = count_forward_references(this_entry) + 1;
+	int total = count_forward_references(this_entry)-1;
+
+	printf("total %d\n", total);
 
 	// initialise an array to store all of the reference value keys
 	char ** reference_keys = malloc(sizeof(char *)*total);
