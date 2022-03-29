@@ -235,7 +235,9 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 
 	// include the backward reference to main entry
 	sub_entry->backward[sub_entry->backward_size-1] = main_entry;
-
+	// printf("%s\n",main_entry->forward[0]->key);
+	qsort(main_entry->forward, main_entry->forward_size ,sizeof(entry*), cmpref);
+	// printf("%s\n",main_entry->forward[0]->key);
 	return;
 }
 
@@ -942,25 +944,25 @@ void command_sort(char * line, entry ** ptr){
 }
 
 void command_forward(char * line, entry ** ptr){
-	// entry * forward_key = find_key(line,*ptr);
-	// if(forward_key == NULL){
-	// 	printf("no such key\n\n");
-	// 	return;
-	// }
-	// if(forward_key->forward_size == 0){
-	// 	printf("nil\n\n");
-	// 	return;
-	// }else{
-	// 	int i = 0;
-	// 	entry * reference;
-	// 	for(; i < forward_key->forward_size-1; i++){
-	// 		reference = forward_key->forward[i];
-	// 		// printf("%s, ",reference->key);
-	// 	}
-	// 	reference = forward_key->forward[i];
-	// 	// printf("%s\n",reference->key);
+	entry * forward_key = find_key(line,*ptr);
+	if(forward_key == NULL){
+		printf("no such key\n\n");
+		return;
+	}
+	if(forward_key->forward_size == 0){
+		printf("nil\n\n");
+		return;
+	}else{
+		int i = 0;
+		entry * reference;
+		for(; i < forward_key->forward_size-1; i++){
+			reference = forward_key->forward[i];
+			printf("%s, ",reference->key);
+		}
+		reference = forward_key->forward[i];
+		printf("%s\n",reference->key);
 
-	// }
+	}
 		
 	return;
 }
