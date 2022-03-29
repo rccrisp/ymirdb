@@ -49,6 +49,21 @@ entry * find_key(char * line, entry * ptr){
 
 }
 
+// deals with the linked list references when adding a new entry
+void list_add(entry ** last_entry_ptr, entry * new_entry){
+
+	entry * last_entry = *last_entry_ptr;
+
+	if(*last_entry_ptr!=NULL){
+		last_entry->next = new_entry;
+	}
+
+	new_entry->prev = last_entry;
+	new_entry->next = NULL;
+	*last_entry_ptr = new_entry;
+	return;
+}
+
 snapshot * find_snapshot(char * line, snapshot * head){
 	int snapshot_to_find = atoi(strtok(line, " \n"));
 	// head is always NULL entry
@@ -218,7 +233,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		if(entry_values[i].type == 1){
 			sub_entry = entry_values[i].entry;
 			this_entry->forward_size = sub_entry->forward_size+1;
-			memcpy(this_entry->forward,&sub_entry, sizeof(entry*));
+			list_add(this_entry->forward,sub_entry);
 			// memcpy(sub_entry->backward,&this_entry,sizeof(entry*));
 		}
 		
@@ -226,6 +241,10 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	free(entry_values);
 	this_entry->is_simple = simple;
+	if(simple){
+		this_entry->forward = NULL;
+		this_entry->backward = NULL;
+	}
 	return true;
 }
 
@@ -308,22 +327,6 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	this_entry->length = size_after_push;
 
 	return true;
-}
-
-
-// deals with the linked list references when adding a new entry
-void list_add(entry ** last_entry_ptr, entry * new_entry){
-
-	entry * last_entry = *last_entry_ptr;
-
-	if(*last_entry_ptr!=NULL){
-		last_entry->next = new_entry;
-	}
-
-	new_entry->prev = last_entry;
-	new_entry->next = NULL;
-	*last_entry_ptr = new_entry;
-	return;
 }
 
 bool delete_references(entry * this_entry){
@@ -889,14 +892,15 @@ void command_forward(char * line, entry ** ptr){
 		printf("nil\n\n");
 		return;
 	}else{
-		forward_key = *forward_key->forward;
-		while(forward_key!=NULL){
-			if(*forward_key->forward == NULL){
-				printf("%s\n\n", forward_key->key);
+		entry * iter = forward_key->prev;
+		while(iter){
+			if(iter->prev == NULL){
+				printf("%s\n\n", iter->key);
 			}else{
-				printf("%s, ", forward_key->key);
+				printf("%s, ", iter->key);
 			}
-			forward_key = *forward_key->forward;
+			
+			iter = iter->prev;
 		}
 
 	}
