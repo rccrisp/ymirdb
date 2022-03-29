@@ -880,6 +880,10 @@ void command_sort(char * line, entry ** ptr){
 
 void command_forward(char * line, entry ** ptr){
 	entry * forward_key = find_key(line,*ptr);
+	if(forward_key == NULL){
+		printf("no such key\n\n");
+		return;
+	}
 	if(forward_key->forward_size == 0){
 		printf("nil\n\n");
 		return;
@@ -891,7 +895,7 @@ void command_forward(char * line, entry ** ptr){
 		forward_key = *forward_key->forward;
 	}
 
-	printf("%s\n\n", forward_key->key);
+	// printf("%s\n\n", forward_key->key);
 	
 	return;
 }
