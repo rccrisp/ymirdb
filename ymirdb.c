@@ -602,7 +602,7 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 		printf("no such key\n\n");
 		return;
 	}
-	
+
 	// check if current state is valid after removal
 	if(this_entry->backward_size!=0){
 		printf("not permitted\n\n");
@@ -629,7 +629,7 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 	// if current state is valid after removal
 	list_delete(entry_ptr,this_entry);
 
-
+	printf("ok\n\n");
 }
 
 void command_set(char * line, entry ** ptr){
@@ -1164,7 +1164,7 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 		line = &command[0]+4;
 		command_del(line,entry_ptr);
 	}else if(strncasecmp(command,"purge",5)==0){
-		line = &command[0]+4;
+		line = &command[0]+6;
 		command_purge(line,entry_ptr,snapshot_ptr);
 	}else if(strncasecmp(command,"set",3)==0){
 		line = &command[0]+4;
