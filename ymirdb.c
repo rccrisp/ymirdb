@@ -94,13 +94,12 @@ void list_add(entry ** last_entry_ptr, entry * new_entry){
 
 snapshot * find_snapshot(char * line, snapshot * head){
 	int snapshot_to_find = atoi(strtok(line, " \n"));
-	// head is always NULL entry
 	snapshot * iter = head;
 	while(iter){
 		if(iter->id == snapshot_to_find){
 			return iter;
 		}
-		iter = iter->next;
+		iter = iter->prev;
 	}
 
 	return NULL;
@@ -463,7 +462,9 @@ void list_free(entry * ptr){
 int snapshot_list_add(snapshot ** last_snapshot_ptr, entry * head_entries){
 	snapshot * new_snapshot = malloc(sizeof(snapshot));
 	snapshot * last_snapshot = * last_snapshot_ptr;
-	if(last_snapshot!=NULL){
+
+	// if this is not the first snapshot
+	if(*last_snapshot_ptr!=NULL){
 		last_snapshot->next = new_snapshot;
 		new_snapshot->id = last_snapshot->id + 1;
 	}else{
@@ -471,20 +472,33 @@ int snapshot_list_add(snapshot ** last_snapshot_ptr, entry * head_entries){
 	}
 
 	new_snapshot->prev = last_snapshot;
+	new_snapshot->next = NULL;
 	new_snapshot->entries = head_entries;
 	*last_snapshot_ptr = new_snapshot;
+
 	return new_snapshot->id;
 }
 
 void snapshot_list_delete(snapshot ** ptr, snapshot* delete_snapshot){
+	// if we are deleting the snapshot currently pointed to by the ptr, update ptr
 	if(*ptr == delete_snapshot){
 		*ptr = delete_snapshot->prev;
-	}else{
-		snapshot * next_snapshot = delete_snapshot->next;
-		snapshot * prev_snapshot = delete_snapshot->prev;
+	}
 
-		next_snapshot->prev = prev_snapshot;
-		prev_snapshot->next = next_snapshot;
+	snapshot * next_snapshot = delete_snapshot->next;
+	snapshot * prev_snapshot = delete_snapshot->prev;
+
+	next_snapshot->prev = prev_snapshot;
+	prev_snapshot->next = next_snapshot;
+
+	entry * iter = delete_snapshot->entries;
+	entry * hold;
+	while(iter){
+		free(iter->forward);
+		free(iter->backward);
+		hold = iter;
+		free(hold->values);
+		iter = iter->prev;
 	}
 	free(delete_snapshot->entries);
 	free(delete_snapshot);
