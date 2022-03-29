@@ -42,19 +42,22 @@ int cmpalpha(const void * a, const void * b){
 
 void delete_references(entry * this_entry){
 	entry * forward_ref;
-	
+
 	for(int i = 0; i < this_entry->forward_size;i++){
 		forward_ref = this_entry->forward[i];
 		int skip = 0;
 		for(int j = 0; j + skip < forward_ref->backward_size; j++){
-			if(forward_ref->backward[j] == forward_ref){
+			if(strcmp(forward_ref->backward[j]->key,this_entry->key)==0){
 				skip++;
 			}
 			forward_ref->backward[j] = forward_ref->backward[j+skip];
 		}
 		forward_ref->backward_size-=skip;
-		forward_ref->backward = realloc(forward_ref->backward,sizeof(entry*)*(forward_ref->backward_size)); 
+		forward_ref->backward = realloc(forward_ref->backward,sizeof(entry*)*(forward_ref->backward_size));
 	}
+	free(this_entry->forward);
+	this_entry->forward = NULL;
+
 }
 
 entry * find_key(char * line, entry * ptr){
@@ -282,6 +285,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	this_entry->backward = malloc(sizeof(entry*));
 	this_entry->forward_size = 0;
 	this_entry->backward_size = 0;
+
 	// variable to store any entries being added to this entry
 	entry * sub_entry;
 
@@ -631,6 +635,7 @@ void command_set(char * line, entry ** ptr){
 		}
 		
 	}else{
+		delete_references(this_entry);
 		this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
 		this_entry->length = length_of_line;
 
