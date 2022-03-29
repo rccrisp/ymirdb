@@ -212,23 +212,26 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 	int prev_size = main_entry->forward_size;
 
 	// update the number of forward references (this new entry, plus all of its references)
-	main_entry->forward_size += sub_entry->forward_size+1;
+	main_entry->forward_size = prev_size + sub_entry->forward_size + 1;
 
 	// as we have added a new entry, we must reallocate space for forward references to include this new
 	// entry, and all of its forward entries
-	main_entry->forward = realloc(main_entry->forward,sizeof(entry)*main_entry->forward_size);
+	main_entry->forward = realloc(main_entry->forward,sizeof(entry*)*main_entry->forward_size);
 
 	// add the forward reference to the sub_entry
 	main_entry->forward[prev_size] = sub_entry;
 
 	// copy across the new forward references
-	memcpy(main_entry->forward[prev_size+1],sub_entry->forward,sizeof(entry)*sub_entry->forward_size);
-
+	for(int i = prev_size+1; i < main_entry->forward_size; i++){
+		main_entry->forward[i] = sub_entry->forward[i-(prev_size+1)];
+	}	
+	
 	// update the number of backwards entries
 	sub_entry->backward_size++;
 
+	
 	// reallocate memory
-	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry)*sub_entry->backward_size);
+	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry*)*sub_entry->backward_size);
 
 	// include the backward reference to main entry
 	sub_entry->backward[sub_entry->backward_size-1] = main_entry;
@@ -270,9 +273,10 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	// start populating the new values
 
 	// assign memory for forward and backward references (will reallocate later)
-	this_entry->forward = malloc(sizeof(entry));
-	this_entry->backward = malloc(sizeof(entry));
-
+	this_entry->forward = malloc(sizeof(entry*));
+	this_entry->backward = malloc(sizeof(entry*));
+	this_entry->forward_size = 0;
+	this_entry->backward_size = 0;
 	// variable to store any entries being added to this entry
 	entry * sub_entry;
 
@@ -290,6 +294,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 			// set type to entry
 			these_values[i].type = ENTRY;
 			// this function updates backwards and forwards references appropriately
+			
 			deal_with_references(this_entry,these_values[i].entry);
 		}
 		j++;
