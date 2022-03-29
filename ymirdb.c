@@ -954,7 +954,7 @@ void command_forward(char * line, entry ** ptr){
 	char ** reference_keys = malloc(sizeof(char *));
 
 	// initialise a count to track how many references we have
-	int size = 0;
+	int size = 1;
 
 	// loop through all the top level forward entries
 	for(int i = 0; i<this_entry->forward_size;i++){
@@ -962,12 +962,12 @@ void command_forward(char * line, entry ** ptr){
 	}
 	
 	// sort in lexicographical order
-	qsort(reference_keys,size-1,sizeof(char*),cmpalpha);
+	qsort(reference_keys,size,sizeof(char*),cmpalpha);
 
 	// print out the references
 	int i = 0;
 
-	for(; i < size-1;i++){
+	for(; i < size-2;i++){
 		// we dont want to print duplicate values
 		if(strcmp(reference_keys[i],reference_keys[i+1])!=0){
 			printf("%s, ", reference_keys[i]);
