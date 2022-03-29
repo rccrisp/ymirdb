@@ -216,7 +216,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		this_entry->values[i] = entry_values[i];
 		if(entry_values[i].type == 1){
 			sub_entry = entry_values[i].entry;
-			this_entry->forward_size+=sub_entry->forward_size+1;
+			this_entry->forward_size = sub_entry->forward_size+1;
 			memcpy(this_entry->forward,&sub_entry, sizeof(entry*));
 			// memcpy(sub_entry->backward,&this_entry,sizeof(entry*));
 		}
