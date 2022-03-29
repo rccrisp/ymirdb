@@ -51,12 +51,9 @@ entry * find_key(char * line, entry * ptr){
 
 // deals with the linked list references when adding a new entry
 void list_add(entry ** last_entry_ptr, entry * new_entry){
-
-	// if(last_entry_ptr == NULL){
-		
-	// }
 	
 	entry * last_entry = *last_entry_ptr;
+
 	if(*last_entry_ptr!=NULL){
 		last_entry->next = new_entry;
 	}
@@ -65,6 +62,8 @@ void list_add(entry ** last_entry_ptr, entry * new_entry){
 	new_entry->next = NULL;
 	*last_entry_ptr = new_entry;
 	return;
+	
+
 }
 
 snapshot * find_snapshot(char * line, snapshot * head){
@@ -206,6 +205,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	element * entry_values = malloc(sizeof(element)*size);
 	entry * entry_to_include;
 	int j = 1;
+	int num_entries = 0;
 	for(int i = index; i < size; i++){
 		if(isnumber(new_values[j])){
 			entry_values[i].value = atoi(new_values[j]);
@@ -220,6 +220,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 				entry_values[i].entry = entry_to_include;
 				entry_values[i].type = ENTRY;
 				simple = false;
+				num_entries++;
 			}
 			
 		}
@@ -228,16 +229,17 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	// if we have gone through all the values, and all are valid, add them to this entry
 	entry * sub_entry;
-	this_entry->forward = malloc(sizeof(entry**));
-	*this_entry->forward = NULL;
-	this_entry->backward = malloc(sizeof(entry**));
+	this_entry->forward = malloc(sizeof(entry*)*num_entries);
+	this_entry->backward = malloc(sizeof(entry*));
 	this_entry->forward_size = 0;
+	j = 0;
 	for(int i = index; i < size; i++){
 		this_entry->values[i] = entry_values[i];
 		if(entry_values[i].type == 1){
 			sub_entry = entry_values[i].entry;
 			this_entry->forward_size = sub_entry->forward_size+1;
-			list_add(this_entry->forward,sub_entry);
+			this_entry->forward[j] = sub_entry;
+			j++;
 			// memcpy(sub_entry->backward,&this_entry,sizeof(entry*));
 		}
 		
@@ -245,10 +247,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	free(entry_values);
 	this_entry->is_simple = simple;
-	if(simple){
-		this_entry->forward = NULL;
-		this_entry->backward = NULL;
-	}
+
 	return true;
 }
 
