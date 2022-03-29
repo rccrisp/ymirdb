@@ -1004,7 +1004,6 @@ void command_forward(char * line, entry ** ptr){
 	
 }
 
-
 int backward_references(entry * this_entry, char ** reference_keys, int size){
 
 	for(int i = 0; i <this_entry->backward_size;i++){
@@ -1077,8 +1076,21 @@ void command_backward(char * line, entry ** ptr){
 	free(reference_keys);
 }
 
-void command_type(){
-	printf("displays if the entry of this key is simple or general\n");
+void command_type(char * line, entry ** ptr){
+	// find the key to sort from from the linked list
+	entry * type_entry = find_key(line,*ptr);
+
+	if(type_entry!=NULL){
+		if(type_entry->is_simple){
+			printf("simple");
+		}else{
+			printf("general");
+		}
+	}else{
+		printf("no such key");
+	}
+
+	printf("\n\n");
 }
 
 int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot_ptr){
@@ -1157,13 +1169,15 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 		line = &command[0]+9;
 		command_backward(line,entry_ptr);
 	}else if(strncasecmp(command,"type",4)==0){
-		command_type();
+		line = &command[0]+5;
+		command_type(line,entry_ptr);
 	}else{ 
 		printf("INVALID COMMAND: TYPE HELP FOR A LIST OF VALID COMMANDS\n");
 	}
 
 	return 0;
 }
+
 int main(void) {
 
 	char line[MAX_LINE];
