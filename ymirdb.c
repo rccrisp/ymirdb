@@ -269,8 +269,14 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	// start populating the new values
 
+	// assign memory for forward and backward references (will reallocate later)
+	this_entry->forward = malloc(sizeof(entry*));
+	this_entry->backward = malloc(sizeof(entry*));
+
 	// variable to store any entries being added to this entry
 	entry * sub_entry;
+
+	// index to track place in the new entries
 	int j = 1;
 	for(int i = index; i < size; i++){
 		// if it is a number
