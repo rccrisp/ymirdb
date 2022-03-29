@@ -887,16 +887,16 @@ void command_forward(char * line, entry ** ptr){
 	if(forward_key->forward_size == 0){
 		printf("nil\n\n");
 		return;
-	}
-
-	forward_key = *forward_key->forward;
-	while(forward_key->forward_size>0){
-		printf("%s, ", forward_key->key);
+	}else{
 		forward_key = *forward_key->forward;
-	}
+		while(forward_key->forward_size>0){
+			printf("%s, ", forward_key->key);
+			forward_key = *forward_key->forward;
+		}
 
-	// printf("%s\n\n", forward_key->key);
-	
+		printf("%s\n\n", forward_key->key);
+	}
+		
 	return;
 }
 
