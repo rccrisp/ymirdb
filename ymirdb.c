@@ -926,7 +926,7 @@ int forward_references(entry * this_entry, char * reference_keys[], int size){
 		size = forward_references(this_entry->forward[i], reference_keys, size);
 	}
 	size++;
-	reference_keys = realloc(*reference_keys, sizeof(char *)*(size));
+	reference_keys = realloc(reference_keys, sizeof(char *)*(size));
 
 	reference_keys[size-1] = this_entry->key;
 
@@ -960,6 +960,8 @@ void command_forward(char * line, entry ** ptr){
 	for(int i = 0; i<this_entry->forward_size;i++){
 		size = forward_references(this_entry->forward[i], reference_keys, size);
 	}
+
+	reference_keys = realloc(reference_keys,sizeof(char*)*size);
 	
 	// sort in lexicographical order
 	qsort(reference_keys,size,sizeof(char*),cmpalpha);
