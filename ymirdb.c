@@ -597,37 +597,72 @@ void command_del(char * line, entry ** ptr){
 
 void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 	entry * this_entry = find_key(line,*entry_ptr);
+	
+	// create boolean to store whether this key exists in any current or previous state
+	bool is_a_current_key = false;
+	bool is_a_snapshot_key = false;
 
-	if(this_entry == NULL){
-		printf("no such key\n\n");
-		return;
+	// check if key exists in current state 
+	if(this_entry != NULL){
+		is_a_current_key = true;
 	}
 
-	// check if current state is valid after removal
-	if(this_entry->backward_size!=0){
-		printf("not permitted\n\n");
-		return;
-	}
-
+	// check if key exists in any snapshots
 	snapshot * iter = *snapshot_ptr;
-	// check if snapshots are still valid after removal
 	while(iter){
-		entry * snapshot_entry = find_key(line,iter->entries);
-		if(snapshot_entry->backward_size!=0){
-			printf("not permitted\n\n");
-			return;
+		if(NULL != find_key(line,iter->entries)){
+			is_a_snapshot_key = true;
 		}
 		iter = iter->prev;
 	}
 
-	// if snapshots remain valid after removal, we may delete the entry from the snapshots
-	while(iter){
-		list_delete(&iter->entries, this_entry);
-		iter = iter->prev;
+	// if the key doesnt exist in any state
+	if(!is_a_current_key&&!is_a_snapshot_key){
+		printf("no such key\n\n");
+		return ;
+	}
+
+	// if the key exists in a snapshot
+	if(is_a_snapshot_key){
+		iter = *snapshot_ptr;
+		entry * snapshot_entry;
+		// check if snapshots are still valid after removal
+		while(iter){
+			snapshot_entry = find_key(line,iter->entries);
+			// if the key exists in this snapshot
+			if(snapshot_entry!=NULL){
+				// if the snapshot has back references
+				if(snapshot_entry->backward_size!=0){
+					printf("not permitted\n\n");
+					return;
+				}
+			}
+			iter = iter->prev;
+		}
+
+		// if snapshots remain valid after removal, we may delete the entry from the snapshots
+		iter = *snapshot_ptr;
+		while(iter){
+			if(snapshot_entry!=NULL){
+				list_delete(&iter->entries, this_entry);
+			}
+			iter = iter->prev;
+		}
 	}
 	
-	// if current state is valid after removal
-	list_delete(entry_ptr,this_entry);
+
+	// if key exists in current state
+	if(is_a_current_key){
+		// check if current state is valid after removal
+		if(this_entry->backward_size!=0){
+			printf("not permitted\n\n");
+			return;
+		}
+		
+		// if current state is valid after removal
+		list_delete(entry_ptr,this_entry);
+	}
+	
 
 	printf("ok\n\n");
 }
