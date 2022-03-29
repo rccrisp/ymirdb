@@ -216,13 +216,13 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 
 	// as we have added a new entry, we must reallocate space for forward references to include this new
 	// entry, and all of its forward entries
-	main_entry->forward = realloc(main_entry->forward,sizeof(entry*)*main_entry->forward_size);
+	main_entry->forward = realloc(main_entry->forward,sizeof(entry)*main_entry->forward_size);
 
 	// add the forward reference to the sub_entry
 	main_entry->forward[prev_size] = sub_entry;
 
 	// copy across the new forward references
-	memcpy(main_entry->forward[prev_size+1],sub_entry->forward,sizeof(entry*)*sub_entry->forward_size);
+	memcpy(main_entry->forward[prev_size+1],sub_entry->forward,sizeof(entry)*sub_entry->forward_size);
 
 	// update the number of backwards entries
 	sub_entry->backward_size++;
