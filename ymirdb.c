@@ -226,6 +226,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	// if we have gone through all the values, and all are valid, add them to this entry
 	entry * sub_entry;
 	this_entry->forward = malloc(sizeof(entry**));
+	this_entry->forward = NULL;
 	this_entry->backward = malloc(sizeof(entry**));
 	this_entry->forward_size = 0;
 	for(int i = index; i < size; i++){
