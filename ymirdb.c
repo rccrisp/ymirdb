@@ -245,7 +245,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	int size = this_entry->length;
 
 	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
-	for(int i = 1; i < size+1; i++){
+	for(int i = 1; i < size; i++){
 		// if its not a number
 		if(!isnumber(new_values[i])){
 			// if its not a key or is a self reference
@@ -271,13 +271,14 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	// variable to store any entries being added to this entry
 	entry * sub_entry;
+	int j = 1;
 	for(int i = index; i < size; i++){
 		// if it is a number
-		if(isnumber(new_values[i+1])){
-			these_values[i].value = atoi(new_values[i+1]);
+		if(isnumber(new_values[j])){
+			these_values[i].value = atoi(new_values[j]);
 			these_values[i].type = INTEGER;
 		}else{
-			sub_entry = find_key(new_values[i],*ptr);
+			sub_entry = find_key(new_values[j],*ptr);
 			// copy the subentry pointer to values of this entry
 			these_values[i].entry = sub_entry;
 			// set type to entry
@@ -285,10 +286,11 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 			// this function updates backwards and forwards references appropriately
 			deal_with_references(this_entry,these_values[i].entry);
 		}
+		j++;
 	}
 
 	memcpy(this_entry->values,these_values,sizeof(element)*size);
-	
+
 	this_entry->is_simple = simple;
 
 	return true;
