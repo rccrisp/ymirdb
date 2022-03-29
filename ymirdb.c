@@ -927,6 +927,7 @@ int forward_references(entry * this_entry, char * reference_keys[], int size){
 	}
 	size++;
 	reference_keys = realloc(reference_keys, sizeof(char *)*(size));
+
 	reference_keys[size-1] = this_entry->key;
 
 	return size;
@@ -957,7 +958,7 @@ void command_forward(char * line, entry ** ptr){
 
 	// loop through all the top level forward entries
 	for(int i = 0; i<this_entry->forward_size;i++){
-		size += forward_references(this_entry->forward[i], reference_keys, size);
+		size = forward_references(this_entry->forward[i], reference_keys, size);
 	}
 	
 	// sort in lexicographical order
@@ -965,8 +966,13 @@ void command_forward(char * line, entry ** ptr){
 
 	// print out the references
 	int i = 0;
+
 	for(; i < size-1;i++){
-		printf("%s, ", reference_keys[i]);
+		// we dont want to print duplicate values
+		if(strcmp(reference_keys[i],reference_keys[i+1])!=0){
+			printf("%s, ", reference_keys[i]);
+		}
+		
 	}
 	printf("%s\n\n", reference_keys[i]);
 
