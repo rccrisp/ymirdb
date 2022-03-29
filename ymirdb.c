@@ -511,11 +511,10 @@ void snapshot_list_free(snapshot ** ptr){
 	if(iter == NULL){
 		return;
 	}
-	while(iter->next){
+	while(iter){
 		current = iter;
-		iter = iter->next;
-		list_free(current->entries);
-		free(current);
+		iter = iter->prev;
+		snapshot_list_delete(ptr,current);
 	}
 
 	return ;
