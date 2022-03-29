@@ -44,7 +44,7 @@ int cmpref(const void * a, const void * b){
 
 entry * find_key(char * line, entry * ptr){
 	char * key_to_find = strtok(line, " \n");
-	// head is always NULL entry
+
 	entry * iter = ptr;
 	while(iter){
 		if(strcmp(iter->key,key_to_find) == 0){
@@ -206,7 +206,7 @@ void include_entry_in_values(entry ** main_entry_ptr, entry ** sub_entry_ptr){
 
 }
 
-void deal_with_references(entry * main_entry, entry * sub_entry){
+void deal_with_references(entry ** ptr, entry * main_entry, entry * sub_entry){
 
 	// store the number of previous forward references
 	int prev_size = main_entry->forward_size;
@@ -225,19 +225,27 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 	for(int i = prev_size+1; i < main_entry->forward_size; i++){
 		main_entry->forward[i] = sub_entry->forward[i-(prev_size+1)];
 	}	
-	
-	// update the number of backwards entries
-	sub_entry->backward_size++;
 
+	// now we must deal with backwards references (update all backwards references to include
+	// new entry)
 	
-	// reallocate memory
-	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry*)*sub_entry->backward_size);
+	while(sub_entry->NULL){
+		// update the number of backwards entries
+		sub_entry->backward_size++;
 
-	// include the backward reference to main entry
-	sub_entry->backward[sub_entry->backward_size-1] = main_entry;
-	// printf("%s\n",main_entry->forward[0]->key);
-	qsort(main_entry->forward, main_entry->forward_size ,sizeof(entry*), cmpref);
-	// printf("%s\n",main_entry->forward[0]->key);
+		// reallocate memory
+		sub_entry->backward = realloc(sub_entry->backward,sizeof(entry*)*sub_entry->backward_size);
+
+		// include the backward reference to main entry
+		sub_entry->backward[sub_entry->backward_size-1] = main_entry;
+
+		sub_entry = find_key(sub_entry->backward[sub_entry->backward_size-1]);
+		
+	}
+
+
+	printf("bward %ld\n", sub_entry->backward_size);
+
 	return;
 }
 
@@ -250,7 +258,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	int size = this_entry->length;
 
 	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
-	for(int i = 1; i < size; i++){
+	for(int i = 1; i < size+1; i++){
 		// if its not a number
 		if(!isnumber(new_values[i])){
 			// if its not a key or is a self reference
@@ -297,7 +305,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 			these_values[i].type = ENTRY;
 			// this function updates backwards and forwards references appropriately
 			
-			deal_with_references(this_entry,these_values[i].entry);
+			deal_with_references(ptr,this_entry,these_values[i].entry);
 		}
 		j++;
 	}
@@ -601,7 +609,6 @@ void command_set(char * line, entry ** ptr){
 	// find the values to push to the key
 	char *this_line[MAX_LINE];
 	int length_of_line = strip_values(line,this_line);
-
 
 	if(sizeof(this_line[0])>MAX_KEY){
 		return;
@@ -945,6 +952,15 @@ void command_sort(char * line, entry ** ptr){
 
 void command_forward(char * line, entry ** ptr){
 	entry * forward_key = find_key(line,*ptr);
+
+	// create a copy of the forward references to sort lexicographically and print
+	entry ** cpy = malloc(sizeof(entry*)*forward_key->forward_size);
+	memcpy(cpy,forward_key->forward, sizeof(entry*)*forward_key->forward_size);
+
+
+	// sort the forwards references lexicographically
+	qsort(cpy, forward_key->forward_size ,sizeof(entry*), cmpref);
+
 	if(forward_key == NULL){
 		printf("no such key\n\n");
 		return;
@@ -956,19 +972,41 @@ void command_forward(char * line, entry ** ptr){
 		int i = 0;
 		entry * reference;
 		for(; i < forward_key->forward_size-1; i++){
-			reference = forward_key->forward[i];
+			reference = cpy[i];
 			printf("%s, ",reference->key);
 		}
-		reference = forward_key->forward[i];
+		reference = cpy[i];
+		printf("%s\n\n",reference->key);
+
+	}
+
+	free(cpy);
+
+	return;
+}
+
+void command_backward(char * line, entry ** ptr){
+	entry * backward_key = find_key(line,*ptr);
+	if(backward_key == NULL){
+		printf("no such key\n\n");
+		return;
+	}
+	if(backward_key->backward_size == 0){
+		printf("nil\n\n");
+		return;
+	}else{
+		int i = 0;
+		entry * reference;
+		for(; i < backward_key->backward_size-1; i++){
+			reference = backward_key->backward[i];
+			printf("%s, ",reference->key);
+		}
+		reference = backward_key->backward[i];
 		printf("%s\n\n",reference->key);
 
 	}
 		
 	return;
-}
-
-void command_backward(){
-	printf("lists all the backward references of this key\n");
 }
 
 void command_type(){
@@ -1048,7 +1086,8 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 		line = &command[0]+8;
 		command_forward(line,entry_ptr);
 	}else if(strncasecmp(command,"backward",8)==0){
-		command_backward();
+		line = &command[0]+9;
+		command_backward(line,entry_ptr);
 	}else if(strncasecmp(command,"type",4)==0){
 		command_type();
 	}else{ 
@@ -1075,7 +1114,6 @@ int main(void) {
 		//
 		// TODO
 		//
-		
 		if(command_interpreter(line, &ptr, &snapshots) == -1){
 			return 0;
 		}
