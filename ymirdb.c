@@ -34,6 +34,14 @@ int cmpfunc(const void * a, const void * b){
 	return (ea->value - eb->value);
 }
 
+int cmpref(const void * a, const void * b){
+	const entry * ea = *(entry **)a;
+	const entry * eb = *(entry **)b;
+	return(strcmp(ea->key,eb->key));
+
+	
+}
+
 entry * find_key(char * line, entry * ptr){
 	char * key_to_find = strtok(line, " \n");
 	// head is always NULL entry
@@ -198,54 +206,89 @@ void include_entry_in_values(entry ** main_entry_ptr, entry ** sub_entry_ptr){
 
 }
 
+void deal_with_references(entry * main_entry, entry * sub_entry){
+
+	// store the number of previous forward references
+	int prev_size = main_entry->forward_size;
+
+	// update the number of forward references (this new entry, plus all of its references)
+	main_entry->forward_size += sub_entry->forward_size+1;
+
+	// as we have added a new entry, we must reallocate space for forward references to include this new
+	// entry, and all of its forward entries
+	main_entry->forward = realloc(main_entry->forward,sizeof(entry*)*main_entry->forward_size);
+
+	// add the forward reference to the sub_entry
+	main_entry->forward[prev_size] = sub_entry;
+
+	// copy across the new forward references
+	memcpy(main_entry->forward[prev_size+1],sub_entry->forward,sizeof(entry*)*sub_entry->forward_size);
+
+	// update the number of backwards entries
+	sub_entry->backward_size++;
+
+	// reallocate memory
+	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry*)*sub_entry->backward_size);
+
+	// include the backward reference to main entry
+	sub_entry->backward[sub_entry->backward_size-1] = main_entry;
+
+	return;
+}
+
 // given a character array of values, include these values in the correct key, from a given index
 bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index){
+	// boolean to store if this is a simple or general entry
 	bool simple = true;
+
+	// store the size of this entry
 	int size = this_entry->length;
-	element * entry_values = malloc(sizeof(element)*size);
-	entry * entry_to_include;
-	int j = 1;
-	int num_entries = 0;
-	for(int i = index; i < size; i++){
-		if(isnumber(new_values[j])){
-			entry_values[i].value = atoi(new_values[j]);
-			entry_values[i].type = INTEGER;
-		}else{
-			entry_to_include = find_key(new_values[j],*ptr);
-			// if this isnt a valid key or is a self-reference
-			if(entry_to_include == NULL || entry_to_include == this_entry){
-				free(entry_values);
+
+	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
+	for(int i = 1; i < size+1; i++){
+		// if its not a number
+		if(!isnumber(new_values[i])){
+			// if its not a key or is a self reference
+			if(find_key(new_values[i],*ptr)==NULL || this_entry == find_key(new_values[i],*ptr)){
 				return false;
-			}else{
-				entry_values[i].entry = entry_to_include;
-				entry_values[i].type = ENTRY;
-				simple = false;
-				num_entries++;
 			}
-			
+			// have found an entry
+			simple = false;
 		}
-		j++;
 	}
 
 	// if we have gone through all the values, and all are valid, add them to this entry
-	entry * sub_entry;
-	this_entry->forward = malloc(sizeof(entry*)*num_entries);
-	this_entry->backward = malloc(sizeof(entry*));
-	this_entry->forward_size = 0;
-	j = 0;
-	for(int i = index; i < size; i++){
-		this_entry->values[i] = entry_values[i];
-		if(entry_values[i].type == 1){
-			sub_entry = entry_values[i].entry;
-			this_entry->forward_size = sub_entry->forward_size+1;
-			this_entry->forward[j] = sub_entry;
-			j++;
-			// memcpy(sub_entry->backward,&this_entry,sizeof(entry*));
-		}
-		
+	
+	// assign enough memory to store all the entries
+	element * these_values = malloc(sizeof(element)*size);
+	
+	// if we are appending values, copy the first values across
+	if(index>0){
+		memcpy(these_values,this_entry->values,sizeof(element)*(index));
 	}
 
-	free(entry_values);
+	// start populating the new values
+
+	// variable to store any entries being added to this entry
+	entry * sub_entry;
+	for(int i = index; i < size; i++){
+		// if it is a number
+		if(isnumber(new_values[i+1])){
+			these_values[i].value = atoi(new_values[i+1]);
+			these_values[i].type = INTEGER;
+		}else{
+			sub_entry = find_key(new_values[i],*ptr);
+			// copy the subentry pointer to values of this entry
+			these_values[i].entry = sub_entry;
+			// set type to entry
+			these_values[i].type = ENTRY;
+			// this function updates backwards and forwards references appropriately
+			deal_with_references(this_entry,these_values[i].entry);
+		}
+	}
+
+	memcpy(this_entry->values,these_values,sizeof(element)*size);
+	
 	this_entry->is_simple = simple;
 
 	return true;
@@ -886,27 +929,25 @@ void command_sort(char * line, entry ** ptr){
 }
 
 void command_forward(char * line, entry ** ptr){
-	entry * forward_key = find_key(line,*ptr);
-	if(forward_key == NULL){
-		printf("no such key\n\n");
-		return;
-	}
-	if(forward_key->forward_size == 0){
-		printf("nil\n\n");
-		return;
-	}else{
-		entry * iter = forward_key->prev;
-		while(iter){
-			if(iter->prev == NULL){
-				printf("%s\n\n", iter->key);
-			}else{
-				printf("%s, ", iter->key);
-			}
-			
-			iter = iter->prev;
-		}
+	// entry * forward_key = find_key(line,*ptr);
+	// if(forward_key == NULL){
+	// 	printf("no such key\n\n");
+	// 	return;
+	// }
+	// if(forward_key->forward_size == 0){
+	// 	printf("nil\n\n");
+	// 	return;
+	// }else{
+	// 	int i = 0;
+	// 	entry * reference;
+	// 	for(; i < forward_key->forward_size-1; i++){
+	// 		reference = forward_key->forward[i];
+	// 		// printf("%s, ",reference->key);
+	// 	}
+	// 	reference = forward_key->forward[i];
+	// 	// printf("%s\n",reference->key);
 
-	}
+	// }
 		
 	return;
 }
