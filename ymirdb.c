@@ -248,7 +248,7 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 }
 
 // given a character array of values, include these values in the correct key, from a given index
-bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index){
+bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, bool first){
 	// boolean to store if this is a simple or general entry
 	bool simple = true;
 
@@ -281,10 +281,11 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	// start populating the new values
 
 	// assign memory for forward and backward references (will reallocate later)
-	if(this_entry->backward == NULL){
+	if(first){
 		this_entry->backward = malloc(sizeof(entry*));
 		this_entry->backward_size = 0;
 	}
+
 	this_entry->forward = malloc(sizeof(entry*));
 	this_entry->forward_size = 0;
 
@@ -331,7 +332,7 @@ bool append(entry ** ptr, char * some_values[], int num_new){
 	this_entry->length = size_after_append;
 
 	// populate the values with the new values
-	return populate_values(ptr,this_entry,some_values,num_old);
+	return populate_values(ptr,this_entry,some_values,num_old,false);
 	
 }
 
@@ -626,7 +627,7 @@ void command_set(char * line, entry ** ptr){
 		this_entry->values = malloc(sizeof(struct element)*(length_of_line));
 		this_entry->length = length_of_line; // update this later to include entries
 
-		valid = populate_values(ptr,this_entry,this_line,0);
+		valid = populate_values(ptr,this_entry,this_line,0,true);
 
 		if(valid){
 			// add this key to the linked list of keys
@@ -641,7 +642,7 @@ void command_set(char * line, entry ** ptr){
 		this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
 		this_entry->length = length_of_line;
 
-		valid = populate_values(ptr,this_entry,this_line,0);
+		valid = populate_values(ptr,this_entry,this_line,0,false);
 	}
 
 	if(valid){
