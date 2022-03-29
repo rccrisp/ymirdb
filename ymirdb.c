@@ -40,6 +40,23 @@ int cmpalpha(const void * a, const void * b){
 	
 }
 
+void delete_references(entry * this_entry){
+	entry * forward_ref;
+	
+	for(int i = 0; i < this_entry->forward_size;i++){
+		forward_ref = this_entry->forward[i];
+		int skip = 0;
+		for(int j = 0; j + skip < forward_ref->backward_size; j++){
+			if(forward_ref->backward[j] == forward_ref){
+				skip++;
+			}
+			forward_ref->backward[j] = forward_ref->backward[j+skip];
+		}
+		forward_ref->backward_size-=skip;
+		forward_ref->backward = realloc(forward_ref->backward,sizeof(entry*)*(forward_ref->backward_size)); 
+	}
+}
+
 entry * find_key(char * line, entry * ptr){
 	char * key_to_find = strtok(line, " \n");
 	// head is always NULL entry
@@ -281,8 +298,8 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 			these_values[i].entry = sub_entry;
 			// set type to entry
 			these_values[i].type = ENTRY;
+
 			// this function updates backwards and forwards references appropriately
-			
 			deal_with_references(this_entry,these_values[i].entry);
 		}
 		j++;
@@ -376,54 +393,45 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	return true;
 }
 
-bool delete_references(entry * this_entry){
-	if(this_entry->backward_size != 0){
-		return false;
-	}
-
-	entry * forward_entry;
-	for(int i = 0; i < this_entry->forward_size; i++){
-		forward_entry = this_entry->forward[i];
-		int num_removed = 0;
-		for(int j = 0; j < forward_entry->backward_size;j++){
-			if(forward_entry->backward[j] == this_entry){
-				num_removed++;
-			}
-			if(j+num_removed<forward_entry->backward_size){
-				forward_entry->backward[j] = forward_entry->backward[j+num_removed];
-			}else{
-				break;
-			}
-		}
-		forward_entry->backward_size = forward_entry->backward_size - num_removed;
-		forward_entry->backward = realloc(forward_entry->backward,sizeof(entry *)*(forward_entry->backward_size));
-	}
-
-	return true;
-}
-
 bool list_delete(entry ** ptr, entry * delete_entry){
 	// if we are deleting the value currently pointed to by the pointer, update the pointer
 	if(*ptr == delete_entry){
 		*ptr = delete_entry->prev;
-	}else{
+	}
+	// if we can delete the current entry without causing an invalid state
+	if(delete_entry->backward_size==0){
+
+		// patch up the linkedlist after the delete
 		entry * next_entry = delete_entry->next;
 		entry * prev_entry = delete_entry->prev;
 
-		next_entry->prev = prev_entry;
-		prev_entry->next = next_entry;
-	}
+		// if there is a previous entry CHECK THESE!!
+		if(prev_entry != NULL){
+			prev_entry->next = next_entry;
+		}
+		if(next_entry!=NULL){
+			next_entry->prev = prev_entry;
+		}
+		
 
-	// if we can delete the current entry without causing an invalid state
-	if(delete_entry->is_simple || delete_references(delete_entry)){
+		// set pointers to null
 		delete_entry->next = NULL;
 		delete_entry->prev = NULL;
+
+		// delete references
+		delete_references(delete_entry);
+
+		// free allocated memory
+		free(delete_entry->backward);
+		free(delete_entry->forward);
 		free(delete_entry->values);
 		free(delete_entry);
 		return true;
 	}else{
 		return false;
 	}
+
+
 
 	
 }
@@ -564,6 +572,7 @@ void command_get(char * line, entry ** ptr){
 
 }
 
+
 void command_del(char * line, entry ** ptr){
 	entry * this_entry = find_key(line,*ptr);
 
@@ -661,7 +670,6 @@ void command_push(char * line, entry ** ptr){
 		printf("no such key\n\n");
 	}
 }
-
 
 void command_append(char * line, entry ** ptr){
 	// find the values to append to the key
