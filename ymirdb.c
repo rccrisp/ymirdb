@@ -598,6 +598,11 @@ void command_del(char * line, entry ** ptr){
 void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 	entry * this_entry = find_key(line,*entry_ptr);
 
+	if(this_entry == NULL){
+		printf("no such key\n\n");
+		return;
+	}
+	
 	// check if current state is valid after removal
 	if(this_entry->backward_size!=0){
 		printf("not permitted\n\n");
