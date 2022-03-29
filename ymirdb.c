@@ -961,7 +961,7 @@ void command_forward(char * line, entry ** ptr){
 	}
 	
 	// sort in lexicographical order
-	qsort(reference_keys,size,sizeof(char*),cmpalpha);
+	qsort(reference_keys,size-1,sizeof(char*),cmpalpha);
 
 	// print out the references
 	int i = 0;
