@@ -228,23 +228,15 @@ void deal_with_references(entry ** ptr, entry * main_entry, entry * sub_entry){
 
 	// now we must deal with backwards references (update all backwards references to include
 	// new entry)
-	
-	while(sub_entry->NULL){
-		// update the number of backwards entries
-		sub_entry->backward_size++;
 
-		// reallocate memory
-		sub_entry->backward = realloc(sub_entry->backward,sizeof(entry*)*sub_entry->backward_size);
+	// update the number of backwards entries
+	sub_entry->backward_size++;
 
-		// include the backward reference to main entry
-		sub_entry->backward[sub_entry->backward_size-1] = main_entry;
+	// reallocate memory
+	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry*)*sub_entry->backward_size);
 
-		sub_entry = find_key(sub_entry->backward[sub_entry->backward_size-1]);
-		
-	}
-
-
-	printf("bward %ld\n", sub_entry->backward_size);
+	// include the backward reference to main entry
+	sub_entry->backward[sub_entry->backward_size-1] = main_entry;
 
 	return;
 }
