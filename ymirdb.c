@@ -595,8 +595,36 @@ void command_del(char * line, entry ** ptr){
 	}
 }
 
-void command_purge(){
-	printf("deletes entry from current state and snapshots\n");
+void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
+	entry * this_entry = find_key(line,*entry_ptr);
+
+	// check if current state is valid after removal
+	if(this_entry->backward_size!=0){
+		printf("not permitted\n\n");
+		return;
+	}
+
+	snapshot * iter = *snapshot_ptr;
+	// check if snapshots are still valid after removal
+	while(iter){
+		entry * snapshot_entry = find_key(line,iter->entries);
+		if(snapshot_entry->backward_size!=0){
+			printf("not permitted\n\n");
+			return;
+		}
+		iter = iter->prev;
+	}
+
+	// if snapshots remain valid after removal, we may delete the entry from the snapshots
+	while(iter){
+		list_delete(&iter->entries, this_entry);
+		iter = iter->prev;
+	}
+	
+	// if current state is valid after removal
+	list_delete(entry_ptr,this_entry);
+
+
 }
 
 void command_set(char * line, entry ** ptr){
@@ -1131,7 +1159,8 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 		line = &command[0]+4;
 		command_del(line,entry_ptr);
 	}else if(strncasecmp(command,"purge",5)==0){
-		command_purge();
+		line = &command[0]+4;
+		command_purge(line,entry_ptr,snapshot_ptr);
 	}else if(strncasecmp(command,"set",3)==0){
 		line = &command[0]+4;
 		command_set(line,entry_ptr);
