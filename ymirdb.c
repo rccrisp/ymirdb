@@ -50,7 +50,7 @@ void delete_references(entry * this_entry){
 			if(strcmp(forward_ref->backward[j]->key,this_entry->key)==0){
 				skip++;
 			}
-			forward_ref->backward[j] = forward_ref->backward[j+skip];
+			*forward_ref->backward[j] = *forward_ref->backward[j+skip];
 		}
 		forward_ref->backward_size-=skip;
 		forward_ref->backward = realloc(forward_ref->backward,sizeof(entry*)*(forward_ref->backward_size));
