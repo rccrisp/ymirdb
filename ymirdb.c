@@ -960,7 +960,7 @@ void command_forward(char * line, entry ** ptr){
 			printf("%s, ",reference->key);
 		}
 		reference = forward_key->forward[i];
-		printf("%s\n",reference->key);
+		printf("%s\n\n",reference->key);
 
 	}
 		
