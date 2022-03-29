@@ -965,10 +965,10 @@ void command_forward(char * line, entry ** ptr){
 
 	// print out the references
 	int i = 0;
-	for(; i < size-1;i++){
+	for(; i < size-2;i++){
 		printf("%s, ", reference_keys[i]);
 	}
-	printf("%s\n\n", reference_keys[i]);
+	printf("%s\n\n", reference_keys[i]-1);
 
 	free(reference_keys);
 	return;
