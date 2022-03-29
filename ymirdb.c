@@ -58,7 +58,6 @@ void delete_references(entry * this_entry){
 		forward_ref->backward_size-=skip;
 		forward_ref->backward = realloc(forward_ref->backward,sizeof(entry*)*(forward_ref->backward_size));
 	}
-
 }
 
 entry * find_key(char * line, entry * ptr){
@@ -282,10 +281,12 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	// start populating the new values
 
 	// assign memory for forward and backward references (will reallocate later)
+	if(this_entry->forward == NULL){
+		this_entry->backward = malloc(sizeof(entry*));
+		this_entry->backward_size = 0;
+	}
 	this_entry->forward = malloc(sizeof(entry*));
-	this_entry->backward = malloc(sizeof(entry*));
 	this_entry->forward_size = 0;
-	this_entry->backward_size = 0;
 
 	// variable to store any entries being added to this entry
 	entry * sub_entry;
