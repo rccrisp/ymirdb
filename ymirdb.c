@@ -920,17 +920,29 @@ void command_sort(char * line, entry ** ptr){
 	
 }
 
-int forward_references(entry * this_entry, char * reference_keys[], int size){
+int forward_references(entry * this_entry, char ** reference_keys, int size){
 
 	for(int i = 0; i <this_entry->forward_size;i++){
 		size = forward_references(this_entry->forward[i], reference_keys, size);
 	}
+	
 	size++;
-	reference_keys = realloc(reference_keys, sizeof(char *)*(size));
-
 	reference_keys[size-1] = this_entry->key;
 
 	return size;
+}
+
+int count_forward_references(entry * this_entry){
+	if(this_entry->forward_size == 0){
+		return 1;
+	}
+
+	int sum = 0;
+	for(int i = 0; i < this_entry->forward_size;i++){
+		sum += count_forward_references(this_entry->forward[i]);
+	}
+
+	return sum;
 }
 
 void command_forward(char * line, entry ** ptr){
@@ -950,8 +962,11 @@ void command_forward(char * line, entry ** ptr){
 		return;
 	}
 
+	// count all the forward references to assign the correct amount of memory
+	int total = count_forward_references(this_entry) + 1;
+
 	// initialise an array to store all of the reference value keys
-	char ** reference_keys = malloc(sizeof(char *));
+	char ** reference_keys = malloc(sizeof(char *)*total);
 
 	// initialise a count to track how many references we have
 	int size = 0;
@@ -960,8 +975,6 @@ void command_forward(char * line, entry ** ptr){
 	for(int i = 0; i<this_entry->forward_size;i++){
 		size = forward_references(this_entry->forward[i], reference_keys, size);
 	}
-
-	reference_keys = realloc(reference_keys,sizeof(char*)*size);
 	
 	// sort in lexicographical order
 	qsort(reference_keys,size,sizeof(char*),cmpalpha);
