@@ -46,9 +46,9 @@ void delete_references(entry * this_entry){
 	for(int i = 0; i < this_entry->forward_size;i++){
 		forward_ref = this_entry->forward[i];
 		int skip = 0;
-		for(int j = 0; j + skip < forward_ref->backward_size; j++){
+		for(int j = 0; j + skip < forward_ref->backward_size-1; j++){
 			if(strcmp(forward_ref->backward[j]->key,this_entry->key)==0){
-				// skip++;
+				skip++;
 			}
 			forward_ref->backward[j] = forward_ref->backward[j+skip];
 		}
