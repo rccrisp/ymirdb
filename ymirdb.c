@@ -962,12 +962,12 @@ void command_forward(char * line, entry ** ptr){
 	}
 	
 	// sort in lexicographical order
-	qsort(reference_keys,size-1,sizeof(char*),cmpalpha);
+	qsort(reference_keys,size,sizeof(char*),cmpalpha);
 
 	// print out the references
 	int i = 0;
 
-	for(; i < size-2;i++){
+	for(; i < size-1;i++){
 		// we dont want to print duplicate values
 		if(strcmp(reference_keys[i],reference_keys[i+1])!=0){
 			printf("%s, ", reference_keys[i]);
