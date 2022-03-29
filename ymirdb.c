@@ -926,7 +926,7 @@ int forward_references(entry * this_entry, char * reference_keys[], int size){
 		size = forward_references(this_entry->forward[i], reference_keys, size);
 	}
 	size++;
-	reference_keys = realloc(reference_keys, sizeof(char *)*(size));
+	*reference_keys = realloc(*reference_keys, sizeof(char *)*(size));
 
 	reference_keys[size-1] = this_entry->key;
 
@@ -954,7 +954,7 @@ void command_forward(char * line, entry ** ptr){
 	char ** reference_keys = malloc(sizeof(char *));
 
 	// initialise a count to track how many references we have
-	int size = 1;
+	int size = 0;
 
 	// loop through all the top level forward entries
 	for(int i = 0; i<this_entry->forward_size;i++){
