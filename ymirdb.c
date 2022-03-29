@@ -281,7 +281,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	// start populating the new values
 
 	// assign memory for forward and backward references (will reallocate later)
-	if(this_entry->backward_size == 0){
+	if(this_entry->backward == NULL){
 		this_entry->backward = malloc(sizeof(entry*));
 		this_entry->backward_size = 0;
 	}
