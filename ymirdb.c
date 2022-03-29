@@ -228,7 +228,7 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 	sub_entry->backward_size++;
 
 	// reallocate memory
-	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry*)*sub_entry->backward_size);
+	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry)*sub_entry->backward_size);
 
 	// include the backward reference to main entry
 	sub_entry->backward[sub_entry->backward_size-1] = main_entry;
