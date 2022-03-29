@@ -633,7 +633,6 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 			if(snapshot_entry!=NULL){
 				// if the snapshot has back references
 				if(snapshot_entry->backward_size!=0){
-					printf("%ld\n",snapshot_entry->backward_size);
 					printf("not permitted\n\n");
 					return;
 				}
@@ -1178,6 +1177,19 @@ void command_type(char * line, entry ** ptr){
 	printf("\n\n");
 }
 
+void command_size(char * line, entry ** ptr){
+		// find the key to sort from from the linked list
+	entry * this_entry = find_key(line,*ptr);
+
+	if(this_entry!=NULL){
+		printf("backward size %ld\nforward size %ld\n\n",this_entry->backward_size,this_entry->forward_size);
+	}else{
+		printf("no such key");
+	}
+
+	printf("\n\n");
+}
+
 int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot_ptr){
 	char * line;
 	if(strncasecmp(command,"bye",3)==0){
@@ -1257,8 +1269,11 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 	}else if(strncasecmp(command,"type",4)==0){
 		line = &command[0]+5;
 		command_type(line,entry_ptr);
-	}else{ 
-		printf("INVALID COMMAND: TYPE HELP FOR A LIST OF VALID COMMANDS\n");
+	}else if(strncasecmp(command,"size",4)==0){ 
+		line = &command[0]+5;
+		command_size(line,entry_ptr);
+	}else{
+		printf("INVALID COMMAND: TYPE HELP FOR A LIST OF VALID COMMANDS\n\n");
 	}
 
 	return 0;
