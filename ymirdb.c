@@ -633,6 +633,7 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 			if(snapshot_entry!=NULL){
 				// if the snapshot has back references
 				if(snapshot_entry->backward_size!=0){
+					printf("%ld\n",snapshot_entry->backward_size);
 					printf("not permitted\n\n");
 					return;
 				}
@@ -655,7 +656,6 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 	if(is_a_current_key){
 		// check if current state is valid after removal
 		if(this_entry->backward_size!=0){
-			printf("%ld\n",this_entry->backward_size);
 			printf("not permitted\n\n");
 			return;
 		}
