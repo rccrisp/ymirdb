@@ -357,7 +357,7 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	this_entry->length = num_new;
 	bool success = populate_values(ptr,this_entry,push_values,0,false);
 	if(success){
-		for(int i = 0; i < size_after_push; i++){
+		for(int i = 0; i < num_old; i++){
 			this_entry->values[num_new+i] = old_values[i]; 
 		}
 		this_entry->length = size_after_push;
