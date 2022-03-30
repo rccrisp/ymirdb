@@ -339,13 +339,32 @@ bool append(entry ** ptr, char * some_values[], int num_new){
 }
 
 bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
+
+	// track if we push a general entry or not
+	bool simple = true;
+
+	// make sure all the push values are valid
+	for(int i = 1; i < num_new; i++){
+		// if its not a number
+		if(!isnumber(push_values[i])){
+			// if its not a key or is a self reference
+			if(find_key(push_values[i],*ptr)==NULL || this_entry == find_key(push_values[i],*ptr)){
+				return false;
+			}
+			// have found an entry
+			simple = false;
+		}
+	}
+
+	// we now know all push values are valid so may proceed
+
 	// this is the size of the entry before pushing
 	int num_old = this_entry->length;
 
 	// this is the size after pushing
 	int size_after_push = num_new + num_old;
 
-	// initialise a temp element array to store the new elements
+	// initialise a temp element array to store the old elements
 	element * old_values = malloc(sizeof(element)*num_old);
 
 	// copy across the old values
@@ -353,27 +372,45 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 		old_values[i] = this_entry->values[i];
 	}
 
-	// try and add the new values to the beginning of the values
-	this_entry->values = realloc(this_entry->values,sizeof(entry*)*num_new);
-	this_entry->length = num_new;
-	bool success = populate_values(ptr,this_entry,push_values,0,false);
-	if(success){
-		this_entry->values = realloc(this_entry->values,sizeof(entry*)*size_after_push);
-		this_entry->length = size_after_push;
-		for(int i = 0; i < num_old; i++){
-			this_entry->values[num_new+i] = old_values[i]; 
+	// insert the new push values
+
+	// allocate memory for values after push
+	this_entry->values = realloc(this_entry->values,sizeof(element)*size_after_push);
+	this_entry->length = size_after_push;
+	entry * sub_entry;
+	int j = 1;
+	for(int i = 0; i < num_new; i++){
+		// if it is a number
+		if(isnumber(push_values[j])){
+			this_entry->values[i].value = atoi(push_values[j]);
+			this_entry->values[i].type = INTEGER;
+		}else{
+			sub_entry = find_key(push_values[j],*ptr);
+			// copy the subentry pointer to values of this entry
+			this_entry->values[i].entry = sub_entry;
+			// set type to entry
+			this_entry->values[i].type = ENTRY;
+
+			// this function updates backwards and forwards references appropriately
+			deal_with_references(this_entry,this_entry->values[i].entry);
 		}
-	}else{
-		this_entry->values = realloc(this_entry->values,sizeof(entry*)*num_old);
-		this_entry->length = num_old;
-		for(int i = 0; i < num_old; i++){
-			this_entry->values[i] = old_values[i]; 
-		}
+		j++;
+	}
+
+	// append the old values
+	for(int i = 0; i < num_old;i++){
+		this_entry->values[num_new+i] = old_values[i];
+	}
+
+
+	if(this_entry->is_simple && !simple){
+		this_entry->is_simple = simple;
 	}
 
 	free(old_values);
 
-	return success;
+
+	return true;
 	
 }
 
