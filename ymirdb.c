@@ -27,6 +27,9 @@
 // ...
 //
 
+// establish a global variable to track snapshot number
+int snapshot_id = 1;
+
 
 int cmpfunc(const void * a, const void * b){
 	const element * ea = a;
@@ -466,11 +469,11 @@ int snapshot_list_add(snapshot ** last_snapshot_ptr, entry * head_entries){
 	// if this is not the first snapshot
 	if(*last_snapshot_ptr!=NULL){
 		last_snapshot->next = new_snapshot;
-		new_snapshot->id = last_snapshot->id + 1;
 	}else{
-		new_snapshot->id = 1;
 	}
 
+	new_snapshot->id = snapshot_id;
+	snapshot_id++;
 	new_snapshot->prev = last_snapshot;
 	new_snapshot->next = NULL;
 	new_snapshot->entries = head_entries;
