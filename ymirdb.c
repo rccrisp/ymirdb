@@ -1011,7 +1011,7 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 
 	while(iter){
 		// initialise entry struct
-		entry * this_entry = malloc(sizeof(entry));
+		entry * this_entry = malloc(sizeof(entry*));
 
 		// copy the key
 		strcpy(this_entry->key,iter->key);
