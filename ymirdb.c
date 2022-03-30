@@ -300,7 +300,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		if(!isnumber(new_values[i])){
 			// if its not a key or is a self reference
 			if(find_key(new_values[i],*ptr)==NULL){
-				printf("not a valid entry\n\n");
+				printf("no such key\n\n");
 			}else if(this_entry == find_key(new_values[i],*ptr)){
 				printf("not permitted\n\n");
 				return false;
