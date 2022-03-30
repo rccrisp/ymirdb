@@ -488,8 +488,12 @@ void snapshot_list_delete(snapshot ** ptr, snapshot* delete_snapshot){
 	snapshot * next_snapshot = delete_snapshot->next;
 	snapshot * prev_snapshot = delete_snapshot->prev;
 
-	next_snapshot->prev = prev_snapshot;
-	prev_snapshot->next = next_snapshot;
+	if(prev_snapshot != NULL){
+		prev_snapshot->next = next_snapshot;
+	}
+	if(next_snapshot!=NULL){
+		next_snapshot->prev = prev_snapshot;
+	}
 
 	entry * iter = delete_snapshot->entries;
 	entry * hold;
@@ -933,7 +937,6 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 		
 
 		// delete all newer snapshots
-		this_snapshot = this_snapshot->next;
 		snapshot * iter_snapshots = *snapshots;
 		snapshot * holder;
 		while(this_snapshot->id != iter_snapshots->id){
