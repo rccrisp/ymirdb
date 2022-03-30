@@ -1118,12 +1118,35 @@ void command_sum(){
 	printf("displays sum of values\n");
 }
 
-void command_len(){
-	printf("displays number of values");
+int length(entry * this_entry){
+	if(this_entry->is_simple){
+		return this_entry->length;
+	}
+	
+	int total = this_entry->length - this_entry->forward_size;
+	for(int i = 0; i < this_entry->forward_size;i++){
+		total += length(this_entry->forward[i]);
+	}
+
+	return total;
+}
+
+void command_len(char * line, entry ** ptr){
+	// find the key to find the length of from from the linked list
+	entry * length_entry = find_key(line,*ptr);
+
+	if(length_entry!=NULL){
+		printf("%d\n", length(length_entry));
+	}else{
+		printf("no such key\n");
+	}
+
+	printf("\n");
+	return;
 }
 
 void command_rev(char * line, entry ** ptr){
-	// find the key to sort from from the linked list
+	// find the key to rev from from the linked list
 	entry * rev_entry = find_key(line,*ptr);
 
 	if(rev_entry!=NULL){
@@ -1408,7 +1431,8 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 	}else if(strncasecmp(command,"sum",3)==0){
 		command_sum();
 	}else if(strncasecmp(command,"len",3)==0){
-		command_len();
+		line = &command[0]+4;
+		command_len(line,entry_ptr);
 	}else if(strncasecmp(command,"rev",3)==0){
 		line = &command[0]+4;
 		command_rev(line,entry_ptr);
