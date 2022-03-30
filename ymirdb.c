@@ -1192,6 +1192,7 @@ int sum(entry * this_entry){
 
 	return total_sum;
 }
+
 void command_sum(char * line,entry ** ptr){
 	// find the key to find the sum of from from the linked list
 	entry * sum_entry = find_key(line,*ptr);
