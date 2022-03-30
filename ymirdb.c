@@ -354,16 +354,21 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	}
 
 	// try and add the new values to the beginning of the values
-	this_entry->values = realloc(this_entry->values,sizeof(entry*)*size_after_push);
+	this_entry->values = realloc(this_entry->values,sizeof(entry*)*num_new);
 	this_entry->length = num_new;
 	bool success = populate_values(ptr,this_entry,push_values,0,false);
 	if(success){
+		this_entry->values = realloc(this_entry->values,sizeof(entry*)*size_after_push);
 		this_entry->length = size_after_push;
 		for(int i = 0; i < num_old; i++){
 			this_entry->values[num_new+i] = old_values[i]; 
 		}
 	}else{
+		this_entry->values = realloc(this_entry->values,sizeof(entry*)*num_old);
 		this_entry->length = num_old;
+		for(int i = 0; i < num_old; i++){
+			this_entry->values[i] = old_values[i]; 
+		}
 	}
 
 	free(old_values);
