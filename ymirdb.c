@@ -641,6 +641,7 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 		entry * snapshot_entry;
 		// check if snapshots are still valid after removal
 		while(iter){
+			// find the entry in this snapshot
 			snapshot_entry = find_key(line,iter->entries);
 			// if the key exists in this snapshot
 			if(snapshot_entry!=NULL){
@@ -656,7 +657,9 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 		// if snapshots remain valid after removal, we may delete the entry from the snapshots
 		iter = *snapshot_ptr;
 		while(iter){
+			// find the entry in this snapshot
 			snapshot_entry = find_key(line,iter->entries);
+			// if the entry exists
 			if(snapshot_entry!=NULL){
 				list_delete(&iter->entries, snapshot_entry);
 			}
@@ -883,8 +886,12 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 	snapshot * this_snapshot = find_snapshot(line,*snapshots);
 
 	if(this_snapshot!=NULL){
-		// delete the current state as we are going to replace it
-		list_free(*ptr);
+		// if w
+		if(*ptr!=NULL){
+			// delete the current state as we are going to replace it
+			list_free(*ptr);
+		}
+
 
 		// set current state to snapshot state
 		entry * snapshot_entries = this_snapshot->entries->next;
