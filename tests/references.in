@@ -1,0 +1,14 @@
+set a 1
+set b 2
+set c 3
+snapshot
+set c a b
+snapshot
+forward c
+set c a a
+forward c
+backward a
+checkout 1
+forward c
+backward a
+bye

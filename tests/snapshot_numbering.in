@@ -1,0 +1,13 @@
+set a 1 2 3
+snapshot
+set b 4 5 6
+snapshot
+set c 7 8 9
+snapshot
+list snapshots
+drop 3
+list snapshots
+snapshot
+list snapshots
+drop 5
+bye

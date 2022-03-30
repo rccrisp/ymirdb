@@ -1,0 +1,4 @@
+set a 15 -7 3 2
+sort a
+get a
+bye

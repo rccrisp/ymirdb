@@ -1,0 +1,38 @@
+> ok
+
+> saved as snapshot 1
+
+> ok
+
+> ok
+
+> saved as snapshot 2
+
+> c
+b
+a
+
+> c [a b]
+b [4 5 6]
+a [1 2 3]
+
+> 2
+1
+
+> ok
+
+> a [1 2 3]
+
+> ok
+
+> c [a b]
+b [4 5 6]
+a [1 2 3]
+
+> a, b
+
+> ok
+
+> 1
+
+> bye
