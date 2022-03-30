@@ -210,7 +210,7 @@ void remove_value_from_index(entry * this_entry, int index){
 }
 
 int strip_values(char * line, char * strip_values[]){
-	char * token = strtok(line, " ");
+	char * token = strtok(line, " \n");
 	int number_of_values = -1; // because first value is the key
 	for(int i = 0; i < MAX_LINE; i++){
 		if(token == NULL){
