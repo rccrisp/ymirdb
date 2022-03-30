@@ -890,17 +890,18 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 		if(*ptr!=NULL){
 			// delete the current state as we are going to replace it
 			list_free(*ptr);
+			*ptr = NULL;
 		}
 
 
 		// set current state to snapshot state
-		entry * snapshot_entries = this_snapshot->entries->next;
+		entry * snapshot_entries = this_snapshot->entries;
 		entry * this_entry;
 		while(snapshot_entries){
 			this_entry = malloc(sizeof(element)*(snapshot_entries->length));
 			this_entry = snapshot_entries;
 			list_add(ptr,this_entry);
-			snapshot_entries = snapshot_entries->next;
+			snapshot_entries = snapshot_entries->prev;
 		}
 
 		// delete all newer snapshots
@@ -908,7 +909,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 		snapshot * holder;
 		while(this_snapshot){
 			holder = this_snapshot->next;
-			list_free(this_snapshot->entries);
+			snapshot_list_delete(snapshots,this_snapshot);
 			this_snapshot = holder;
 		}
 		printf("ok\n");
