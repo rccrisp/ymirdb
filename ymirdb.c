@@ -382,14 +382,14 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	for(int i = 0; i < num_new; i++){
 		// if it is a number
 		if(isnumber(push_values[j])){
-			this_entry->values[i].value = atoi(push_values[j]);
-			this_entry->values[i].type = INTEGER;
+			this_entry->values[num_new-1-i].value = atoi(push_values[j]);
+			this_entry->values[num_new-1-i].type = INTEGER;
 		}else{
 			sub_entry = find_key(push_values[j],*ptr);
 			// copy the subentry pointer to values of this entry
-			this_entry->values[i].entry = sub_entry;
+			this_entry->values[num_new-1-i].entry = sub_entry;
 			// set type to entry
-			this_entry->values[i].type = ENTRY;
+			this_entry->values[num_new-1-i].type = ENTRY;
 
 			// this function updates backwards and forwards references appropriately
 			deal_with_references(this_entry,this_entry->values[i].entry);
