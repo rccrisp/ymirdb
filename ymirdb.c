@@ -362,11 +362,11 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 		}
 		this_entry->length = size_after_push;
 	}else{
-		this_entry->length = num_old
+		this_entry->length = num_old;
 	}
 
 	free(old_values);
-	
+
 	return success;
 	
 }
