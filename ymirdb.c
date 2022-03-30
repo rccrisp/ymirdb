@@ -153,13 +153,40 @@ element * uniq(element * these_values, size_t * size){
 void remove_value_from_index(entry * this_entry, int index){
 	element * these_values = this_entry->values;
 	int size_before_remove = this_entry->length;
+
 	int j = 0;
+	// if the value being plucked is an entry, remove it from the references
+	if(this_entry->values[index-1].type == 1){
+		entry * entry_to_remove = this_entry->values[index-1].entry;
+		// deal with forward references of deleted entry
+		for(int i = 0; i+j < this_entry->forward_size;i++){
+			if(strcmp(this_entry->forward[i]->key,entry_to_remove->key)==0){
+				j = 1;
+			}
+			this_entry->forward[i] = this_entry->forward[i+j];
+		}
+		this_entry->forward_size--;
+		this_entry->forward = realloc(this_entry->forward,sizeof(entry*)*this_entry->forward_size);
+		// deal with backward references to deleted entry
+		j = 0;
+		for(int i = 0; i<entry_to_remove->backward_size;i++){
+			if(strcmp(entry_to_remove->backward[i]->key,this_entry->key)==0){
+				j = 1;
+			}
+			entry_to_remove->backward[i] = entry_to_remove->backward[i+j];
+		}
+		entry_to_remove->backward_size--;
+		entry_to_remove->backward = realloc(entry_to_remove->backward,sizeof(entry*)*this_entry->backward_size);
+
+	}
+
+	j = 0;
 	for(int i = 0; i < size_before_remove; i++){
 		if(i == index-1){
 			i++;
 		}
 		if(i != size_before_remove){
-			these_values[j].value = these_values[i].value;
+			these_values[j] = these_values[i];
 		}
 		
 		j++;
@@ -891,7 +918,11 @@ void command_pluck(char * line, entry ** ptr){
 		if(pluck_entry->length < index || index <= 0){
 			printf("index out of range\n");
 		}else{
-			printf("%d\n", pluck_entry->values[index-1].value);
+			if(pluck_entry->values[index-1].type == 0){
+				printf("%d\n", pluck_entry->values[index-1].value);
+			}else{
+				printf("%s\n", pluck_entry->values[index-1].entry->key);
+			}
 			remove_value_from_index(pluck_entry,index);
 		}
 		
@@ -913,7 +944,11 @@ void command_pop(char * line, entry ** ptr){
 		if(pop_entry->length == 0){
 			printf("nil\n");
 		}else{
-			printf("%d\n", pop_entry->values[0].value);
+			if(pop_entry->values[0].type == 0){
+				printf("%d\n", pop_entry->values[0].value);
+			}else{
+				printf("%s\n", pop_entry->values[0].entry->key);
+			}
 			remove_value_from_index(pop_entry,1);
 		}
 		
