@@ -163,21 +163,33 @@ void remove_value_from_index(entry * this_entry, int index){
 			if(strcmp(this_entry->forward[i]->key,entry_to_remove->key)==0){
 				j = 1;
 			}
-			this_entry->forward[i] = this_entry->forward[i+j];
+			if(i+j<this_entry->forward_size){
+				this_entry->forward[i] = this_entry->forward[i+j];
+			}
 		}
 		this_entry->forward_size--;
-		this_entry->forward = realloc(this_entry->forward,sizeof(entry*)*this_entry->forward_size);
+		if(this_entry->forward_size>0){
+			this_entry->forward = realloc(this_entry->forward,sizeof(entry*)*this_entry->forward_size);
+		}else{
+			this_entry->forward = malloc(sizeof(entry*));
+		}
 		// deal with backward references to deleted entry
 		j = 0;
 		for(int i = 0; i<entry_to_remove->backward_size;i++){
 			if(strcmp(entry_to_remove->backward[i]->key,this_entry->key)==0){
 				j = 1;
 			}
-			entry_to_remove->backward[i] = entry_to_remove->backward[i+j];
+			if(i+j<this_entry->forward_size){
+				entry_to_remove->backward[i] = entry_to_remove->backward[i+j];
+			}	
 		}
 		entry_to_remove->backward_size--;
-		entry_to_remove->backward = realloc(entry_to_remove->backward,sizeof(entry*)*this_entry->backward_size);
-
+		if(entry_to_remove->backward_size>0){
+			entry_to_remove->backward = realloc(entry_to_remove->backward,sizeof(entry*)*this_entry->backward_size);
+		}else{
+			entry_to_remove->backward = malloc(sizeof(entry*));
+		}
+		
 	}
 
 	j = 0;
