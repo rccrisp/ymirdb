@@ -295,7 +295,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	int size = this_entry->length;
 
 	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
-	for(int i = 1; i < size; i++){
+	for(int i = 1; i < size+1; i++){
 		// if its not a number
 		if(!isnumber(new_values[i])){
 			// if its not a key or is a self reference
