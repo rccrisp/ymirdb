@@ -1106,16 +1106,104 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 	return;
 }
 
-void command_min(){
-	printf("displays minimum value\n");
+int minimum(entry * this_entry){
+	int min;
+	if(this_entry->values[0].type == ENTRY){
+		min = minimum(this_entry->values[0].entry);
+	}else{
+		min = this_entry->values[0].value;
+	}
+	int potential_min;
+	for(int i = 1; i < this_entry->length; i++){
+		if(this_entry->values[i].type == ENTRY){
+			potential_min = minimum(this_entry->values[i].entry);
+		}else{
+			potential_min = this_entry->values[i].value;
+		}
+
+		if(potential_min<min){
+			min = potential_min;
+		}
+	}
+
+	return min;
 }
 
-void command_max(){
-	printf("displays maximum value\n");
+void command_min(char * line,entry ** ptr){
+	// find the key to find the length of from from the linked list
+	entry * min_entry = find_key(line,*ptr);
+
+	if(min_entry!=NULL){
+		printf("%d\n", minimum(min_entry));
+	}else{
+		printf("no such key\n");
+	}
+
+	printf("\n");
+	return;
 }
 
-void command_sum(){
-	printf("displays sum of values\n");
+int maximum(entry * this_entry){
+	int max;
+	if(this_entry->values[0].type == ENTRY){
+		max = maximum(this_entry->values[0].entry);
+	}else{
+		max = this_entry->values[0].value;
+	}
+	int potential_max;
+	for(int i = 1; i < this_entry->length; i++){
+		if(this_entry->values[i].type == ENTRY){
+			potential_max = maximum(this_entry->values[i].entry);
+		}else{
+			potential_max = this_entry->values[i].value;
+		}
+
+		if(max<potential_max){
+			max = potential_max;
+		}
+	}
+
+	return max;
+}
+
+void command_max(char * line, entry ** ptr){
+	// find the key to find the length of from from the linked list
+	entry * max_entry = find_key(line,*ptr);
+
+	if(max_entry!=NULL){
+		printf("%d\n", maximum(max_entry));
+	}else{
+		printf("no such key\n");
+	}
+
+	printf("\n");
+	return;
+}
+
+int sum(entry * this_entry){
+	int total_sum = 0;
+	for(int i = 1; i < this_entry->length; i++){
+		if(this_entry->values[i].type == ENTRY){
+			total_sum += sum(this_entry->values[i].entry);
+		}else{
+			total_sum+=this_entry->values[i].value;
+		}
+	}
+
+	return total_sum;
+}
+void command_sum(char * line,entry ** ptr){
+	// find the key to find the sum of from from the linked list
+	entry * sum_entry = find_key(line,*ptr);
+
+	if(sum_entry!=NULL){
+		printf("%d\n", sum(sum_entry));
+	}else{
+		printf("no such key\n");
+	}
+
+	printf("\n");
+	return;
 }
 
 int length(entry * this_entry){
@@ -1425,11 +1513,14 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 	}else if(strncasecmp(command,"snapshot",8)==0){
 		command_snapshot(entry_ptr,snapshot_ptr);
 	}else if(strncasecmp(command,"min",3)==0){
-		command_min();
+		line = &command[0]+4;
+		command_min(line,entry_ptr);
 	}else if(strncasecmp(command,"max",3)==0){
-		command_max();
+		line = &command[0]+4;
+		command_max(line,entry_ptr);
 	}else if(strncasecmp(command,"sum",3)==0){
-		command_sum();
+		line = &command[0]+4;
+		command_sum(line,entry_ptr);
 	}else if(strncasecmp(command,"len",3)==0){
 		line = &command[0]+4;
 		command_len(line,entry_ptr);
