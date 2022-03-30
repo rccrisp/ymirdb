@@ -933,11 +933,11 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 		
 
 		// delete all newer snapshots
-		snapshot * iter2 = *snapshots;
+		snapshot * iter_snapshots = *snapshots;
 		snapshot * holder;
-		while(this_snapshot != iter2){
-			holder = iter2->prev;
-			snapshot_list_delete(snapshots,iter2);
+		while(this_snapshot->id != iter_snapshots->id){
+			holder = iter_snapshots->prev;
+			snapshot_list_delete(snapshots,iter_snapshots);
 			this_snapshot = holder;
 		}
 		printf("ok\n");
