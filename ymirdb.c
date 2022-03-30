@@ -782,15 +782,33 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 	printf("ok\n\n");
 }
 
+bool valid_key(char * key_name){
+	if(strlen(key_name)>=MAX_KEY){
+		return false;
+	}
+	if(isalpha(key_name[0])==0){
+		return false;
+	}
+	for(int i = 0; i <strlen(key_name);i++){
+		if(isalnum(key_name[i])==0){
+			return false;
+		}
+	}
+	return true;
+}
+
 void command_set(char * line, entry ** ptr){
 	// find the values to push to the key
 	char *this_line[MAX_LINE];
 	int length_of_line = strip_values(line,this_line);
 
 
-	if(sizeof(this_line[0])>MAX_KEY){
+	// check if key is valid
+	if(!valid_key(this_line[0])){
+		printf("key name not permitted\n\n");
 		return;
 	}
+	
 
 	// see if this key already exists
 	entry * this_entry = find_key(line,*ptr);
