@@ -861,7 +861,11 @@ void command_pick(char * line, entry ** ptr){
 		if(pick_entry->length < index || index <= 0){
 			printf("index out of range\n");
 		}else{
-			printf("%d\n", pick_entry->values[index-1].value);
+			if(pick_entry->values[index-1].type == 0){
+				printf("%d\n", pick_entry->values[index-1].value);
+			}else{
+				printf("%s\n", pick_entry->values[index-1].entry->key);
+			}
 		}
 		
 		
