@@ -933,7 +933,6 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 		
 
 		// delete all newer snapshots
-		this_snapshot = this_snapshot->next;
 		snapshot * iter2 = *snapshots;
 		snapshot * holder;
 		while(this_snapshot != iter2){
