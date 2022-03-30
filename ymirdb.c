@@ -297,12 +297,12 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	entry * potential_entry;
 	// loop through and ensure this is a valid entry (first entry is the key we are assigning too)
-	for(int i = 0; i < size; i++){
+	for(int i = 1; i < size; i++){
 		// if its not a number
 		if(!isnumber(new_values[i])){
 			// if its not a key or is a self reference
-			potential_entry = find_key(new_values[i+1],*ptr);
-			if(potential_entry==NULL||strcmp(new_values[i+1],this_entry->key)==0){
+			potential_entry = find_key(new_values[i],*ptr);
+			if(potential_entry==NULL||strcmp(new_values[i],this_entry->key)==0){
 				return false;
 			}
 			// have found an entry
