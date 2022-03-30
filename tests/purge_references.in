@@ -1,0 +1,11 @@
+set a 1 2 3
+set b a
+purge a
+snapshot
+set b 4 5 6
+snapshot
+purge a
+drop 1
+purge a
+list entries
+bye

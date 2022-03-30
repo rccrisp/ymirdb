@@ -1,0 +1,14 @@
+set a 1 2 3
+push a 0
+set b -1 -2 -3
+push a b
+min a
+sum a
+backward b
+forward a
+push a b b b
+len a
+forward a
+backward b
+get a
+bye

@@ -1,0 +1,18 @@
+set a 1
+snapshot
+set a 2
+snapshot
+set a 3
+snapshot
+checkout 1
+get a
+purge a
+get a
+list snapshots
+checkout 2
+get a
+checkout 3
+get a
+purge a
+purge b
+bye
