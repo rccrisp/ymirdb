@@ -570,7 +570,7 @@ void command_list_snapshots(snapshot ** snapshots){
 	}else{
 		while(iter){
 			printf("%d\n", iter->id);
-			iter = iter->next;
+			iter = iter->prev;
 		}
 	}
 	printf("\n");
@@ -927,7 +927,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			this_entry->length = iter->length;
 
 			list_add(ptr,this_entry);
-			iter = iter->next;
+			iter = iter->prev;
 		}
 
 		
@@ -992,7 +992,7 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			this_entry->length = iter->length;
 
 			list_add(ptr,this_entry);
-			iter = iter->next;
+			iter = iter->prev;
 		}
 		printf("ok\n");
 	}else{
@@ -1041,7 +1041,7 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 
 		// add to the snapshot list
 		list_add(&entry_ptr,this_entry);
-		iter = iter->next;
+		iter = iter->prev;
 	}
 
 	int id = snapshot_list_add(snapshots,entry_ptr);
