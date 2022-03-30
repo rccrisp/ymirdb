@@ -658,7 +658,7 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 		while(iter){
 			snapshot_entry = find_key(line,iter->entries);
 			if(snapshot_entry!=NULL){
-				list_delete(&iter->entries, this_entry);
+				list_delete(&iter->entries, snapshot_entry);
 			}
 			iter = iter->prev;
 		}
