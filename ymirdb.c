@@ -250,12 +250,15 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 }
 
 // given a character array of values, include these values in the correct key, from a given index
-bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int num_to_populate, int index, bool first){
+bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, bool first){
 	// boolean to store if this is a simple or general entry
 	bool simple = true;
 
+	// store the size of this entry
+	int size = this_entry->length;
+
 	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
-	for(int i = 1; i < num_to_populate; i++){
+	for(int i = 1; i < size; i++){
 		// if its not a number
 		if(!isnumber(new_values[i])){
 			// if its not a key or is a self reference
@@ -270,7 +273,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	// if we have gone through all the values, and all are valid, add them to this entry
 	
 	// assign enough memory to store all the entries
-	element * these_values = malloc(sizeof(element)*num_to_populate);
+	element * these_values = malloc(sizeof(element)*size);
 	
 	// if we are appending values, copy the first values across
 	if(index>0){
@@ -293,7 +296,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	// index to track place in the new entries
 	int j = 1;
-	for(int i = index; i < num_to_populate; i++){
+	for(int i = index; i < size; i++){
 		// if it is a number
 		if(isnumber(new_values[j])){
 			these_values[i].value = atoi(new_values[j]);
@@ -311,7 +314,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		j++;
 	}
 
-	memcpy(this_entry->values,these_values,sizeof(element)*this_entry->length);
+	memcpy(this_entry->values,these_values,sizeof(element)*size);
 
 	this_entry->is_simple = simple;
 
@@ -331,13 +334,11 @@ bool append(entry ** ptr, char * some_values[], int num_new){
 	this_entry->length = size_after_append;
 
 	// populate the values with the new values
-	printf("here");
-	return populate_values(ptr,this_entry,some_values,num_new,num_old,false);
+	return populate_values(ptr,this_entry,some_values,num_old,false);
 	
 }
 
 bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
-
 	// this is the size of the entry before pushing
 	int num_old = this_entry->length;
 
@@ -351,21 +352,23 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	for(int i = 0; i < num_old; i++){
 		old_values[i] = this_entry->values[i];
 	}
-
 	// try and add the new values to the beginning of the values
 	this_entry->values = realloc(this_entry->values,sizeof(entry*)*size_after_push);
-	this_entry->length = size_after_push;
-	bool success = populate_values(ptr,this_entry,push_values,num_new,0,false);
+	this_entry->length = num_new;
+	bool success = populate_values(ptr,this_entry,push_values,0,false);
 	if(success){
 		for(int i = 0; i < size_after_push; i++){
 			this_entry->values[num_new+i] = old_values[i]; 
 		}
+		this_entry->length = size_after_push;
+	}else{
+		this_entry->length = num_old
 	}
 
 	free(old_values);
 	
-
 	return success;
+	
 }
 
 bool list_delete(entry ** ptr, entry * delete_entry){
@@ -685,7 +688,7 @@ void command_set(char * line, entry ** ptr){
 		this_entry->values = malloc(sizeof(struct element)*(length_of_line));
 		this_entry->length = length_of_line; // update this later to include entries
 
-		valid = populate_values(ptr,this_entry,this_line,length_of_line,0,true);
+		valid = populate_values(ptr,this_entry,this_line,0,true);
 
 		if(valid){
 			// add this key to the linked list of keys
@@ -700,7 +703,7 @@ void command_set(char * line, entry ** ptr){
 		this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
 		this_entry->length = length_of_line;
 
-		valid = populate_values(ptr,this_entry,this_line,length_of_line,0,false);
+		valid = populate_values(ptr,this_entry,this_line,0,false);
 	}
 
 	if(valid){
@@ -728,7 +731,7 @@ void command_push(char * line, entry ** ptr){
 		if(push(ptr,push_entry,push_values,number_of_values)){
 			printf("ok\n\n");
 		}else{
-			printf("not permitted\n\n");
+			printf("not permitted\n");
 		}
 		
 		
