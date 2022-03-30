@@ -321,21 +321,60 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	return true;
 }
 
-bool append(entry ** ptr, char * some_values[], int num_new){
-	entry * this_entry = *ptr;
+bool append(entry ** ptr, entry * this_entry, char * append_values[], int num_new){
+	// track if we append a general entry or not
+	bool simple = true;
 
-	// find the size of values after including the new values
+	// make sure all the append values are valid
+	for(int i = 1; i < num_new+1; i++){
+		// if its not a number
+		if(!isnumber(append_values[i])){
+			// if its not a key or is a self reference
+			if(find_key(append_values[i],*ptr)==NULL || this_entry == find_key(append_values[i],*ptr)){
+				return false;
+			}
+			// have found an entry that is valid
+			simple = false;
+		}
+	}
+
+	// we now know all the append values are valid so may proceed
+
+	// this is the size of the entry before appending
 	int num_old = this_entry->length;
+
+	// this is the size after appending
 	int size_after_append = num_new + num_old;
 
-	// reallocate memory
+	// reallocate the memory to fit new size
 	this_entry->values = realloc(this_entry->values,sizeof(element)*size_after_append);
-
 	this_entry->length = size_after_append;
+	entry * sub_entry;
+	int j = 1;
+	for(int i = 0; i < num_new; i++){
+		// if it is a number
+		if(isnumber(append_values[j])){
+			this_entry->values[num_old+i].value = atoi(append_values[j]);
+			this_entry->values[num_old+i].type = INTEGER;
+		}else{
+			sub_entry = find_key(append_values[j],*ptr);
+			// copy the subentry pointer to values of this entry
+			this_entry->values[num_old+i].entry = sub_entry;
+			// set type to entry
+			this_entry->values[num_old+i].type = ENTRY;
 
-	// populate the values with the new values
-	return populate_values(ptr,this_entry,some_values,num_old,false);
-	
+			// this function updates backwards and forwards references appropriately
+			deal_with_references(this_entry,this_entry->values[num_old+i].entry);
+		}
+		j++;
+	}
+
+	if(!simple){
+		this_entry->is_simple = simple;
+	}
+
+	return true;
+
 }
 
 bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
@@ -352,7 +391,6 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 				return false;
 			}
 			// have found an entry that is valid
-			
 			simple = false;
 		}
 	}
@@ -795,7 +833,7 @@ void command_append(char * line, entry ** ptr){
 	// append the values into the key
 	if(append_entry!=NULL){
 		// 
-		valid = append(&append_entry,append_values,number_of_values);
+		valid = append(ptr,append_entry,append_values,number_of_values);
 		
 		if(valid){
 			printf("ok\n\n");
