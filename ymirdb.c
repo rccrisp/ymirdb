@@ -250,15 +250,12 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 }
 
 // given a character array of values, include these values in the correct key, from a given index
-bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, bool first){
+bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int num_to_populate, int index, bool first){
 	// boolean to store if this is a simple or general entry
 	bool simple = true;
 
-	// store the size of this entry
-	int size = this_entry->length;
-
 	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
-	for(int i = 1; i < size; i++){
+	for(int i = 1; i < num_to_populate; i++){
 		// if its not a number
 		if(!isnumber(new_values[i])){
 			// if its not a key or is a self reference
@@ -273,7 +270,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	// if we have gone through all the values, and all are valid, add them to this entry
 	
 	// assign enough memory to store all the entries
-	element * these_values = malloc(sizeof(element)*size);
+	element * these_values = malloc(sizeof(element)*num_to_populate);
 	
 	// if we are appending values, copy the first values across
 	if(index>0){
@@ -296,7 +293,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	// index to track place in the new entries
 	int j = 1;
-	for(int i = index; i < size; i++){
+	for(int i = index; i < num_to_populate; i++){
 		// if it is a number
 		if(isnumber(new_values[j])){
 			these_values[i].value = atoi(new_values[j]);
@@ -314,7 +311,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		j++;
 	}
 
-	memcpy(this_entry->values,these_values,sizeof(element)*size);
+	memcpy(this_entry->values,these_values,sizeof(element)*num_to_populate);
 
 	this_entry->is_simple = simple;
 
@@ -334,7 +331,8 @@ bool append(entry ** ptr, char * some_values[], int num_new){
 	this_entry->length = size_after_append;
 
 	// populate the values with the new values
-	return populate_values(ptr,this_entry,some_values,num_old,false);
+	printf("here");
+	return populate_values(ptr,this_entry,some_values,num_new,num_old,false);
 	
 }
 
@@ -347,59 +345,27 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	int size_after_push = num_new + num_old;
 
 	// initialise a temp element array to store the new elements
-	element * new_values = malloc(sizeof(element)*size_after_push);
-
-	// intialise a boolean to store whether this is a simple or general entry
-	bool simple = true;
-
-	// create a dummy entry value for if we need to include an entry in the values
-	entry * entry_to_include;
-
-	// loop through the proposed push values and make sure they are all valid
-	int j = 1;
-	for(int i = 0; i < num_new; i++){
-		// if its a number, add it to the values array
-		if(isnumber(push_values[num_new-j+1])){
-			new_values[i].value = atoi(push_values[num_new-j+1]);
-			new_values[i].type = INTEGER;
-		}else{
-			entry_to_include = find_key(push_values[num_new-j+1],*ptr);
-			// if this isnt a valid key or is a self-reference
-			if(entry_to_include == NULL || entry_to_include == this_entry){
-				free(new_values);
-				return false;
-			}else{
-				new_values[i].entry = entry_to_include;
-				new_values[i].type = ENTRY;
-				simple = false;
-			}
-			
-		}
-		j++;
-	}
+	element * old_values = malloc(sizeof(element)*size_after_push);
 
 	// append the old values to the end
 	for(int i = 0; i < num_old; i++){
-		new_values[num_new + i] = this_entry->values[i];
+		old_values[i] = this_entry->values[i];
 	}
 
-
-	// if we have gone through all the values, and all are valid, add them to this entry
-	this_entry->values = realloc(this_entry->values,sizeof(element)*(size_after_push));
-	for(int i = 0; i < size_after_push; i++){
-		this_entry->values[i] = new_values[i];
-		if(new_values[i].type == 1){
-			include_entry_in_values(&this_entry,&new_values[i].entry);
-		}	
-	}
-
-	this_entry->is_simple = simple;
-
-	free(new_values);
-	
+	// try and add the new values to the beginning of the values
+	this_entry->values = realloc(this_entry->values,sizeof(entry*)*size_after_push);
 	this_entry->length = size_after_push;
+	bool success = populate_values(ptr,this_entry,push_values,num_new,0,false);
+	if(success){
+		for(int i = 0; i < size_after_push; i++){
+			this_entry->values[num_new+i] = old_values[i]; 
+		}
+	}
 
-	return true;
+	free(old_values);
+	
+
+	return success;
 }
 
 bool list_delete(entry ** ptr, entry * delete_entry){
@@ -719,7 +685,7 @@ void command_set(char * line, entry ** ptr){
 		this_entry->values = malloc(sizeof(struct element)*(length_of_line));
 		this_entry->length = length_of_line; // update this later to include entries
 
-		valid = populate_values(ptr,this_entry,this_line,0,true);
+		valid = populate_values(ptr,this_entry,this_line,length_of_line,0,true);
 
 		if(valid){
 			// add this key to the linked list of keys
@@ -734,7 +700,7 @@ void command_set(char * line, entry ** ptr){
 		this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
 		this_entry->length = length_of_line;
 
-		valid = populate_values(ptr,this_entry,this_line,0,false);
+		valid = populate_values(ptr,this_entry,this_line,length_of_line,0,false);
 	}
 
 	if(valid){
@@ -762,7 +728,7 @@ void command_push(char * line, entry ** ptr){
 		if(push(ptr,push_entry,push_values,number_of_values)){
 			printf("ok\n\n");
 		}else{
-			printf("not permitted\n");
+			printf("not permitted\n\n");
 		}
 		
 		
