@@ -311,7 +311,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		j++;
 	}
 
-	memcpy(this_entry->values,these_values,sizeof(element)*num_to_populate);
+	memcpy(this_entry->values,these_values,sizeof(element)*this_entry->length);
 
 	this_entry->is_simple = simple;
 
@@ -347,7 +347,7 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	// initialise a temp element array to store the new elements
 	element * old_values = malloc(sizeof(element)*size_after_push);
 
-	// append the old values to the end
+	// copy across the old values
 	for(int i = 0; i < num_old; i++){
 		old_values[i] = this_entry->values[i];
 	}
