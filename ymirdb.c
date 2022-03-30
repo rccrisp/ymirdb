@@ -258,7 +258,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	int size = this_entry->length;
 
 	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
-	for(int i = 1; i < size; i++){
+	for(int i = 1; i < size+1; i++){
 		// if its not a number
 		if(!isnumber(new_values[i])){
 			// if its not a key or is a self reference
@@ -344,14 +344,15 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	bool simple = true;
 
 	// make sure all the push values are valid
-	for(int i = 1; i < num_new; i++){
+	for(int i = 1; i < num_new+1; i++){
 		// if its not a number
 		if(!isnumber(push_values[i])){
 			// if its not a key or is a self reference
 			if(find_key(push_values[i],*ptr)==NULL || this_entry == find_key(push_values[i],*ptr)){
 				return false;
 			}
-			// have found an entry
+			// have found an entry that is valid
+			
 			simple = false;
 		}
 	}
@@ -402,8 +403,7 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 		this_entry->values[num_new+i] = old_values[i];
 	}
 
-
-	if(this_entry->is_simple && !simple){
+	if(!simple){
 		this_entry->is_simple = simple;
 	}
 
