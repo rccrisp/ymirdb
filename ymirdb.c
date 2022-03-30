@@ -39,8 +39,6 @@ int cmpfunc(const void * a, const void * b){
 
 int cmpalpha(const void * a, const void * b){
 	return(strcmp(*(char**)a,*(char**)b));
-
-	
 }
 
 void delete_references(entry * this_entry){
@@ -65,6 +63,7 @@ void delete_references(entry * this_entry){
 
 entry * find_key(char * line, entry * ptr){
 	char * key_to_find = strtok(line, " \n");
+	// head is always NULL entry
 	entry * iter = ptr;
 	while(iter){
 		if(strcmp(iter->key,key_to_find) == 0){
@@ -295,14 +294,12 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	// store the size of this entry
 	int size = this_entry->length;
 
-	entry * potential_entry;
-	// loop through and ensure this is a valid entry (first entry is the key we are assigning too)
+	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
 	for(int i = 1; i < size; i++){
 		// if its not a number
 		if(!isnumber(new_values[i])){
 			// if its not a key or is a self reference
-			potential_entry = find_key(new_values[i],*ptr);
-			if(potential_entry==NULL||strcmp(new_values[i],this_entry->key)==0){
+			if(find_key(new_values[i],*ptr)==NULL || this_entry == find_key(new_values[i],*ptr)){
 				return false;
 			}
 			// have found an entry
@@ -788,7 +785,6 @@ void command_set(char * line, entry ** ptr){
 
 
 	if(sizeof(this_line[0])>MAX_KEY){
-		printf("key size must not exceed 15 characters\n\n");
 		return;
 	}
 
