@@ -1182,7 +1182,7 @@ void command_max(char * line, entry ** ptr){
 
 int sum(entry * this_entry){
 	int total_sum = 0;
-	for(int i = 1; i < this_entry->length; i++){
+	for(int i = 0; i < this_entry->length; i++){
 		if(this_entry->values[i].type == ENTRY){
 			total_sum += sum(this_entry->values[i].entry);
 		}else{
