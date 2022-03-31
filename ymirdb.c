@@ -1319,7 +1319,19 @@ int length(entry * this_entry){
 		return this_entry->length;
 	}
 	
-	int total = this_entry->length - this_entry->forward_size;
+	int current_length;
+	if(this_entry->length = NULL){
+		current_length = 0;
+	}else{
+		current_length = this_entry->length;
+	}
+	int forward_length;
+	if(this_entry->forward_size = NULL){
+		forward_length = 0;
+	}else{
+		forward_length = this_entry->forward_size;
+	}
+	int total = current_length - forward_length;
 	for(int i = 0; i < this_entry->forward_size;i++){
 		total += length(this_entry->forward[i]);
 	}
