@@ -57,7 +57,7 @@ void delete_references(entry * this_entry){
 			forward_ref->backward[j] = forward_ref->backward[j+skip];
 		}
 		forward_ref->backward_size-=skip;
-		if(backward_size!=0){
+		if(forward_ref->backward_size!=0){
 			forward_ref->backward = realloc(forward_ref->backward,sizeof(entry*)*(forward_ref->backward_size));
 		}else{
 			free(forward_ref->backward);
