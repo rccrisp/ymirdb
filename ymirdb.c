@@ -349,8 +349,11 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	if(first){
 		this_entry->backward = malloc(sizeof(entry*));
 		this_entry->backward_size = 0;
+	}else{
+		free(this_entry->forward);
 	}
 
+	
 	this_entry->forward = malloc(sizeof(entry*));
 	this_entry->forward_size = 0;
 
@@ -568,7 +571,9 @@ void list_free(entry * ptr){
 	}
 	while(iter){
 		current = iter;
-		iter = iter->next;
+		iter = iter->prev;
+		free(current->backward);
+		free(current->forward);
 		free(current->values);
 		free(current);
 	}
@@ -616,13 +621,13 @@ void snapshot_list_delete(snapshot ** ptr, snapshot* delete_snapshot){
 	entry * iter = delete_snapshot->entries;
 	entry * hold;
 	while(iter){
+		hold = iter->prev;
 		free(iter->forward);
 		free(iter->backward);
-		hold = iter;
-		free(hold->values);
-		iter = iter->prev;
+		free(iter->values);
+		free(iter);
+		iter = hold;
 	}
-	free(delete_snapshot->entries);
 	free(delete_snapshot);
 
 }
@@ -859,6 +864,7 @@ void command_set(char * line, entry ** ptr){
 			list_add(ptr,this_entry);
 			*ptr = this_entry;
 		}else{
+			free(this_entry->values);
 			free(this_entry);
 		}
 		
