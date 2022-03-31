@@ -207,6 +207,11 @@ void remove_value_from_index(entry * this_entry, int index){
 	these_values = realloc(these_values, sizeof(element)*(size_before_remove-1));
 	this_entry->values = these_values;
 	this_entry->length--;
+	
+	// finally, if we have removed our only general entry, replace the type
+	if(this_entry->forward_size == 0){
+		this_entry->is_simple = true;
+	}
 	return ;
 }
 
