@@ -1077,9 +1077,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 
 			// copy the values
 			this_entry->values = malloc(sizeof(element)*iter->length);
-			for(int i = 0; i < iter->length; i++){
-				this_entry->values[i] = iter->values[i];
-			}
+			memcpy(this_entry->values,iter->values,sizeof(element)*iter->length);
 
 			// copy the length
 			this_entry->length = iter->length;
@@ -1152,9 +1150,7 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 
 			// copy the values
 			this_entry->values = malloc(sizeof(element)*iter->length);
-			for(int i = 0; i < iter->length; i++){
-				this_entry->values[i] = iter->values[i];
-			}
+			memcpy(this_entry->values,iter->values,sizeof(element)*iter->length);
 
 			//  assign memory for the references
 			this_entry->backward = malloc(sizeof(entry*));
@@ -1214,9 +1210,7 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 
 		// copy the values
 		this_entry->values = malloc(sizeof(element)*iter->length);
-		for(int i = 0; i < iter->length; i++){
-			this_entry->values[i] = iter->values[i];
-		}
+		memcpy(this_entry->values,iter->values,sizeof(element)*iter->length);
 
 		//  assign memory for the references
 		this_entry->backward = malloc(sizeof(entry*));
