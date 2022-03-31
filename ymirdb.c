@@ -1138,11 +1138,9 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 	snapshot * this_snapshot = find_snapshot(line,*snapshots);
 	if(this_snapshot!=NULL){
-		if(*ptr!=NULL){
-			// delete the current state as we are going to replace it
-			list_free(*ptr);
-			*ptr = NULL;
-		}
+		// delete the current state as we are going to replace it
+		list_free(*ptr);
+		*ptr = NULL;
 
 		entry * iter = this_snapshot->entries;
 		// go through all the snapshot entries and set their values in the current state
