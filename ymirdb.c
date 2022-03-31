@@ -1079,7 +1079,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			}
 
 		// now go through and deal with all the references
-		iter = this_snapshot->entries;
+		iter = *ptr;
 		entry * sub_entry;
 		while(iter){
 
@@ -1146,12 +1146,12 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			// copy the length
 			this_entry->length = iter->length;
 
-				list_add(ptr,this_entry);
-				iter = iter->prev;
-			}
+			list_add(ptr,this_entry);
+			iter = iter->prev;
+		}
 
 		// now go through and deal with all the references
-		iter = this_snapshot->entries;
+		iter = *ptr;
 		entry * sub_entry;
 		while(iter){
 
