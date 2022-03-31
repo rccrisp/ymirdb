@@ -631,8 +631,8 @@ void snapshot_list_delete(snapshot ** ptr, snapshot* delete_snapshot){
 	entry * hold;
 	while(iter){
 		hold = iter->prev;
-		free(iter->forward);
-		free(iter->backward);
+		// free(iter->forward);
+		// free(iter->backward);
 		free(iter->values);
 		free(iter);
 		iter = hold;
