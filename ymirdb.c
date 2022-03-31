@@ -583,6 +583,8 @@ void list_free(entry * ptr){
 		current->backward = NULL;
 		current->forward = NULL;
 		current->values = NULL;
+		current->forward_size = 0;
+		current->backward_size = 0;
 	}
 
 	return ;
