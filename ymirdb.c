@@ -1066,29 +1066,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			// allocate memory for the entry
 			this_entry = malloc(sizeof(entry));
 
-			// copy the key
-			strcpy(this_entry->key,iter->key);
-
-			// allocate memory for the values
-			this_entry->values = malloc(sizeof(element)*iter->length);
-			for(int i = 0; i < iter->length; i++){
-				this_entry->values[i] = iter->values[i];
-			}
-
-			// copy the forward references
-			this_entry->forward_size = iter->forward_size;
-			this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
-			memmove(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
-
-
-			// copy the backward references
-			this_entry->backward_size = iter->backward_size;
-			this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
-			memmove(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
-
-
-			// copy the length
-			this_entry->length = iter->length;
+			memmove(this_entry, iter, sizeof(entry));
 
 			list_add(ptr,this_entry);
 			iter = iter->prev;
@@ -1129,28 +1107,7 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			// allocate memory for the entry
 			this_entry = malloc(sizeof(entry));
 
-			// copy the key
-			strcpy(this_entry->key,iter->key);
-
-			// allocate memory for the values
-			this_entry->values = malloc(sizeof(element)*iter->length);
-			for(int i = 0; i < iter->length; i++){
-				this_entry->values[i] = iter->values[i];
-			}
-
-			// copy the forward references
-			this_entry->forward_size = iter->forward_size;
-			this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
-			memmove(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
-
-
-			// copy the backward references
-			this_entry->backward_size = iter->backward_size;
-			this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
-			memmove(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
-
-			// copy the length
-			this_entry->length = iter->length;
+			memmove(this_entry, iter, sizeof(entry));
 
 			list_add(ptr,this_entry);
 			iter = iter->prev;
@@ -1174,29 +1131,7 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 		// initialise entry struct
 		entry * this_entry = malloc(sizeof(entry));
 
-		// copy the key
-		strcpy(this_entry->key,iter->key);
-
-		// copy the values
-		this_entry->values = malloc(sizeof(element)*iter->length);
-		for(int i = 0; i < iter->length; i++){
-			this_entry->values[i] = iter->values[i];
-		}
-
-		// copy the forward references
-		this_entry->forward_size = iter->forward_size;
-		this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
-		memmove(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
-
-
-		// copy the backward references
-		this_entry->backward_size = iter->backward_size;
-		this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
-		memmove(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
-
-
-		// copy the length
-		memcpy(&this_entry->length,&iter->length,sizeof(size_t));
+		memmove(this_entry, iter, sizeof(entry));
 
 		// add to the snapshot list
 		list_add(&entry_ptr,this_entry);
