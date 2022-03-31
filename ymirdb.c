@@ -1056,42 +1056,49 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			list_free(*ptr);
 			*ptr = NULL;
 		}
-
-		entry * iter = this_snapshot->entries;
+		bool set = false;
+		entry iter = *this_snapshot->entries;
 		entry * this_entry;
 		// go through all the snapshot entries and set their values in the current state
-		while(iter){
+		while(true){
+			if(iter.prev == NULL){
+				set = true;
+			}
 			// allocate memory for the entry
 			this_entry = malloc(sizeof(entry));
 
 			// copy the key
-			strcpy(this_entry->key,iter->key);
+			strcpy(this_entry->key,iter.key);
 
 			// allocate memory for the values
-			this_entry->values = malloc(sizeof(element)*iter->length);
-			for(int i = 0; i < iter->length; i++){
-				this_entry->values[i] = iter->values[i];
+			this_entry->values = malloc(sizeof(element)*iter.length);
+			for(int i = 0; i < iter.length; i++){
+				this_entry->values[i] = iter.values[i];
 			}
 
 			// copy the forward references
-			this_entry->forward_size = iter->forward_size;
+			this_entry->forward_size = iter.forward_size;
 			this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
 			for(int i = 0; i < this_entry->forward_size; i++){
-				this_entry->forward[i] = iter->forward[i];
+				this_entry->forward[i] = iter.forward[i];
 			}
 
 			// copy the backward references
-			this_entry->backward_size = iter->backward_size;
+			this_entry->backward_size = iter.backward_size;
 			this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
 			for(int i = 0; i < this_entry->backward_size; i++){
-				this_entry->backward[i] = iter->backward[i];
+				this_entry->backward[i] = iter.backward[i];
 			}
 
 			// copy the length
-			this_entry->length = iter->length;
+			this_entry->length = iter.length;
 
+			// add to the snapshot list
 			list_add(ptr,this_entry);
-			iter = iter->prev;
+			if(set){
+				break;
+			}
+			iter = *iter.prev;
 		}
 
 		
@@ -1121,42 +1128,49 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 		// delete the current state as we are going to replace it
 		list_free(*ptr);
 		*ptr = NULL;
-
-		entry * iter = this_snapshot->entries;
+		bool set = false;
+		entry iter = *this_snapshot->entries;
 		entry * this_entry;
 		// go through all the snapshot entries and set their values in the current state
-		while(iter){
+		while(true){
+			if(iter.prev == NULL){
+				set = true;
+			}
 			// allocate memory for the entry
 			this_entry = malloc(sizeof(entry));
 
 			// copy the key
-			strcpy(this_entry->key,iter->key);
+			strcpy(this_entry->key,iter.key);
 
 			// allocate memory for the values
-			this_entry->values = malloc(sizeof(element)*iter->length);
-			for(int i = 0; i < iter->length; i++){
-				this_entry->values[i] = iter->values[i];
+			this_entry->values = malloc(sizeof(element)*iter.length);
+			for(int i = 0; i < iter.length; i++){
+				this_entry->values[i] = iter.values[i];
 			}
 
 			// copy the forward references
-			this_entry->forward_size = iter->forward_size;
+			this_entry->forward_size = iter.forward_size;
 			this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
 			for(int i = 0; i < this_entry->forward_size; i++){
-				this_entry->forward[i] = iter->forward[i];
+				this_entry->forward[i] = iter.forward[i];
 			}
 
 			// copy the backward references
-			this_entry->backward_size = iter->backward_size;
+			this_entry->backward_size = iter.backward_size;
 			this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
 			for(int i = 0; i < this_entry->backward_size; i++){
-				this_entry->backward[i] = iter->backward[i];
+				this_entry->backward[i] = iter.backward[i];
 			}
 
 			// copy the length
-			this_entry->length = iter->length;
+			this_entry->length = iter.length;
 
+			// add to the snapshot list
 			list_add(ptr,this_entry);
-			iter = iter->prev;
+			if(set){
+				break;
+			}
+			iter = *iter.prev;
 		}
 		printf("ok\n");
 	}else{
