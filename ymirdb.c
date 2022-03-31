@@ -558,8 +558,8 @@ bool list_delete(entry ** ptr, entry * delete_entry){
 		delete_references(delete_entry);
 
 		// free allocated memory
-		// free(delete_entry->backward);
-		// free(delete_entry->forward);
+		free(delete_entry->backward);
+		free(delete_entry->forward);
 		free(delete_entry->values);
 		free(delete_entry);
 		return true;
@@ -581,8 +581,8 @@ void list_free(entry * ptr){
 	while(iter){
 		current = iter;
 		iter = iter->prev;
-		// free(current->backward);
-		// free(current->forward);
+		free(current->backward);
+		free(current->forward);
 		free(current->values);
 		free(current);
 	}
@@ -631,8 +631,8 @@ void snapshot_list_delete(snapshot ** ptr, snapshot* delete_snapshot){
 	entry * hold;
 	while(iter){
 		hold = iter->prev;
-		// free(iter->forward);
-		// free(iter->backward);
+		free(iter->forward);
+		free(iter->backward);
 		free(iter->values);
 		free(iter);
 		iter = hold;
@@ -1068,6 +1068,13 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			// allocate memory for the entry
 			this_entry = malloc(sizeof(entry));
 
+			// allocate the appropriate memory
+			this_entry->values = malloc(sizeof(element)*iter->length);
+
+			this_entry->forward = malloc(sizeof(entry*)*iter->forward_size);
+
+			this_entry->backward = malloc(sizeof(entry*)*iter->backward_size);
+
 			memmove(this_entry,iter,sizeof(entry));
 
 			list_add(ptr,this_entry);
@@ -1109,6 +1116,13 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			// allocate memory for the entry
 			this_entry = malloc(sizeof(entry));
 
+			// allocate the appropriate memory
+			this_entry->values = malloc(sizeof(element)*iter->length);
+
+			this_entry->forward = malloc(sizeof(entry*)*iter->forward_size);
+
+			this_entry->backward = malloc(sizeof(entry*)*iter->backward_size);
+
 			memmove(this_entry,iter,sizeof(entry));
 
 			list_add(ptr,this_entry);
@@ -1132,6 +1146,13 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 	while(iter){
 		// initialise entry struct
 		entry * this_entry = malloc(sizeof(entry));
+
+		// allocate the appropriate memory
+		this_entry->values = malloc(sizeof(element)*iter->length);
+
+		this_entry->forward = malloc(sizeof(entry*)*iter->forward_size);
+
+		this_entry->backward = malloc(sizeof(entry*)*iter->backward_size);
 
 		memmove(this_entry,iter,sizeof(entry));
 
