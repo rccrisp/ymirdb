@@ -580,7 +580,9 @@ void list_free(entry * ptr){
 		free(current->backward);
 		free(current->forward);
 		free(current->values);
-		// free(current);
+		current->backward = NULL;
+		current->forward = NULL;
+		current->values = NULL;
 	}
 
 	return ;
