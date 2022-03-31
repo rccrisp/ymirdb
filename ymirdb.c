@@ -1131,26 +1131,34 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			// allocate memory for the entry
 			this_entry = malloc(sizeof(entry));
 
-			// copy the key
-			strcpy(this_entry->key,iter->key);
+			memmove(this_entry,iter,sizeof(entry));
+			// // copy the key
+			// strcpy(this_entry->key,iter->key);
 
-			// allocate memory for the values
-			this_entry->values = malloc(sizeof(element)*iter->length);
-			memcpy(this_entry->values,iter->values,sizeof(element)*this_entry->length);
+			// // allocate memory for the values
+			// this_entry->values = malloc(sizeof(element)*iter->length);
+			// for(int i = 0; i < iter->length; i++){
+			// 	this_entry->values[i] = iter->values[i];
+			// }
 
+			// // copy the forward references
+			// this_entry->forward_size = iter->forward_size;
+			// this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
+			// memcpy(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
+			// // for(int i = 0; i < this_entry->forward_size; i++){
+			// // 	this_entry->forward[i] = iter->forward[i];
+			// // }
 
-			// copy the forward references
-			this_entry->forward_size = iter->forward_size;
-			this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
-			memcpy(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
+			// // copy the backward references
+			// this_entry->backward_size = iter->backward_size;
+			// this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
+			// memcpy(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
+			// // for(int i = 0; i < this_entry->backward_size; i++){
+			// // 	this_entry->backward[i] = iter->backward[i];
+			// // }
 
-			// copy the backward references
-			this_entry->backward_size = iter->backward_size;
-			this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
-			memcpy(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
-
-			// copy the length
-			this_entry->length = iter->length;
+			// // copy the length
+			// this_entry->length = iter->length;
 
 			list_add(ptr,this_entry);
 			iter = iter->prev;
@@ -1179,20 +1187,23 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 
 		// copy the values
 		this_entry->values = malloc(sizeof(element)*iter->length);
-		memmove(this_entry->values,iter->values,sizeof(element)*this_entry->length);
-
+		for(int i = 0; i < iter->length; i++){
+			this_entry->values[i] = iter->values[i];
+		}
 
 		// copy the forward references
 		this_entry->forward_size = iter->forward_size;
 		this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
-		memmove(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
-
+		for(int i = 0; i < this_entry->forward_size; i++){
+			this_entry->forward[i] = iter->forward[i];
+		}
 
 		// copy the backward references
 		this_entry->backward_size = iter->backward_size;
 		this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
-		memmove(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
-
+		for(int i = 0; i < this_entry->backward_size; i++){
+			this_entry->backward[i] = iter->backward[i];
+		}
 
 		// copy the length
 		this_entry->length = iter->length;
