@@ -577,9 +577,10 @@ void list_free(entry * ptr){
 	while(iter){
 		current = iter;
 		iter = iter->prev;
+		list_delete(current);
 		// free(current->backward);
 		// free(current->forward);
-		free(current->values);
+		// free(current->values);
 		// current->backward = NULL;
 		// current->forward = NULL;
 		// current->values = NULL;
