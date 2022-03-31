@@ -288,7 +288,8 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 	return; 
 }
 
-bool valid_values(entry ** ptr, char * new_values){
+bool valid_values(entry ** ptr, entry * this_entry, char * new_values[], int size){
+
 	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
 	for(int i = 1; i < size+1; i++){
 		// if its not a number
@@ -862,7 +863,7 @@ void command_set(char * line, entry ** ptr){
 		}
 		
 	}else{
-		valid = valid_values(ptr,this_line);
+		valid = valid_values(ptr,this_entry,this_line,length_of_line);
 
 		if(valid){
 			delete_references(this_entry);
