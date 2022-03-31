@@ -169,8 +169,7 @@ void remove_value_from_index(entry * this_entry, int index){
 		if(this_entry->forward_size>0){
 			this_entry->forward = realloc(this_entry->forward,sizeof(entry*)*this_entry->forward_size);
 		}else{
-			free(this_entry->forward);
-			this_entry->forward = NULL;
+			this_entry->forward = malloc(sizeof(entry*));
 		}
 		// deal with backward references to deleted entry
 		j = 0;
@@ -186,8 +185,7 @@ void remove_value_from_index(entry * this_entry, int index){
 		if(entry_to_remove->backward_size>0){
 			entry_to_remove->backward = realloc(entry_to_remove->backward,sizeof(entry*)*this_entry->backward_size);
 		}else{
-			free(entry_to_remove->backward);
-			entry_to_remove->backward = NULL;
+			entry_to_remove->backward = malloc(sizeof(entry*));
 		}
 		
 	}
