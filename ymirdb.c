@@ -583,7 +583,6 @@ void list_free(entry * ptr){
 		current->backward = NULL;
 		current->forward = NULL;
 		current->values = NULL;
-		free(current);
 	}
 
 	return ;
@@ -1197,7 +1196,7 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 
 
 		// copy the length
-		this_entry->length = iter->length;
+		memcpy(&this_entry->length,&iter->length,sizeof(size_t));
 
 		// add to the snapshot list
 		list_add(&entry_ptr,this_entry);
