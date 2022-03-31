@@ -1131,7 +1131,7 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			// allocate memory for the entry
 			this_entry = malloc(sizeof(entry));
 
-			memmove(this_entry,iter,sizeof(entry));
+			memcpy(this_entry,iter,sizeof(entry));
 			// // copy the key
 			// strcpy(this_entry->key,iter->key);
 
