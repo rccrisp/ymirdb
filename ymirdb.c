@@ -1064,7 +1064,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 	snapshot * this_snapshot = find_snapshot(line,*snapshots);
 
 	if(this_snapshot!=NULL){
-		entry ** ptrcpy = NULL;
+		entry * ptrcpy = NULL;
 
 		entry * iter = this_snapshot->entries;
 		// go through all the snapshot entries and set their values in the current state
@@ -1090,12 +1090,12 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			this_entry->forward = malloc(sizeof(entry*));
 			this_entry->forward_size = 0;
 
-				list_add(ptrcpy,this_entry);
+				list_add(&ptrcpy,this_entry);
 				iter = iter->prev;
 			}
 
 		// now go through and deal with all the references
-		iter = *ptrcpy;
+		iter = ptrcpy;
 		entry * sub_entry;
 		while(iter){
 
@@ -1103,7 +1103,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			for(int i = 0; i < iter->length; i++){
 				// if this entry is an entry, build the reference
 				if(iter->values[i].type == 1){
-					sub_entry = find_key_alt(iter->values[i].entry->key,*ptrcpy);
+					sub_entry = find_key_alt(iter->values[i].entry->key,ptrcpy);
 					deal_with_references(iter,sub_entry);
 				}
 			}
@@ -1125,7 +1125,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 		// delete the current state as we are going to replace it
 		list_free(*ptr);
 		*ptr = NULL;
-		ptr = ptrcpy;
+		*ptr = ptrcpy;
 		printf("ok\n");
 	}else{
 		printf("no such snapshot\n");
@@ -1139,7 +1139,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 	snapshot * this_snapshot = find_snapshot(line,*snapshots);
 	if(this_snapshot!=NULL){
-		entry ** ptrcpy = NULL;
+		entry * ptrcpy = NULL;
 
 		entry * iter = this_snapshot->entries;
 		// go through all the snapshot entries and set their values in the current state
@@ -1165,12 +1165,12 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			// copy the length
 			this_entry->length = iter->length;
 
-			list_add(ptrcpy,this_entry);
+			list_add(&ptrcpy,this_entry);
 			iter = iter->prev;
 		}
 
 		// now go through and deal with all the references
-		iter = *ptrcpy;
+		iter = ptrcpy;
 		entry * sub_entry;
 		while(iter){
 
@@ -1178,7 +1178,7 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			for(int i = 0; i < iter->length; i++){
 				// if this entry is an entry, build the reference
 				if(iter->values[i].type == 1){
-					sub_entry = find_key_alt(iter->values[i].entry->key,*ptrcpy);
+					sub_entry = find_key_alt(iter->values[i].entry->key,ptrcpy);
 					deal_with_references(iter,sub_entry);
 				}
 			}
@@ -1188,7 +1188,7 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 		// delete the current state as we are going to replace it
 		list_free(*ptr);
 		*ptr = NULL;
-		ptr = ptrcpy;
+		*ptr = ptrcpy;
 	}else{
 		printf("no such snapshot\n");
 	}
