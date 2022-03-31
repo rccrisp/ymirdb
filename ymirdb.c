@@ -1048,7 +1048,7 @@ void command_drop(char * line, snapshot ** snapshots){
 
 entry * front(entry**ptr){
 	entry * front_ptr = *ptr;
-	while(front_ptr){
+	while(front_ptr->prev){
 		front_ptr = front_ptr->prev;
 	}
 
