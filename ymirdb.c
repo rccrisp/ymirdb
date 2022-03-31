@@ -170,7 +170,7 @@ void remove_value_from_index(entry * this_entry, int index){
 			this_entry->forward = realloc(this_entry->forward,sizeof(entry*)*this_entry->forward_size);
 		}else{
 			free(this_entry->forward);
-			this_entry->forward = NULL;
+			this_entry->forward = malloc(sizeof(entry*));
 		}
 		// deal with backward references to deleted entry
 		j = 0;
@@ -187,7 +187,7 @@ void remove_value_from_index(entry * this_entry, int index){
 			entry_to_remove->backward = realloc(entry_to_remove->backward,sizeof(entry*)*this_entry->backward_size);
 		}else{
 			free(entry_to_remove->backward);
-			entry_to_remove->backward = NULL;
+			entry_to_remove->backward = malloc(sizeof(entry*));
 		}
 		
 	}
@@ -288,6 +288,25 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 	return; 
 }
 
+bool valid_values(entry ** ptr, char * new_values){
+	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
+	for(int i = 1; i < size+1; i++){
+		// if its not a number
+		if(!isnumber(new_values[i])){
+			// if its not a key or is a self reference
+			if(find_key(new_values[i],*ptr)==NULL){
+				printf("no such key\n\n");
+				return false;
+			}else if(this_entry == find_key(new_values[i],*ptr)){
+				printf("not permitted\n\n");
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 // given a character array of values, include these values in the correct key, from a given index
 bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, bool first){
 	// boolean to store if this is a simple or general entry
@@ -360,6 +379,8 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	memcpy(this_entry->values,these_values,sizeof(element)*size);
 
 	this_entry->is_simple = simple;
+
+	free(these_values);
 
 	return true;
 }
@@ -841,11 +862,16 @@ void command_set(char * line, entry ** ptr){
 		}
 		
 	}else{
-		delete_references(this_entry);
-		this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
-		this_entry->length = length_of_line;
+		valid = valid_values(ptr,this_line);
 
-		valid = populate_values(ptr,this_entry,this_line,0,false);
+		if(valid){
+			delete_references(this_entry);
+			this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
+			this_entry->length = length_of_line;
+
+			populate_values(ptr,this_entry,this_line,0,false);
+		}
+	
 	}
 
 	if(valid){
