@@ -1118,10 +1118,9 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 	snapshot * this_snapshot = find_snapshot(line,*snapshots);
 	if(this_snapshot!=NULL){
-		// delete the current state as we are going to replace it
-		list_free(*ptr);
-		*ptr = NULL;
 
+		// create a copy of the ptr
+		entry * ptrcpy = NULL;
 		entry * iter = this_snapshot->entries;
 		entry * this_entry;
 		// go through all the snapshot entries and set their values in the current state
@@ -1155,10 +1154,13 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			// copy the length
 			this_entry->length = iter->length;
 
-			list_add(ptr,this_entry);
+			list_add(&ptrcpy,this_entry);
 			iter = iter->prev;
 		}
 		printf("ok\n");
+		// delete the current state as we are going to replace it
+		list_free(*ptr);
+		*ptr = ptrcpy;
 	}else{
 		printf("no such snapshot\n");
 	}
@@ -1671,7 +1673,7 @@ int main(void) {
 
 	char line[MAX_LINE];
 	entry * ptr = NULL;
-	snapshot * snapshots = NULL;
+	snapshot * snapshots = NULL; 
 
 	while (true) {
 		printf("> ");
