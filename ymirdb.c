@@ -577,13 +577,10 @@ void list_free(entry * ptr){
 	while(iter){
 		current = iter;
 		iter = iter->prev;
-		list_delete(&ptr,current);
-		// free(current->backward);
-		// free(current->forward);
-		// free(current->values);
-		// current->backward = NULL;
-		// current->forward = NULL;
-		// current->values = NULL;
+		free(current->backward);
+		free(current->forward);
+		free(current->values);
+		free(current);
 	}
 
 	return ;
@@ -938,7 +935,7 @@ void command_append(char * line, entry ** ptr){
 		if(valid){
 			printf("ok\n\n");
 		}else{
-			printf("not a valid entry\n\n");
+			printf("not a valid entry");
 		}
 		
 		
@@ -1079,14 +1076,16 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			// copy the forward references
 			this_entry->forward_size = iter->forward_size;
 			this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
-			memmove(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
-
+			for(int i = 0; i < this_entry->forward_size; i++){
+				this_entry->forward[i] = iter->forward[i];
+			}
 
 			// copy the backward references
 			this_entry->backward_size = iter->backward_size;
 			this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
-			memmove(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
-
+			for(int i = 0; i < this_entry->backward_size; i++){
+				this_entry->backward[i] = iter->backward[i];
+			}
 
 			// copy the length
 			this_entry->length = iter->length;
@@ -1142,13 +1141,16 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			// copy the forward references
 			this_entry->forward_size = iter->forward_size;
 			this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
-			memmove(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
-
+			for(int i = 0; i < this_entry->forward_size; i++){
+				this_entry->forward[i] = iter->forward[i];
+			}
 
 			// copy the backward references
 			this_entry->backward_size = iter->backward_size;
 			this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
-			memmove(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
+			for(int i = 0; i < this_entry->backward_size; i++){
+				this_entry->backward[i] = iter->backward[i];
+			}
 
 			// copy the length
 			this_entry->length = iter->length;
@@ -1187,17 +1189,19 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 		// copy the forward references
 		this_entry->forward_size = iter->forward_size;
 		this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
-		memmove(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
-
+		for(int i = 0; i < this_entry->forward_size; i++){
+			this_entry->forward[i] = iter->forward[i];
+		}
 
 		// copy the backward references
 		this_entry->backward_size = iter->backward_size;
 		this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
-		memmove(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
-
+		for(int i = 0; i < this_entry->backward_size; i++){
+			this_entry->backward[i] = iter->backward[i];
+		}
 
 		// copy the length
-		memcpy(&this_entry->length,&iter->length,sizeof(size_t));
+		this_entry->length = iter->length;
 
 		// add to the snapshot list
 		list_add(&entry_ptr,this_entry);
@@ -1311,9 +1315,6 @@ void command_sum(char * line,entry ** ptr){
 }
 
 int length(entry * this_entry){
-	if(this_entry == NULL){
-		return 0;
-	}
 	if(this_entry->is_simple){
 		return this_entry->length;
 	}
@@ -1321,7 +1322,6 @@ int length(entry * this_entry){
 	int total = this_entry->length - this_entry->forward_size;
 	for(int i = 0; i < this_entry->forward_size;i++){
 		total += length(this_entry->forward[i]);
-		
 	}
 
 	return total;
@@ -1554,6 +1554,19 @@ void command_type(char * line, entry ** ptr){
 	printf("\n\n");
 }
 
+void command_size(char * line, entry ** ptr){
+		// find the key to sort from from the linked list
+	entry * this_entry = find_key(line,*ptr);
+
+	if(this_entry!=NULL){
+		printf("backward size %ld\nforward size %ld\n\n",this_entry->backward_size,this_entry->forward_size);
+	}else{
+		printf("no such key");
+	}
+
+	printf("\n\n");
+}
+
 int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot_ptr){
 	char * line;
 	if(strncasecmp(command,"bye",3)==0){
@@ -1637,6 +1650,9 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 	}else if(strncasecmp(command,"type",4)==0){
 		line = &command[0]+5;
 		command_type(line,entry_ptr);
+	}else if(strncasecmp(command,"size",4)==0){ 
+		line = &command[0]+5;
+		command_size(line,entry_ptr);
 	}else{
 		printf("INVALID COMMAND: TYPE HELP FOR A LIST OF VALID COMMANDS\n\n");
 	}
