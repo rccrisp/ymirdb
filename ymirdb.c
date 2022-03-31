@@ -1310,6 +1310,9 @@ void command_sum(char * line,entry ** ptr){
 }
 
 int length(entry * this_entry){
+	if(this_entry == NULL){
+		return 0;
+	}
 	if(this_entry->is_simple){
 		return this_entry->length;
 	}
@@ -1543,19 +1546,6 @@ void command_type(char * line, entry ** ptr){
 		}else{
 			printf("general");
 		}
-	}else{
-		printf("no such key");
-	}
-
-	printf("\n\n");
-}
-
-void command_size(char * line, entry ** ptr){
-		// find the key to sort from from the linked list
-	entry * this_entry = find_key(line,*ptr);
-
-	if(this_entry!=NULL){
-		printf("backward size %ld\nforward size %ld\n\n",this_entry->backward_size,this_entry->forward_size);
 	}else{
 		printf("no such key");
 	}
