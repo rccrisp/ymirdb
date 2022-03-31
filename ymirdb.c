@@ -76,6 +76,20 @@ entry * find_key(char * line, entry * ptr){
 
 }
 
+entry * find_key_alt(char * line, entry * ptr){
+	// head is always NULL entry
+	entry * iter = ptr;
+	while(iter){
+		if(strcmp(iter->key,line) == 0){
+			return iter;
+		}
+		iter = iter->prev;
+	}
+
+	return NULL;
+
+}
+
 // deals with the linked list references when adding a new entry
 void list_add(entry ** last_entry_ptr, entry * new_entry){
 	
@@ -1093,7 +1107,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			for(int i = 0; i < iter->length; i++){
 				// if this entry is an entry, build the reference
 				if(iter->values[i].type == 1){
-					sub_entry = find_key(iter->values[i].entry->key,*ptr);
+					sub_entry = find_key_alt(iter->values[i].entry->key,*ptr);
 					deal_with_references(iter,sub_entry);
 				}
 			}
@@ -1165,7 +1179,7 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			for(int i = 0; i < iter->length; i++){
 				// if this entry is an entry, build the reference
 				if(iter->values[i].type == 1){
-					sub_entry = find_key(iter->values[i].entry->key,*ptr);
+					sub_entry = find_key_alt(iter->values[i].entry->key,*ptr);
 					deal_with_references(iter,sub_entry);
 				}
 			}
@@ -1224,7 +1238,7 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 		for(int i = 0; i < iter->length; i++){
 			// if this entry is an entry, build the reference
 			if(iter->values[i].type == 1){
-				sub_entry = find_key(iter->values[i].entry->key,entry_ptr);
+				sub_entry = find_key_alt(iter->values[i].entry->key,entry_ptr);
 				deal_with_references(iter,sub_entry);
 			}
 		}
