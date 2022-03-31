@@ -359,7 +359,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		this_entry->backward = malloc(sizeof(entry*));
 		this_entry->backward_size = 0;
 	}else{
-		// free(this_entry->forward);
+		free(this_entry->forward);
 	}
 
 	
@@ -558,8 +558,8 @@ bool list_delete(entry ** ptr, entry * delete_entry){
 		delete_references(delete_entry);
 
 		// free allocated memory
-		free(delete_entry->backward);
-		free(delete_entry->forward);
+		// free(delete_entry->backward);
+		// free(delete_entry->forward);
 		free(delete_entry->values);
 		free(delete_entry);
 		return true;
