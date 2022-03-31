@@ -1090,7 +1090,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 
 				list_add(&ptrcpy,this_entry);
 				iter = iter->prev;
-			}
+		}
 
 		// now go through and deal with all the references
 		iter = ptrcpy;
@@ -1102,6 +1102,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 				// if this entry is an entry, build the reference
 				if(iter->values[i].type == 1){
 					sub_entry = find_key_alt(iter->values[i].entry->key,ptrcpy);
+					iter->values[i].entry = sub_entry;
 					deal_with_references(iter,sub_entry);
 				}
 			}
@@ -1175,6 +1176,7 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 				// if this entry is an entry, build the reference
 				if(iter->values[i].type == 1){
 					sub_entry = find_key_alt(iter->values[i].entry->key,ptrcpy);
+					iter->values[i].entry = sub_entry;
 					deal_with_references(iter,sub_entry);
 				}
 			}
@@ -1236,6 +1238,7 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 			// if this entry is an entry, build the reference
 			if(iter->values[i].type == 1){
 				sub_entry = find_key_alt(iter->values[i].entry->key,entry_ptr);
+				iter->values[i].entry = sub_entry;
 				deal_with_references(iter,sub_entry);
 			}
 		}
