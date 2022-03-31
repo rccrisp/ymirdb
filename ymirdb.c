@@ -1600,105 +1600,89 @@ void command_type(char * line, entry ** ptr){
 	printf("\n\n");
 }
 
-void command_size(char * line, entry ** ptr){
-		// find the key to sort from from the linked list
-	entry * this_entry = find_key(line,*ptr);
-
-	if(this_entry!=NULL){
-		printf("backward size %ld\nforward size %ld\n\n",this_entry->backward_size,this_entry->forward_size);
-	}else{
-		printf("no such key");
-	}
-
-	printf("\n\n");
-}
-
 int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot_ptr){
-	char * line;
+	// char * line;
 	if(strncasecmp(command,"bye",3)==0){
 		list_free(*entry_ptr);
 		snapshot_list_free(snapshot_ptr);
 		command_bye();
 		return -1;
-	}else if(strncasecmp(command,"help",4)==0){
-		command_help();
-	}else if(strncasecmp(command,"list keys",9)==0){
-		command_list_keys(entry_ptr);
-	}else if(strncasecmp(command,"list entries",12)==0){
-		command_list_entries(entry_ptr);
-	}else if(strncasecmp(command,"list snapshots",14)==0){
-		command_list_snapshots(snapshot_ptr);
-	}else if(strncasecmp(command,"get",3)==0){
-		line = &command[0]+4;
-		command_get(line,entry_ptr);
-	}else if(strncasecmp(command,"del",3)==0){
-		line = &command[0]+4;
-		command_del(line,entry_ptr);
-	}else if(strncasecmp(command,"purge",5)==0){
-		line = &command[0]+6;
-		command_purge(line,entry_ptr,snapshot_ptr);
-	}else if(strncasecmp(command,"set",3)==0){
-		line = &command[0]+4;
-		command_set(line,entry_ptr);
-	}else if(strncasecmp(command,"push",4)==0){
-		line = &command[0]+5;
-		command_push(line,entry_ptr);
-	}else if(strncasecmp(command,"append",6)==0){
-		line = &command[0]+7;
-		command_append(line,entry_ptr);
-	}else if(strncasecmp(command,"pick",4)==0){
-		line = &command[0]+5;
-		command_pick(line,entry_ptr);
-	}else if(strncasecmp(command,"pluck",5)==0){
-		line = &command[0]+6;
-		command_pluck(line,entry_ptr);
-	}else if(strncasecmp(command,"pop",3)==0){
-		line = &command[0]+4;
-		command_pop(line,entry_ptr);
-	}else if(strncasecmp(command,"drop",4)==0){
-		line = &command[0]+5;
-		command_drop(line,snapshot_ptr);
-	}else if(strncasecmp(command,"rollback",8)==0){
-		line = &command[0]+9;
-		command_rollback(line,entry_ptr,snapshot_ptr);
-	}else if(strncasecmp(command,"checkout",8)==0){
-		line = &command[0]+9;
-		command_checkout(line,entry_ptr,snapshot_ptr);
-	}else if(strncasecmp(command,"snapshot",8)==0){
-		command_snapshot(entry_ptr,snapshot_ptr);
-	}else if(strncasecmp(command,"min",3)==0){
-		line = &command[0]+4;
-		command_min(line,entry_ptr);
-	}else if(strncasecmp(command,"max",3)==0){
-		line = &command[0]+4;
-		command_max(line,entry_ptr);
-	}else if(strncasecmp(command,"sum",3)==0){
-		line = &command[0]+4;
-		command_sum(line,entry_ptr);
-	}else if(strncasecmp(command,"len",3)==0){
-		line = &command[0]+4;
-		command_len(line,entry_ptr);
-	}else if(strncasecmp(command,"rev",3)==0){
-		line = &command[0]+4;
-		command_rev(line,entry_ptr);
-	}else if(strncasecmp(command,"uniq",4)==0){
-		line = &command[0]+4;
-		command_uniq(line,entry_ptr);
-	}else if(strncasecmp(command,"sort",4)==0){
-		line = &command[0]+5;
-		command_sort(line,entry_ptr);
-	}else if(strncasecmp(command,"forward",7)==0){
-		line = &command[0]+8;
-		command_forward(line,entry_ptr);
-	}else if(strncasecmp(command,"backward",8)==0){
-		line = &command[0]+9;
-		command_backward(line,entry_ptr);
-	}else if(strncasecmp(command,"type",4)==0){
-		line = &command[0]+5;
-		command_type(line,entry_ptr);
-	}else if(strncasecmp(command,"size",4)==0){ 
-		line = &command[0]+5;
-		command_size(line,entry_ptr);
+	// }else if(strncasecmp(command,"help",4)==0){
+	// 	command_help();
+	// }else if(strncasecmp(command,"list keys",9)==0){
+	// 	command_list_keys(entry_ptr);
+	// }else if(strncasecmp(command,"list entries",12)==0){
+	// 	command_list_entries(entry_ptr);
+	// }else if(strncasecmp(command,"list snapshots",14)==0){
+	// 	command_list_snapshots(snapshot_ptr);
+	// }else if(strncasecmp(command,"get",3)==0){
+	// 	line = &command[0]+4;
+	// 	command_get(line,entry_ptr);
+	// }else if(strncasecmp(command,"del",3)==0){
+	// 	line = &command[0]+4;
+	// 	command_del(line,entry_ptr);
+	// }else if(strncasecmp(command,"purge",5)==0){
+	// 	line = &command[0]+6;
+	// 	command_purge(line,entry_ptr,snapshot_ptr);
+	// }else if(strncasecmp(command,"set",3)==0){
+	// 	line = &command[0]+4;
+	// 	command_set(line,entry_ptr);
+	// }else if(strncasecmp(command,"push",4)==0){
+	// 	line = &command[0]+5;
+	// 	command_push(line,entry_ptr);
+	// }else if(strncasecmp(command,"append",6)==0){
+	// 	line = &command[0]+7;
+	// 	command_append(line,entry_ptr);
+	// }else if(strncasecmp(command,"pick",4)==0){
+	// 	line = &command[0]+5;
+	// 	command_pick(line,entry_ptr);
+	// }else if(strncasecmp(command,"pluck",5)==0){
+	// 	line = &command[0]+6;
+	// 	command_pluck(line,entry_ptr);
+	// }else if(strncasecmp(command,"pop",3)==0){
+	// 	line = &command[0]+4;
+	// 	command_pop(line,entry_ptr);
+	// }else if(strncasecmp(command,"drop",4)==0){
+	// 	line = &command[0]+5;
+	// 	command_drop(line,snapshot_ptr);
+	// }else if(strncasecmp(command,"rollback",8)==0){
+	// 	line = &command[0]+9;
+	// 	command_rollback(line,entry_ptr,snapshot_ptr);
+	// }else if(strncasecmp(command,"checkout",8)==0){
+	// 	line = &command[0]+9;
+	// 	command_checkout(line,entry_ptr,snapshot_ptr);
+	// }else if(strncasecmp(command,"snapshot",8)==0){
+	// 	command_snapshot(entry_ptr,snapshot_ptr);
+	// }else if(strncasecmp(command,"min",3)==0){
+	// 	line = &command[0]+4;
+	// 	command_min(line,entry_ptr);
+	// }else if(strncasecmp(command,"max",3)==0){
+	// 	line = &command[0]+4;
+	// 	command_max(line,entry_ptr);
+	// }else if(strncasecmp(command,"sum",3)==0){
+	// 	line = &command[0]+4;
+	// 	command_sum(line,entry_ptr);
+	// }else if(strncasecmp(command,"len",3)==0){
+	// 	line = &command[0]+4;
+	// 	command_len(line,entry_ptr);
+	// }else if(strncasecmp(command,"rev",3)==0){
+	// 	line = &command[0]+4;
+	// 	command_rev(line,entry_ptr);
+	// }else if(strncasecmp(command,"uniq",4)==0){
+	// 	line = &command[0]+4;
+	// 	command_uniq(line,entry_ptr);
+	// }else if(strncasecmp(command,"sort",4)==0){
+	// 	line = &command[0]+5;
+	// 	command_sort(line,entry_ptr);
+	// }else if(strncasecmp(command,"forward",7)==0){
+	// 	line = &command[0]+8;
+	// 	command_forward(line,entry_ptr);
+	// }else if(strncasecmp(command,"backward",8)==0){
+	// 	line = &command[0]+9;
+	// 	command_backward(line,entry_ptr);
+	// }else if(strncasecmp(command,"type",4)==0){
+	// 	line = &command[0]+5;
+	// 	command_type(line,entry_ptr);
 	}else{
 		printf("INVALID COMMAND: TYPE HELP FOR A LIST OF VALID COMMANDS\n\n");
 	}
@@ -1725,9 +1709,9 @@ int main(void) {
 		// TODO
 		//
 		
-		// if(command_interpreter(line, &ptr, &snapshots) == -1){
-		// 	return 0;
-		// }
+		if(command_interpreter(line, &ptr, &snapshots) == -1){
+			return 0;
+		}
 
   	}
 	
