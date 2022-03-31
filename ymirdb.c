@@ -1209,10 +1209,10 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 
 		// add to the snapshot list
 		list_add(&entry_ptr,this_entry);
-		iter = *iter.prev;
 		if(set){
 			break;
 		}
+		iter = *iter.prev;
 	}
 
 	int id = snapshot_list_add(snapshots,entry_ptr);
