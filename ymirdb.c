@@ -1636,9 +1636,6 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 	}else if(strncasecmp(command,"type",4)==0){
 		line = &command[0]+5;
 		command_type(line,entry_ptr);
-	}else if(strncasecmp(command,"size",4)==0){ 
-		line = &command[0]+5;
-		command_size(line,entry_ptr);
 	}else{
 		printf("INVALID COMMAND: TYPE HELP FOR A LIST OF VALID COMMANDS\n\n");
 	}
