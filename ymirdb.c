@@ -583,8 +583,6 @@ void list_free(entry * ptr){
 		current->backward = NULL;
 		current->forward = NULL;
 		current->values = NULL;
-		current->forward_size = 0;
-		current->backward_size = 0;
 	}
 
 	return ;
@@ -1325,7 +1323,10 @@ int length(entry * this_entry){
 	
 	int total = this_entry->length - this_entry->forward_size;
 	for(int i = 0; i < this_entry->forward_size;i++){
-		total += length(this_entry->forward[i]);
+		if(this_entry->forward[i]!=NULL){
+			total += length(this_entry->forward[i]);
+		}
+		
 	}
 
 	return total;
