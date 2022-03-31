@@ -359,7 +359,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		this_entry->backward = malloc(sizeof(entry*));
 		this_entry->backward_size = 0;
 	}else{
-		free(this_entry->forward);
+		// free(this_entry->forward);
 	}
 
 	
