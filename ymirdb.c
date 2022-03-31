@@ -1082,6 +1082,9 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			// copy the length
 			this_entry->length = iter->length;
 
+			// copy is simple
+			this_entry->is_simple = iter->is_simple;
+
 			//  assign memory for the references
 			this_entry->backward = malloc(sizeof(entry*));
 			this_entry->backward_size = 0;
@@ -1153,6 +1156,9 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 			this_entry->values = malloc(sizeof(element)*iter->length);
 			memmove(this_entry->values,iter->values,sizeof(element)*iter->length);
 
+			// copy is simple
+			this_entry->is_simple = iter->is_simple;
+
 			//  assign memory for the references
 			this_entry->backward = malloc(sizeof(entry*));
 			this_entry->backward_size = 0;
@@ -1223,6 +1229,9 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 		// copy the length
 		this_entry->length = iter->length;
 
+		// copy is simple
+		this_entry->is_simple = iter->is_simple;
+		
 		// add to the snapshot list
 		list_add(&entry_ptr,this_entry);
 		iter = iter->prev;
