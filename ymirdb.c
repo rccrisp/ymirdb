@@ -580,7 +580,7 @@ void list_free(entry * ptr){
 		free(current->backward);
 		free(current->forward);
 		free(current->values);
-		free(current);
+		// free(current);
 	}
 
 	return ;
@@ -935,7 +935,7 @@ void command_append(char * line, entry ** ptr){
 		if(valid){
 			printf("ok\n\n");
 		}else{
-			printf("not a valid entry");
+			printf("not a valid entry\n\n");
 		}
 		
 		
