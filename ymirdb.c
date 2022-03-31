@@ -1071,23 +1071,18 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 
 			// allocate memory for the values
 			this_entry->values = malloc(sizeof(element)*iter->length);
-			for(int i = 0; i < iter->length; i++){
-				this_entry->values[i] = iter->values[i];
-			}
+			memcpy(this_entry->values,iter->values,sizeof(element)*this_entry->length);
+
 
 			// copy the forward references
 			this_entry->forward_size = iter->forward_size;
 			this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
-			for(int i = 0; i < this_entry->forward_size; i++){
-				this_entry->forward[i] = iter->forward[i];
-			}
+			memcpy(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
 
 			// copy the backward references
 			this_entry->backward_size = iter->backward_size;
 			this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
-			for(int i = 0; i < this_entry->backward_size; i++){
-				this_entry->backward[i] = iter->backward[i];
-			}
+			memcpy(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
 
 			// copy the length
 			this_entry->length = iter->length;
@@ -1136,25 +1131,18 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 
 			// allocate memory for the values
 			this_entry->values = malloc(sizeof(element)*iter->length);
-			for(int i = 0; i < iter->length; i++){
-				this_entry->values[i] = iter->values[i];
-			}
+			memcpy(this_entry->values,iter->values,sizeof(element)*this_entry->length);
+
 
 			// copy the forward references
 			this_entry->forward_size = iter->forward_size;
 			this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
 			memcpy(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
-			// for(int i = 0; i < this_entry->forward_size; i++){
-			// 	this_entry->forward[i] = iter->forward[i];
-			// }
 
 			// copy the backward references
 			this_entry->backward_size = iter->backward_size;
 			this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
 			memcpy(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
-			// for(int i = 0; i < this_entry->backward_size; i++){
-			// 	this_entry->backward[i] = iter->backward[i];
-			// }
 
 			// copy the length
 			this_entry->length = iter->length;
