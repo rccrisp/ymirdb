@@ -1179,19 +1179,19 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 
 		// copy the values
 		this_entry->values = malloc(sizeof(element)*iter->length);
-		memcpy(this_entry->values,iter->values,sizeof(element)*this_entry->length);
+		memmove(this_entry->values,iter->values,sizeof(element)*this_entry->length);
 
 
 		// copy the forward references
 		this_entry->forward_size = iter->forward_size;
 		this_entry->forward = malloc(sizeof(entry*)*this_entry->forward_size);
-		memcpy(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
+		memmove(this_entry->forward,iter->forward,sizeof(entry*)*this_entry->forward_size);
 
 
 		// copy the backward references
 		this_entry->backward_size = iter->backward_size;
 		this_entry->backward = malloc(sizeof(entry*)*this_entry->backward_size);
-		memcpy(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
+		memmove(this_entry->backward,iter->backward,sizeof(entry*)*this_entry->backward_size);
 
 
 		// copy the length
