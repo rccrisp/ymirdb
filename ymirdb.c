@@ -1323,7 +1323,7 @@ int length(entry * this_entry){
 	
 	int total = this_entry->length - this_entry->forward_size;
 	for(int i = 0; i < this_entry->forward_size;i++){
-		if(this_entry->forward[i]!=NULL){
+		if(this_entry->forward!=NULL){
 			total += length(this_entry->forward[i]);
 		}
 		
