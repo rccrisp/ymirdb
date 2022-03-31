@@ -1074,6 +1074,12 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 			// copy the length
 			this_entry->length = iter->length;
 
+			//  assign memory for the references
+			this_entry->backward = malloc(sizeof(entry*));
+			this_entry->backward_size = 0;
+			this_entry->forward = malloc(sizeof(entry*));
+			this_entry->forward_size = 0;
+
 				list_add(ptr,this_entry);
 				iter = iter->prev;
 			}
@@ -1082,12 +1088,6 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 		iter = *ptr;
 		entry * sub_entry;
 		while(iter){
-
-			// assign memory for the references
-			iter->backward = malloc(sizeof(entry*));
-			iter->backward_size = 0;
-			iter->forward = malloc(sizeof(entry*));
-			iter->forward_size = 0;
 
 			// loop through all the entries and establish the references
 			for(int i = 0; i < iter->length; i++){
@@ -1143,6 +1143,12 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 				this_entry->values[i] = iter->values[i];
 			}
 
+			//  assign memory for the references
+			this_entry->backward = malloc(sizeof(entry*));
+			this_entry->backward_size = 0;
+			this_entry->forward = malloc(sizeof(entry*));
+			this_entry->forward_size = 0;
+
 			// copy the length
 			this_entry->length = iter->length;
 
@@ -1154,12 +1160,6 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 		iter = *ptr;
 		entry * sub_entry;
 		while(iter){
-
-			// assign memory for the references
-			iter->backward = malloc(sizeof(entry*));
-			iter->backward_size = 0;
-			iter->forward = malloc(sizeof(entry*));
-			iter->forward_size = 0;
 
 			// loop through all the entries and establish the references
 			for(int i = 0; i < iter->length; i++){
@@ -1201,6 +1201,12 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 			this_entry->values[i] = iter->values[i];
 		}
 
+		//  assign memory for the references
+		this_entry->backward = malloc(sizeof(entry*));
+		this_entry->backward_size = 0;
+		this_entry->forward = malloc(sizeof(entry*));
+		this_entry->forward_size = 0;
+
 		// copy the length
 		this_entry->length = iter->length;
 
@@ -1213,12 +1219,6 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 	iter = entry_ptr;
 	entry * sub_entry;
 	while(iter){
-
-		// assign memory for the references
-		iter->backward = malloc(sizeof(entry*));
-		iter->backward_size = 0;
-		iter->forward = malloc(sizeof(entry*));
-		iter->forward_size = 0;
 
 		// loop through all the entries and establish the references
 		for(int i = 0; i < iter->length; i++){
