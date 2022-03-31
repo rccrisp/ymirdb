@@ -1725,9 +1725,9 @@ int main(void) {
 		// TODO
 		//
 		
-		if(command_interpreter(line, &ptr, &snapshots) == -1){
-			return 0;
-		}
+		// if(command_interpreter(line, &ptr, &snapshots) == -1){
+		// 	return 0;
+		// }
 
   	}
 	
