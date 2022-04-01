@@ -373,7 +373,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		j++;
 	}
 
-	memcpy(this_entry->values,these_values,sizeof(element)*num_values);
+	memcpy(&this_entry->values[index],these_values,sizeof(element)*num_values);
 
 	this_entry->is_simple = simple;
 
