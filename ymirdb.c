@@ -268,22 +268,6 @@ void print_values(entry this_entry){
 	printf("]\n");
 }
 
-void include_entry_in_values(entry ** main_entry_ptr, entry ** sub_entry_ptr){
-	entry * main_entry = *main_entry_ptr;
-	entry * sub_entry = *sub_entry_ptr;
-	// increase the size of the reference tracker
-	main_entry->forward_size++;
-	sub_entry->backward_size++;
-	// include the new reference in the reference list
-	// main_entry->forward = realloc(main_entry->forward,sizeof(entry)*(main_entry->forward_size));
-	main_entry->forward = sub_entry_ptr;
-	// sub_entry->backward = realloc(sub_entry->backward,sizeof(entry)*(sub_entry->backward_size));
-	sub_entry->backward = main_entry_ptr;
-
-	return;
-
-}
-
 void deal_with_references(entry * main_entry, entry * sub_entry){
 
 	// increase the size of forward references
@@ -335,22 +319,8 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	// store the size of this entry
 	int size = this_entry->length;
 
-	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
-	for(int i = 1; i < size+1; i++){
-		// if its not a number
-		if(!isnumber(new_values[i])){
-			// if its not a key or is a self reference
-			if(find_key(new_values[i],*ptr)==NULL){
-				printf("no such key\n\n");
-				return false;
-			}else if(this_entry == find_key(new_values[i],*ptr)){
-				printf("not permitted\n\n");
-				return false;
-			}
-			// have found an entry
-			simple = false;
-		}
-	}
+	// check if values are valid
+	simple = valid_values(ptr,this_entry,new_values,size);
 
 	// if we have gone through all the values, and all are valid, add them to this entry
 	
