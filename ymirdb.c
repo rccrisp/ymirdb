@@ -332,7 +332,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	
 	// if we are appending values, copy the first values across
 	if(index>0){
-		memcpy(these_values,this_entry->values,sizeof(element)*(index));
+		memcpy(these_values,this_entry->values,sizeof(element)*(index+1));
 	}
 
 	// start populating the new values
@@ -373,7 +373,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		j++;
 	}
 
-	memcpy(&this_entry->values[index],these_values,sizeof(element)*num_values);
+	memcpy(this_entry->values,these_values,sizeof(element)*num_values);
 
 	this_entry->is_simple = simple;
 
