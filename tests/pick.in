@@ -1,0 +1,8 @@
+set a 1 2 3
+pick a 0
+pick a 1
+pick a 3
+pick a 4
+push a 0 -1
+pick a 1
+bye

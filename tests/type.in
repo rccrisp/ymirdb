@@ -1,0 +1,16 @@
+set a 1
+set b 2
+type b
+push b a
+type b
+pop b
+type b
+append b a
+type b
+pluck b 2
+type b
+set b a
+type b
+pop b
+type b
+bye

@@ -1,0 +1,59 @@
+> ok
+
+> saved as snapshot 1
+
+> ok
+
+> saved as snapshot 2
+
+> ok
+
+> saved as snapshot 3
+
+> ok
+
+> saved as snapshot 4
+
+> 4
+3
+2
+1
+
+> d [c 6]
+c [b 5]
+b [a 4]
+a [1 2 3]
+
+> d
+c
+b
+a
+
+> ok
+
+> 4
+3
+2
+
+> no such snapshot
+
+> ok
+
+> 4
+3
+
+> no such snapshot
+
+> ok
+
+> c [b 5]
+b [a 4]
+a [1 2 3]
+
+> ok
+
+> 4
+
+> no such snapshot
+
+> bye

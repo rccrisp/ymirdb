@@ -1,0 +1,6 @@
+set a 1
+set b a a 3
+sum b
+pop b
+sum b
+bye

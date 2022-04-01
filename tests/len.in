@@ -1,0 +1,11 @@
+set a 1
+set b a
+set c b
+set d b c
+set e d
+len a
+len b
+len c
+len d
+len e
+bye

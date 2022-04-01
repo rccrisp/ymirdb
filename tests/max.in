@@ -1,0 +1,5 @@
+set animals567 5 1 10 -100 -101 37 2 4
+max animals567
+pluck animals567 6
+max animals567
+bye

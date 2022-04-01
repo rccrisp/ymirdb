@@ -1,0 +1,15 @@
+set a 1 2 3
+pop a
+pop a
+pop a
+pop a
+set b 4 5 6
+append a b
+pop a
+forward a
+backward b
+push a b
+pop a
+forward a
+backward a
+bye

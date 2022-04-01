@@ -1,0 +1,15 @@
+set a 1 2 3 4
+sum a
+set b a 1
+set c b 1
+set d c 1
+set e d -1
+sum b
+sum c
+sum d
+sum e
+set a 0
+sum e
+pop a
+sum e
+bye

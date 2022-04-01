@@ -1,0 +1,23 @@
+set a 1 2 3
+snapshot
+set b a 4
+snapshot
+set c b 5
+snapshot
+set d c 6
+snapshot
+list snapshots
+list entries
+list keys
+drop 1
+list snapshots
+checkout 1
+drop 2
+list snapshots
+checkout 2
+checkout 3
+list entries
+drop 3
+list snapshots
+checkout 3
+bye

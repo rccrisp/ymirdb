@@ -1,0 +1,22 @@
+set a 1 2 3
+pluck a 0
+pluck a 1
+pluck a 1
+pluck a 1
+pluck a 1
+set b -1 0
+push a b
+forward a
+backward b
+pluck a 1
+pluck a 1
+forward a
+backward b
+append a b
+forward a
+backward b
+push a 3 2 1
+pluck a 4
+forward a
+backward b
+bye

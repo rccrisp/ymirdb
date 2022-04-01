@@ -1,0 +1,6 @@
+set animals567 5 1 10 -100 -101 37 2 4
+min animals567
+pluck animals567 5
+pluck animals567 4
+min animals567
+bye
