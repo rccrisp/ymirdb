@@ -320,7 +320,10 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	int size = this_entry->length;
 
 	// check if values are valid
-	simple = valid_values(ptr,this_entry,new_values,size);
+	bool valid  = valid_values(ptr,this_entry,new_values,size,simple);
+	if(!valid){
+		return false;
+	}
 
 	// if we have gone through all the values, and all are valid, add them to this entry
 	
@@ -365,6 +368,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 			// this function updates backwards and forwards references appropriately
 			deal_with_references(this_entry,these_values[i].entry);
+			simple = false;
 		}
 		j++;
 	}
