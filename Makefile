@@ -1,6 +1,6 @@
 TARGET = ymirdb
 
-CC = gcc
+CC = gcc -fprofile-arcs -ftest-coverage --coverage
 
 CFLAGS = -c -Wall -Wvla -Werror -g -std=gnu11 -Werror=format-security
 SRC = ymirdb.c
