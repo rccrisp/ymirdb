@@ -312,7 +312,7 @@ bool valid_values(entry ** ptr, entry * this_entry, char * new_values[], int siz
 }
 
 // given a character array of values, include these values in the correct key, from a given index
-bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, bool first){
+bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, int num_values, bool first){
 	// boolean to store if this is a simple or general entry
 	bool simple = true;
 
@@ -320,7 +320,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	int size = this_entry->length;
 
 	// check if values are valid
-	bool valid  = valid_values(ptr,this_entry,new_values,size);
+	bool valid  = valid_values(ptr,this_entry,new_values,num_values);
 	if(!valid){
 		return false;
 	}
@@ -354,7 +354,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	// index to track place in the new entries
 	int j = 1;
-	for(int i = index; i < size; i++){
+	for(int i = index; i < num_values; i++){
 		// if it is a number
 		if(isnumber(new_values[j])){
 			these_values[i].value = atoi(new_values[j]);
@@ -391,12 +391,12 @@ bool append(entry ** ptr, entry * this_entry, char * append_values[], int num_ne
 	this_entry->length = num_new + num_old;
 
 	// populate values
-	bool valid = populate_values(ptr,this_entry,append_values,num_old,false);
+	bool valid = populate_values(ptr,this_entry,append_values,num_old,num_new,false);
 
 	if(!valid){
 		this_entry->length = num_old;
 	}
-	
+
 	return valid;
 
 }
@@ -813,7 +813,7 @@ void command_set(char * line, entry ** ptr){
 		this_entry->values = malloc(sizeof(struct element)*(length_of_line));
 		this_entry->length = length_of_line; // update this later to include entries
 
-		valid = populate_values(ptr,this_entry,this_line,0,true);
+		valid = populate_values(ptr,this_entry,this_line,0,length_of_line,true);
 
 		if(valid){
 			// add this key to the linked list of keys
@@ -832,7 +832,7 @@ void command_set(char * line, entry ** ptr){
 			this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
 			this_entry->length = length_of_line;
 
-			populate_values(ptr,this_entry,this_line,0,false);
+			populate_values(ptr,this_entry,this_line,0,length_of_line,false);
 		}
 	
 	}
