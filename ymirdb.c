@@ -391,7 +391,7 @@ bool append(entry ** ptr, entry * this_entry, char * append_values[], int num_ne
 	this_entry->length = num_new + num_old;
 
 	// populate values
-	bool valid = populate_values(ptr,this_entry,append_values,num_old,num_new,false);
+	bool valid = populate_values(ptr,this_entry,append_values,num_old-1,num_new,false);
 
 	if(!valid){
 		this_entry->length = num_old;
