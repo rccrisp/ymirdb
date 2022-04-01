@@ -383,58 +383,21 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 }
 
 bool append(entry ** ptr, entry * this_entry, char * append_values[], int num_new){
-	// track if we append a general entry or not
-	bool simple = true;
-
-	// make sure all the append values are valid
-	for(int i = 1; i < num_new+1; i++){
-		// if its not a number
-		if(!isnumber(append_values[i])){
-			// if its not a key or is a self reference
-			if(find_key(append_values[i],*ptr)==NULL || this_entry == find_key(append_values[i],*ptr)){
-				return false;
-			}
-			// have found an entry that is valid
-			simple = false;
-		}
-	}
-
-	// we now know all the append values are valid so may proceed
 
 	// this is the size of the entry before appending
 	int num_old = this_entry->length;
 
-	// this is the size after appending
-	int size_after_append = num_new + num_old;
+	// update the length
+	this_entry->length = num_new + num_old;
 
-	// reallocate the memory to fit new size
-	this_entry->values = realloc(this_entry->values,sizeof(element)*size_after_append);
-	this_entry->length = size_after_append;
-	entry * sub_entry;
-	int j = 1;
-	for(int i = 0; i < num_new; i++){
-		// if it is a number
-		if(isnumber(append_values[j])){
-			this_entry->values[num_old+i].value = atoi(append_values[j]);
-			this_entry->values[num_old+i].type = INTEGER;
-		}else{
-			sub_entry = find_key(append_values[j],*ptr);
-			// copy the subentry pointer to values of this entry
-			this_entry->values[num_old+i].entry = sub_entry;
-			// set type to entry
-			this_entry->values[num_old+i].type = ENTRY;
+	// populate values
+	bool valid = populate_values(ptr,this_entry,append_values,num_old,false);
 
-			// this function updates backwards and forwards references appropriately
-			deal_with_references(this_entry,this_entry->values[num_old+i].entry);
-		}
-		j++;
+	if(!valid){
+		this_entry->length = num_old;
 	}
-
-	if(!simple){
-		this_entry->is_simple = simple;
-	}
-
-	return true;
+	
+	return valid;
 
 }
 
