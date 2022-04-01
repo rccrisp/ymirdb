@@ -320,7 +320,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	int size = this_entry->length;
 
 	// check if values are valid
-	bool valid  = valid_values(ptr,this_entry,new_values,size,simple);
+	bool valid  = valid_values(ptr,this_entry,new_values,size);
 	if(!valid){
 		return false;
 	}
