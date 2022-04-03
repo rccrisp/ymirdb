@@ -31,16 +31,19 @@
 int snapshot_id = 1;
 
 
+// comparator function for sorting simple entry values
 int cmpfunc(const void * a, const void * b){
 	const element * ea = a;
 	const element * eb = b;
 	return (ea->value - eb->value);
 }
 
+// comparator function for sorting references lexicographically
 int cmpalpha(const void * a, const void * b){
 	return(strcmp(*(char**)a,*(char**)b));
 }
 
+// this function takes in an entry that is being deleted and removes appropriate forward and backward references
 void delete_references(entry * this_entry){
 	entry * forward_ref;
 
@@ -61,6 +64,7 @@ void delete_references(entry * this_entry){
 	}
 }
 
+// this function find a key, given the character array standard input
 entry * find_key(char * line, entry * ptr){
 	char * key_to_find = strtok(line, " \n");
 	// head is always NULL entry
@@ -76,6 +80,7 @@ entry * find_key(char * line, entry * ptr){
 
 }
 
+// this function finds a key, given only the string value
 entry * find_key_alt(char * line, entry * ptr){
 	// head is always NULL entry
 	entry * iter = ptr;
@@ -107,6 +112,7 @@ void list_add(entry ** last_entry_ptr, entry * new_entry){
 
 }
 
+// this function finds a snapshot given the character array standard input
 snapshot * find_snapshot(char * line, snapshot * head){
 	int snapshot_to_find = atoi(strtok(line, " \n"));
 	snapshot * iter = head;
@@ -120,6 +126,7 @@ snapshot * find_snapshot(char * line, snapshot * head){
 	return NULL;
 }
 
+// this function checks if input is a number
 bool isnumber(char s[]){
     for (int i = 0; s[i]!= '\0'; i++){
 		if(i==0 && s[i] == '-'){
@@ -132,6 +139,7 @@ bool isnumber(char s[]){
     return true;
 }
 
+// this function reverses simple entries
 element * reverse(element * these_values, int number){
 	int hold;
 	for(int i = 0, j = number -1; i < j; i++, j--){
@@ -143,6 +151,7 @@ element * reverse(element * these_values, int number){
 	return these_values;
 }
 
+// this function removes consecutive duplicate values
 element * uniq(element * these_values, size_t * size){
 
 	int hold = these_values[0].value;
@@ -162,6 +171,7 @@ element * uniq(element * these_values, size_t * size){
 	return these_values;
 }
 
+// this function removes a value from a given index
 void remove_value_from_index(entry * this_entry, int index){
 	element * these_values = this_entry->values;
 	int size_before_remove = this_entry->length;
@@ -229,6 +239,7 @@ void remove_value_from_index(entry * this_entry, int index){
 	return ;
 }
 
+// this function strips the commands given as standard input so they may be interpreted and used by the program
 int strip_values(char * line, char * strip_values[]){
 	char * token = strtok(line, " ");
 	int number_of_values = -1; // because first value is the key
@@ -243,6 +254,7 @@ int strip_values(char * line, char * strip_values[]){
 	return number_of_values;
 }
 
+// this function prints the values for a given entry
 void print_values(entry this_entry){
 
 	element * these_values = this_entry.values;
@@ -268,6 +280,7 @@ void print_values(entry this_entry){
 	printf("]\n");
 }
 
+// this function deals with forward and backward referencing when dealing with new values
 void deal_with_references(entry * main_entry, entry * sub_entry){
 
 	// increase the size of forward references
@@ -291,6 +304,7 @@ void deal_with_references(entry * main_entry, entry * sub_entry){
 	return; 
 }
 
+// this function checks if the character array given as standard input contains valid values (numeric or a valid key name, no self-reference)
 bool valid_values(entry ** ptr, entry * this_entry, char * new_values[], int size){
 
 	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
@@ -312,7 +326,7 @@ bool valid_values(entry ** ptr, entry * this_entry, char * new_values[], int siz
 }
 
 // given a character array of values, include these values in the correct key, from a given index
-bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, int num_values, bool first){
+bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, bool first){
 	// boolean to store if this is a simple or general entry
 	bool simple = true;
 
@@ -320,7 +334,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	int size = this_entry->length;
 
 	// check if values are valid
-	bool valid  = valid_values(ptr,this_entry,new_values,num_values);
+	bool valid  = valid_values(ptr,this_entry,new_values,size);
 	if(!valid){
 		return false;
 	}
@@ -332,7 +346,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	
 	// if we are appending values, copy the first values across
 	if(index>0){
-		memcpy(these_values,this_entry->values,sizeof(element)*(index+1));
+		memcpy(these_values,this_entry->values,sizeof(element)*(index));
 	}
 
 	// start populating the new values
@@ -354,7 +368,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 
 	// index to track place in the new entries
 	int j = 1;
-	for(int i = index; i < num_values; i++){
+	for(int i = index; i < size; i++){
 		// if it is a number
 		if(isnumber(new_values[j])){
 			these_values[i].value = atoi(new_values[j]);
@@ -373,7 +387,7 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 		j++;
 	}
 
-	memcpy(this_entry->values,these_values,sizeof(element)*num_values);
+	memcpy(this_entry->values,these_values,sizeof(element)*size);
 
 	this_entry->is_simple = simple;
 
@@ -382,25 +396,64 @@ bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int 
 	return true;
 }
 
+// this function appends values to an entry
 bool append(entry ** ptr, entry * this_entry, char * append_values[], int num_new){
+	// track if we append a general entry or not
+	bool simple = true;
+
+	// make sure all the append values are valid
+	for(int i = 1; i < num_new+1; i++){
+		// if its not a number
+		if(!isnumber(append_values[i])){
+			// if its not a key or is a self reference
+			if(find_key(append_values[i],*ptr)==NULL || this_entry == find_key(append_values[i],*ptr)){
+				return false;
+			}
+			// have found an entry that is valid
+			simple = false;
+		}
+	}
+
+	// we now know all the append values are valid so may proceed
 
 	// this is the size of the entry before appending
 	int num_old = this_entry->length;
 
-	// update the length
-	this_entry->length = num_new + num_old;
+	// this is the size after appending
+	int size_after_append = num_new + num_old;
 
-	// populate values
-	bool valid = populate_values(ptr,this_entry,append_values,num_old-1,num_new,false);
+	// reallocate the memory to fit new size
+	this_entry->values = realloc(this_entry->values,sizeof(element)*size_after_append);
+	this_entry->length = size_after_append;
+	entry * sub_entry;
+	int j = 1;
+	for(int i = 0; i < num_new; i++){
+		// if it is a number
+		if(isnumber(append_values[j])){
+			this_entry->values[num_old+i].value = atoi(append_values[j]);
+			this_entry->values[num_old+i].type = INTEGER;
+		}else{
+			sub_entry = find_key(append_values[j],*ptr);
+			// copy the subentry pointer to values of this entry
+			this_entry->values[num_old+i].entry = sub_entry;
+			// set type to entry
+			this_entry->values[num_old+i].type = ENTRY;
 
-	if(!valid){
-		this_entry->length = num_old;
+			// this function updates backwards and forwards references appropriately
+			deal_with_references(this_entry,this_entry->values[num_old+i].entry);
+		}
+		j++;
 	}
 
-	return valid;
+	if(!simple){
+		this_entry->is_simple = simple;
+	}
+
+	return true;
 
 }
 
+// this function pushes values to the front of an entry
 bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 
 	// track if we push a general entry or not
@@ -476,6 +529,7 @@ bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
 	
 }
 
+//  this function deletes an entry from the linked list
 bool list_delete(entry ** ptr, entry * delete_entry){
 	// if we are deleting the value currently pointed to by the pointer, update the pointer
 	if(*ptr == delete_entry){
@@ -519,6 +573,7 @@ bool list_delete(entry ** ptr, entry * delete_entry){
 	
 }
 
+//  this function ensures allocated memory is freed when no longer needed
 void list_free(entry * ptr){
 	entry * iter = ptr;
 	entry * current;
@@ -558,6 +613,7 @@ int snapshot_list_add(snapshot ** last_snapshot_ptr, entry * head_entries){
 	return new_snapshot->id;
 }
 
+// delete a snapshot from the linked list
 void snapshot_list_delete(snapshot ** ptr, snapshot* delete_snapshot){
 	// if we are deleting the snapshot currently pointed to by the ptr, update ptr
 	if(*ptr == delete_snapshot){
@@ -588,6 +644,7 @@ void snapshot_list_delete(snapshot ** ptr, snapshot* delete_snapshot){
 
 }
 
+// free allocated memory for snapshots
 void snapshot_list_free(snapshot ** ptr){
 	snapshot * iter = *ptr;
 	snapshot * current;
@@ -603,14 +660,17 @@ void snapshot_list_free(snapshot ** ptr){
 	return ;
 }
 
+// exit program
 void command_bye() {
 	printf("bye\n");
 }
 
+// print help
 void command_help() {
 	printf("%s\n", HELP);
 }
 
+// list all keys in the current state
 void command_list_keys(entry ** ptr){
 	entry * iter = *ptr;
 	bool empty = true;
@@ -628,6 +688,7 @@ void command_list_keys(entry ** ptr){
 	return;
 }
 
+// list all entries in the current state
 void command_list_entries(entry ** ptr){
 	entry * iter = *ptr;
 	bool empty = true;
@@ -646,6 +707,7 @@ void command_list_entries(entry ** ptr){
 	return;
 }
 
+// list all snapshots in the current state
 void command_list_snapshots(snapshot ** snapshots){
 	snapshot * iter = *snapshots;
 	if(iter == NULL){
@@ -660,6 +722,7 @@ void command_list_snapshots(snapshot ** snapshots){
 	return ; 
 }
 
+// get a given key from the current state
 void command_get(char * line, entry ** ptr){
 	entry * this_entry = find_key(line,*ptr);
 
@@ -675,7 +738,7 @@ void command_get(char * line, entry ** ptr){
 
 }
 
-
+// delete a given key from the current state
 void command_del(char * line, entry ** ptr){
 	entry * this_entry = find_key(line,*ptr);
 
@@ -691,6 +754,7 @@ void command_del(char * line, entry ** ptr){
 	}
 }
 
+// remove a given key from the current state and all snapshots
 void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 	entry * this_entry = find_key(line,*entry_ptr);
 	
@@ -767,6 +831,7 @@ void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
 	printf("ok\n\n");
 }
 
+// function to check if this is a valid key name
 bool valid_key(char * key_name){
 	if(strlen(key_name)>=MAX_KEY){
 		return false;
@@ -782,6 +847,7 @@ bool valid_key(char * key_name){
 	return true;
 }
 
+// set a new entry, given some values
 void command_set(char * line, entry ** ptr){
 	// find the values to push to the key
 	char *this_line[MAX_LINE];
@@ -813,7 +879,7 @@ void command_set(char * line, entry ** ptr){
 		this_entry->values = malloc(sizeof(struct element)*(length_of_line));
 		this_entry->length = length_of_line; // update this later to include entries
 
-		valid = populate_values(ptr,this_entry,this_line,0,length_of_line,true);
+		valid = populate_values(ptr,this_entry,this_line,0,true);
 
 		if(valid){
 			// add this key to the linked list of keys
@@ -832,7 +898,7 @@ void command_set(char * line, entry ** ptr){
 			this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
 			this_entry->length = length_of_line;
 
-			populate_values(ptr,this_entry,this_line,0,length_of_line,false);
+			populate_values(ptr,this_entry,this_line,0,false);
 		}
 	
 	}
@@ -846,6 +912,7 @@ void command_set(char * line, entry ** ptr){
 
 }
 
+// push interpreter
 void command_push(char * line, entry ** ptr){
 	// find the values to push to the key
 	char *push_values[MAX_LINE];
@@ -869,6 +936,7 @@ void command_push(char * line, entry ** ptr){
 	}
 }
 
+// append interpreter
 void command_append(char * line, entry ** ptr){
 	// find the values to append to the key
 	char *append_values[MAX_LINE];
@@ -895,6 +963,7 @@ void command_append(char * line, entry ** ptr){
 	}
 }
 
+// pick interpreter
 void command_pick(char * line, entry ** ptr){
 	// find the value to pick from this key
 	char *pick_index[MAX_LINE];
@@ -925,6 +994,7 @@ void command_pick(char * line, entry ** ptr){
 	return;
 }
 
+// pluck interpreter
 void command_pluck(char * line, entry ** ptr){
 	// find the value to pluck from this key
 	char *pluck_index[MAX_LINE];
@@ -956,6 +1026,7 @@ void command_pluck(char * line, entry ** ptr){
 	return;
 }
 
+// pop interpreter
 void command_pop(char * line, entry ** ptr){
 	// find the key to pop from from the linked list
 	entry * pop_entry = find_key(line,*ptr);
@@ -982,6 +1053,7 @@ void command_pop(char * line, entry ** ptr){
 	return;
 }
 
+// drop interpreter
 void command_drop(char * line, snapshot ** snapshots){
 	// find the snapshot to delete
 	snapshot * this_snapshot = find_snapshot(line,*snapshots);
@@ -997,6 +1069,7 @@ void command_drop(char * line, snapshot ** snapshots){
 	return;
 }
 
+// rollback interpreter
 void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 	snapshot * this_snapshot = find_snapshot(line,*snapshots);
 
@@ -1074,7 +1147,7 @@ void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
 	return;
 }
 
-
+// checkout interpreter
 void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 	snapshot * this_snapshot = find_snapshot(line,*snapshots);
 	if(this_snapshot!=NULL){
@@ -1138,6 +1211,7 @@ void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
 	return;
 }
 
+// snapshot interpreter
 void command_snapshot(entry ** ptr, snapshot ** snapshots){
 	// define a pointer to iterate through all the values in the current state
 	entry * iter = *ptr;
@@ -1196,6 +1270,7 @@ void command_snapshot(entry ** ptr, snapshot ** snapshots){
 	return;
 }
 
+// find the minimum value
 int minimum(entry * this_entry){
 	int min;
 	if(this_entry->length == 0){
@@ -1222,6 +1297,7 @@ int minimum(entry * this_entry){
 	return min;
 }
 
+// minimum interpreter
 void command_min(char * line,entry ** ptr){
 	// find the key to find the length of from from the linked list
 	entry * min_entry = find_key(line,*ptr);
@@ -1236,6 +1312,7 @@ void command_min(char * line,entry ** ptr){
 	return;
 }
 
+// find the maximum value
 int maximum(entry * this_entry){
 	int max;
 	if(this_entry->length == 0){
@@ -1262,6 +1339,7 @@ int maximum(entry * this_entry){
 	return max;
 }
 
+// maximum interpreter
 void command_max(char * line, entry ** ptr){
 	// find the key to find the length of from from the linked list
 	entry * max_entry = find_key(line,*ptr);
@@ -1276,6 +1354,7 @@ void command_max(char * line, entry ** ptr){
 	return;
 }
 
+// find the sum of the values for an entry
 int sum(entry * this_entry){
 	if(this_entry->length == 0){
 		return 0;
@@ -1292,6 +1371,7 @@ int sum(entry * this_entry){
 	return total_sum;
 }
 
+// sum interpreter
 void command_sum(char * line,entry ** ptr){
 	// find the key to find the sum of from from the linked list
 	entry * sum_entry = find_key(line,*ptr);
@@ -1306,6 +1386,7 @@ void command_sum(char * line,entry ** ptr){
 	return;
 }
 
+// find the number of values in an entry
 int length(entry * this_entry){
 	if(this_entry->is_simple){
 		return this_entry->length;
@@ -1319,6 +1400,7 @@ int length(entry * this_entry){
 	return total;
 }
 
+// length interpreter
 void command_len(char * line, entry ** ptr){
 	// find the key to find the length of from from the linked list
 	entry * length_entry = find_key(line,*ptr);
@@ -1333,6 +1415,7 @@ void command_len(char * line, entry ** ptr){
 	return;
 }
 
+// reverse interpreter
 void command_rev(char * line, entry ** ptr){
 	// find the key to rev from from the linked list
 	entry * rev_entry = find_key(line,*ptr);
@@ -1349,6 +1432,7 @@ void command_rev(char * line, entry ** ptr){
 	return;
 }
 
+// uniq interpreter
 void command_uniq(char * line, entry ** ptr){
 	// find the key to use from from the linked list
 	entry * uniq_entry = find_key(line,*ptr);
@@ -1365,6 +1449,7 @@ void command_uniq(char * line, entry ** ptr){
 	return;
 }
 
+// sort interpreter
 void command_sort(char * line, entry ** ptr){
 	// find the key to sort from from the linked list
 	entry * sort_entry = find_key(line,*ptr);
@@ -1382,6 +1467,7 @@ void command_sort(char * line, entry ** ptr){
 	
 }
 
+// print the forward references of a given entry in lexicographic ordr
 int forward_references(entry * this_entry, char ** reference_keys, int size){
 
 	for(int i = 0; i <this_entry->forward_size;i++){
@@ -1394,6 +1480,7 @@ int forward_references(entry * this_entry, char ** reference_keys, int size){
 	return size;
 }
 
+// counts the number of forward references
 int count_forward_references(entry * this_entry){
 	if(this_entry->forward_size == 0){
 		return 1;
@@ -1406,6 +1493,7 @@ int count_forward_references(entry * this_entry){
 	return total;
 }
 
+// forward reference interpreter
 void command_forward(char * line, entry ** ptr){
 
 	// find the key to print all forward references for
@@ -1457,6 +1545,7 @@ void command_forward(char * line, entry ** ptr){
 	
 }
 
+// finds all the backward references of an entry
 int backward_references(entry * this_entry, char ** reference_keys, int size){
 
 	for(int i = 0; i <this_entry->backward_size;i++){
@@ -1469,6 +1558,7 @@ int backward_references(entry * this_entry, char ** reference_keys, int size){
 	return size;
 }
 
+// counts the number of backward references
 int count_backward_references(entry * this_entry){
 	if(this_entry->backward_size == 0){
 		return 1;
@@ -1481,6 +1571,7 @@ int count_backward_references(entry * this_entry){
 	return total;
 }
 
+// backwards reference interpreter
 void command_backward(char * line, entry ** ptr){
 		// find the key to print all backward references for
 	entry * this_entry = find_key(line,*ptr);
@@ -1529,6 +1620,7 @@ void command_backward(char * line, entry ** ptr){
 	free(reference_keys);
 }
 
+// prints the type of an entry (simple or general)
 void command_type(char * line, entry ** ptr){
 	// find the key to sort from from the linked list
 	entry * type_entry = find_key(line,*ptr);
@@ -1546,6 +1638,7 @@ void command_type(char * line, entry ** ptr){
 	printf("\n\n");
 }
 
+// interprets given command and calls appropriate function
 int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot_ptr){
 	char * line;
 	if(strncasecmp(command,"bye",3)==0){
