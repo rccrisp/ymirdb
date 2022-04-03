@@ -30,6 +30,156 @@
 // establish a global variable to track snapshot number
 int snapshot_id = 1;
 
+int cmpfunc(const void * a, const void * b);
+
+int cmpalpha(const void * a, const void * b);
+
+void delete_references(entry * this_entry);
+
+entry * find_key(char * line, entry * ptr);
+
+entry * find_key_alt(char * line, entry * ptr);
+
+void list_add(entry ** last_entry_ptr, entry * new_entry);
+
+snapshot * find_snapshot(char * line, snapshot * head);
+
+bool isnumber(char s[]);
+
+element * reverse(element * these_values, int number);
+
+element * uniq(element * these_values, size_t * size);
+
+void remove_value_from_index(entry * this_entry, int index);
+
+int strip_values(char * line, char * strip_values[]);
+
+void print_values(entry this_entry);
+
+void deal_with_references(entry * main_entry, entry * sub_entry);
+
+bool valid_values(entry ** ptr, entry * this_entry, char * new_values[], int size);
+
+bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, bool first);
+
+bool append(entry ** ptr, entry * this_entry, char * append_values[], int num_new);
+
+bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new);
+
+bool list_delete(entry ** ptr, entry * delete_entry);
+
+void list_free(entry * ptr);
+
+int snapshot_list_add(snapshot ** last_snapshot_ptr, entry * head_entries);
+
+void snapshot_list_delete(snapshot ** ptr, snapshot* delete_snapshot);
+
+void snapshot_list_free(snapshot ** ptr);
+
+void command_bye(); 
+
+void command_help();
+
+void command_list_keys(entry ** ptr);
+
+void command_list_entries(entry ** ptr);
+
+void command_list_snapshots(snapshot ** snapshots);
+
+void command_get(char * line, entry ** ptr);
+
+void command_del(char * line, entry ** ptr);
+
+void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr);
+
+bool valid_key(char * key_name);
+
+void command_set(char * line, entry ** ptr);
+
+void command_push(char * line, entry ** ptr);
+
+void command_append(char * line, entry ** ptr);
+
+void command_pick(char * line, entry ** ptr);
+
+void command_pluck(char * line, entry ** ptr);
+
+void command_pop(char * line, entry ** ptr);
+
+void command_drop(char * line, snapshot ** snapshots);
+
+void command_rollback(char * line, entry ** ptr, snapshot ** snapshots);
+
+void command_checkout(char * line, entry ** ptr, snapshot ** snapshots);
+
+void command_snapshot(entry ** ptr, snapshot ** snapshots);
+
+int minimum(entry * this_entry);
+
+void command_min(char * line,entry ** ptr);
+
+int maximum(entry * this_entry);
+
+void command_max(char * line, entry ** ptr);
+
+int sum(entry * this_entry);
+
+void command_sum(char * line,entry ** ptr);
+
+int length(entry * this_entry);
+
+void command_len(char * line, entry ** ptr);
+
+void command_rev(char * line, entry ** ptr);
+
+void command_uniq(char * line, entry ** ptr);
+
+void command_sort(char * line, entry ** ptr);
+
+int forward_references(entry * this_entry, char ** reference_keys, int size);
+
+int count_forward_references(entry * this_entry);
+
+void command_forward(char * line, entry ** ptr);
+
+int backward_references(entry * this_entry, char ** reference_keys, int size);
+
+int count_backward_references(entry * this_entry);
+
+void command_backward(char * line, entry ** ptr);
+
+void command_type(char * line, entry ** ptr);
+
+int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot_ptr);
+
+int main(void) {
+
+	char line[MAX_LINE];
+	entry * ptr = NULL;
+	snapshot * snapshots = NULL;
+
+	while (true) {
+		printf("> ");
+
+		if (NULL == fgets(line, MAX_LINE, stdin)) {
+			printf("\n");
+			command_bye();
+			return 0;
+		}
+
+		//
+		// TODO
+		//
+		
+		if(command_interpreter(line, &ptr, &snapshots) == -1){
+			return 0;
+		}
+
+  	}
+	
+
+	return 0;
+}
 
 // comparator function for sorting simple entry values
 int cmpfunc(const void * a, const void * b){
@@ -661,12 +811,12 @@ void snapshot_list_free(snapshot ** ptr){
 }
 
 // exit program
-void command_bye() {
+void command_bye(){
 	printf("bye\n");
 }
 
 // print help
-void command_help() {
+void command_help(){
 	printf("%s\n", HELP);
 }
 
@@ -1725,35 +1875,6 @@ int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot
 	}else{
 		printf("INVALID COMMAND: TYPE HELP FOR A LIST OF VALID COMMANDS\n\n");
 	}
-
-	return 0;
-}
-
-int main(void) {
-
-	char line[MAX_LINE];
-	entry * ptr = NULL;
-	snapshot * snapshots = NULL;
-
-	while (true) {
-		printf("> ");
-
-		if (NULL == fgets(line, MAX_LINE, stdin)) {
-			printf("\n");
-			command_bye();
-			return 0;
-		}
-
-		//
-		// TODO
-		//
-		
-		if(command_interpreter(line, &ptr, &snapshots) == -1){
-			return 0;
-		}
-
-  	}
-	
 
 	return 0;
 }
