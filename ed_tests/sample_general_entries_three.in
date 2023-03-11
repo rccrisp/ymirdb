@@ -1,0 +1,10 @@
+SET c 7
+SET b 3 5 c
+SET a 1 2 b
+SNAPSHOT
+DEL a
+SNAPSHOT
+SET b 1 2 3
+PURGE b
+PURGE a
+BYE

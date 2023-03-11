@@ -1,0 +1,8 @@
+PUSH a 1
+SET a 1
+GET a
+PUSH a 2
+GET a
+PUSH a 3 4
+GET a
+BYE

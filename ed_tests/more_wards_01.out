@@ -1,0 +1,104 @@
+> ok
+
+> ok
+
+> ok
+
+> ok
+
+> ok
+
+> ok
+
+> ok
+
+> ok
+
+> ok
+
+> ok
+
+> nil
+
+> a
+
+> a, b
+
+> a, b, c
+
+> a, b, c, d
+
+> a, b, c, d, e
+
+> a, b, c, d, e, f
+
+> a, b, c, d, e, f, g
+
+> a, b, c, d, e, f, g, h
+
+> a, b, c, d, e, f, g, h, i
+
+> b, c, d, e, f, g, h, i, j
+
+> c, d, e, f, g, h, i, j
+
+> d, e, f, g, h, i, j
+
+> e, f, g, h, i, j
+
+> f, g, h, i, j
+
+> g, h, i, j
+
+> h, i, j
+
+> i, j
+
+> j
+
+> nil
+
+> ok
+
+> nil
+
+> a
+
+> a, b
+
+> a, b, c
+
+> nil
+
+> e
+
+> e, f
+
+> e, f, g
+
+> e, f, g, h
+
+> e, f, g, h, i
+
+> b, c, d
+
+> c, d
+
+> d
+
+> nil
+
+> f, g, h, i, j
+
+> g, h, i, j
+
+> h, i, j
+
+> i, j
+
+> j
+
+> nil
+
+> bye
+

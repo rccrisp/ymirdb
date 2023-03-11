@@ -1,0 +1,510 @@
+> LIST KEYS
+no keys
+
+> LIST ENTRIES
+no entries
+
+> LIST SNAPSHOTS
+no snapshots
+
+> SET d 4
+ok
+
+> SET c 3 d
+ok
+
+> SET b 2 c
+ok
+
+> SET a 1 b
+ok
+
+> LIST KEYS
+a
+b
+c
+d
+
+> LIST ENTRIES
+a [1 b]
+b [2 c]
+c [3 d]
+d [4]
+
+> LIST SNAPSHOTS
+no snapshots
+
+> TYPE a
+general
+
+> TYPE b
+general
+
+> TYPE c
+general
+
+> TYPE d
+simple
+
+> LEN a
+4
+
+> LEN b
+3
+
+> LEN c
+2
+
+> LEN d
+1
+
+> FORWARD a
+b, c, d
+
+> FORWARD b
+c, d
+
+> FORWARD c
+d
+
+> FORWARD d
+nil
+
+> BACKWARD a
+nil
+
+> BACKWARD b
+a
+
+> BACKWARD c
+a, b
+
+> BACKWARD d
+a, b, c
+
+> SNAPSHOT
+saved as snapshot 1
+
+> APPEND d -1
+ok
+
+> GET d
+[4 -1]
+
+> SORT d
+ok
+
+> GET d
+[-1 4]
+
+> SET e 0
+ok
+
+> APPEND d e
+ok
+
+> LIST KEYS
+e
+a
+b
+c
+d
+
+> LIST ENTRIES
+e [0]
+a [1 b]
+b [2 c]
+c [3 d]
+d [-1 4 e]
+
+> LIST SNAPSHOTS
+1
+
+> TYPE a
+general
+
+> TYPE b
+general
+
+> TYPE c
+general
+
+> TYPE d
+general
+
+> TYPE e
+simple
+
+> LEN a
+6
+
+> LEN b
+5
+
+> LEN c
+4
+
+> LEN d
+3
+
+> LEN e
+1
+
+> FORWARD a
+b, c, d, e
+
+> FORWARD b
+c, d, e
+
+> FORWARD c
+d, e
+
+> FORWARD d
+e
+
+> FORWARD e
+nil
+
+> BACKWARD a
+nil
+
+> BACKWARD b
+a
+
+> BACKWARD c
+a, b
+
+> BACKWARD d
+a, b, c
+
+> BACKWARD e
+a, b, c, d
+
+> SNAPSHOT
+saved as snapshot 2
+
+> CHECKOUT 1
+ok
+
+> APPEND d -1
+ok
+
+> GET d
+[4 -1]
+
+> SORT d
+ok
+
+> GET d
+[-1 4]
+
+> SET e 0
+ok
+
+> APPEND d e
+ok
+
+> LIST KEYS
+e
+a
+b
+c
+d
+
+> LIST ENTRIES
+e [0]
+a [1 b]
+b [2 c]
+c [3 d]
+d [-1 4 e]
+
+> LIST SNAPSHOTS
+2
+1
+
+> TYPE a
+general
+
+> TYPE b
+general
+
+> TYPE c
+general
+
+> TYPE d
+general
+
+> TYPE e
+simple
+
+> LEN a
+6
+
+> LEN b
+5
+
+> LEN c
+4
+
+> LEN d
+3
+
+> LEN e
+1
+
+> FORWARD a
+b, c, d, e
+
+> FORWARD b
+c, d, e
+
+> FORWARD c
+d, e
+
+> FORWARD d
+e
+
+> FORWARD e
+nil
+
+> BACKWARD a
+nil
+
+> BACKWARD b
+a
+
+> BACKWARD c
+a, b
+
+> BACKWARD d
+a, b, c
+
+> BACKWARD e
+a, b, c, d
+
+> SNAPSHOT
+saved as snapshot 3
+
+> CHECKOUT 2
+ok
+
+> LIST KEYS
+e
+a
+b
+c
+d
+
+> LIST ENTRIES
+e [0]
+a [1 b]
+b [2 c]
+c [3 d]
+d [-1 4 e]
+
+> LIST SNAPSHOTS
+3
+2
+1
+
+> TYPE a
+general
+
+> TYPE b
+general
+
+> TYPE c
+general
+
+> TYPE d
+general
+
+> TYPE e
+simple
+
+> LEN a
+6
+
+> LEN b
+5
+
+> LEN c
+4
+
+> LEN d
+3
+
+> LEN e
+1
+
+> FORWARD a
+b, c, d, e
+
+> FORWARD b
+c, d, e
+
+> FORWARD c
+d, e
+
+> FORWARD d
+e
+
+> FORWARD e
+nil
+
+> BACKWARD a
+nil
+
+> BACKWARD b
+a
+
+> BACKWARD c
+a, b
+
+> BACKWARD d
+a, b, c
+
+> BACKWARD e
+a, b, c, d
+
+> PURGE b
+not permitted
+
+> PURGE c
+not permitted
+
+> PURGE d
+not permitted
+
+> PURGE a
+ok
+
+> CHECKOUT 1
+ok
+
+> LIST ENTRIES
+b [2 c]
+c [3 d]
+d [4]
+
+> CHECKOUT 2
+ok
+
+> LIST ENTRIES
+e [0]
+b [2 c]
+c [3 d]
+d [-1 4 e]
+
+> CHECKOUT 3
+ok
+
+> LIST ENTRIES
+e [0]
+b [2 c]
+c [3 d]
+d [-1 4 e]
+
+> PURGE c
+not permitted
+
+> PURGE d
+not permitted
+
+> PURGE b
+ok
+
+> CHECKOUT 1
+ok
+
+> LIST ENTRIES
+c [3 d]
+d [4]
+
+> CHECKOUT 2
+ok
+
+> LIST ENTRIES
+e [0]
+c [3 d]
+d [-1 4 e]
+
+> CHECKOUT 3
+ok
+
+> LIST ENTRIES
+e [0]
+c [3 d]
+d [-1 4 e]
+
+> PURGE d
+not permitted
+
+> PURGE c
+ok
+
+> CHECKOUT 1
+ok
+
+> LIST ENTRIES
+d [4]
+
+> CHECKOUT 2
+ok
+
+> LIST ENTRIES
+e [0]
+d [-1 4 e]
+
+> CHECKOUT 3
+ok
+
+> LIST ENTRIES
+e [0]
+d [-1 4 e]
+
+> PURGE d
+ok
+
+> CHECKOUT 1
+ok
+
+> LIST ENTRIES
+no entries
+
+> CHECKOUT 2
+ok
+
+> LIST ENTRIES
+e [0]
+
+> CHECKOUT 3
+ok
+
+> LIST ENTRIES
+e [0]
+
+> PURGE e
+ok
+
+> CHECKOUT 1
+ok
+
+> LIST ENTRIES
+no entries
+
+> CHECKOUT 2
+ok
+
+> LIST ENTRIES
+no entries
+
+> CHECKOUT 3
+ok
+
+> LIST ENTRIES
+no entries
+
+> BYE
+bye
+

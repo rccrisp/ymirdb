@@ -1,0 +1,172 @@
+> no keys
+
+> no entries
+
+> no snapshots
+
+> ok
+
+> [1]
+
+> saved as snapshot 1
+
+> ok
+
+> [1 2]
+
+> saved as snapshot 2
+
+> ok
+
+> [1 2 3 4]
+
+> saved as snapshot 3
+
+> ok
+
+> [4 3 2 1]
+
+> saved as snapshot 4
+
+> 4
+
+> saved as snapshot 5
+
+> [3 2 1]
+
+> 3
+
+> [2 1]
+
+> saved as snapshot 6
+
+> 2
+
+> [1]
+
+> saved as snapshot 7
+
+> 1
+
+> []
+
+> saved as snapshot 8
+
+> 8
+7
+6
+5
+4
+3
+2
+1
+
+> ok
+
+> a
+
+> [1]
+
+> ok
+
+> a
+
+> [1 2]
+
+> ok
+
+> a
+
+> [1 2 3 4]
+
+> ok
+
+> a
+
+> [4 3 2 1]
+
+> ok
+
+> a
+
+> [3 2 1]
+
+> ok
+
+> a
+
+> [2 1]
+
+> ok
+
+> a
+
+> [1]
+
+> ok
+
+> a
+
+> []
+
+> ok
+
+> 8
+7
+6
+5
+4
+3
+2
+1
+
+> ok
+
+> no keys
+
+> no such key
+
+> ok
+
+> no keys
+
+> no such key
+
+> ok
+
+> no keys
+
+> no such key
+
+> ok
+
+> no keys
+
+> no such key
+
+> ok
+
+> no keys
+
+> no such key
+
+> ok
+
+> no keys
+
+> no such key
+
+> ok
+
+> no keys
+
+> no such key
+
+> ok
+
+> no keys
+
+> no such key
+
+> bye
+

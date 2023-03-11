@@ -1,0 +1,23 @@
+SET a 1 2
+SET b 4 a 6
+LIST ENTRIES
+SUM a
+SUM b
+SET a a
+SET b z
+SET c 7
+SET b 3 5 c
+SET a 1 2 b
+SUM c
+SUM b
+SUM a
+SET c 7
+SET b 3 5 c
+SET a 1 2 b
+FORWARD a
+FORWARD b
+FORWARD c
+BACKWARD a
+BACKWARD b
+BACKWARD c
+BYE

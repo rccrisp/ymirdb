@@ -1,0 +1,8 @@
+set ab 1 2
+set Ab 3 4
+set aB 5 6
+set AB 7 8
+get ab
+list keys
+list entries
+bye

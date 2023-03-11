@@ -1,0 +1,11 @@
+PLUCK a 1
+SET a 3 2 1
+PLUCK a 4
+PLUCK a 3
+GET a
+PLUCK a 2
+GET a
+PLUCK a 1
+GET a
+PLUCK a 0
+BYE

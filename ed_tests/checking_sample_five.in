@@ -1,0 +1,16 @@
+SET a 1 2 3
+SET b 4 5 6
+APPEND a b
+GET a
+MAX a
+SUM a
+LEN a
+PICK a 4
+PLUCK a 3
+GET a
+PLUCK a 3
+GET a
+PUSH a b
+GET a
+POP a
+BYE

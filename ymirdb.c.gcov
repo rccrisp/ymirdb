@@ -1,0 +1,1884 @@
+        -:    0:Source:ymirdb.c
+        -:    0:Graph:./ymirdb.gcno
+        -:    0:Data:./ymirdb.gcda
+        -:    0:Runs:26
+        -:    1:/**
+        -:    2: * comp2017 - assignment 2
+        -:    3: * <your name>
+        -:    4: * <your unikey>
+        -:    5: */
+        -:    6:
+        -:    7:#include <stdio.h>
+        -:    8:#include <stdlib.h>
+        -:    9:#include <string.h>
+        -:   10:#include <strings.h>
+        -:   11:#include <stdbool.h>
+        -:   12:#include <ctype.h>
+        -:   13:
+        -:   14:#include "ymirdb.h"
+        -:   15:
+        -:   16://
+        -:   17:// We recommend that you design your program to be
+        -:   18:// modular where each function performs a small task
+        -:   19://
+        -:   20:// e.g.
+        -:   21://
+        -:   22:// command_bye
+        -:   23:// command_help
+        -:   24:// ...
+        -:   25:// entry_add
+        -:   26:// entry_delete
+        -:   27:// ...
+        -:   28://
+        -:   29:
+        -:   30:// establish a global variable to track snapshot number
+        -:   31:int snapshot_id = 1;
+        -:   32:
+        -:   33:int cmpfunc(const void * a, const void * b);
+        -:   34:
+        -:   35:int cmpalpha(const void * a, const void * b);
+        -:   36:
+        -:   37:void delete_references(entry * this_entry);
+        -:   38:
+        -:   39:entry * find_key(char * line, entry * ptr);
+        -:   40:
+        -:   41:entry * find_key_alt(char * line, entry * ptr);
+        -:   42:
+        -:   43:void list_add(entry ** last_entry_ptr, entry * new_entry);
+        -:   44:
+        -:   45:snapshot * find_snapshot(char * line, snapshot * head);
+        -:   46:
+        -:   47:bool isnumber(char s[]);
+        -:   48:
+        -:   49:element * reverse(element * these_values, int number);
+        -:   50:
+        -:   51:element * uniq(element * these_values, size_t * size);
+        -:   52:
+        -:   53:void remove_value_from_index(entry * this_entry, int index);
+        -:   54:
+        -:   55:int strip_values(char * line, char * strip_values[]);
+        -:   56:
+        -:   57:void print_values(entry this_entry);
+        -:   58:
+        -:   59:void deal_with_references(entry * main_entry, entry * sub_entry);
+        -:   60:
+        -:   61:bool valid_values(entry ** ptr, entry * this_entry, char * new_values[], int size);
+        -:   62:
+        -:   63:bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, bool first);
+        -:   64:
+        -:   65:bool append(entry ** ptr, entry * this_entry, char * append_values[], int num_new);
+        -:   66:
+        -:   67:bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new);
+        -:   68:
+        -:   69:bool list_delete(entry ** ptr, entry * delete_entry);
+        -:   70:
+        -:   71:void list_free(entry * ptr);
+        -:   72:
+        -:   73:int snapshot_list_add(snapshot ** last_snapshot_ptr, entry * head_entries);
+        -:   74:
+        -:   75:void snapshot_list_delete(snapshot ** ptr, snapshot* delete_snapshot);
+        -:   76:
+        -:   77:void snapshot_list_free(snapshot ** ptr);
+        -:   78:
+        -:   79:void command_bye(); 
+        -:   80:
+        -:   81:void command_help();
+        -:   82:
+        -:   83:void command_list_keys(entry ** ptr);
+        -:   84:
+        -:   85:void command_list_entries(entry ** ptr);
+        -:   86:
+        -:   87:void command_list_snapshots(snapshot ** snapshots);
+        -:   88:
+        -:   89:void command_get(char * line, entry ** ptr);
+        -:   90:
+        -:   91:void command_del(char * line, entry ** ptr);
+        -:   92:
+        -:   93:void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr);
+        -:   94:
+        -:   95:bool valid_key(char * key_name);
+        -:   96:
+        -:   97:void command_set(char * line, entry ** ptr);
+        -:   98:
+        -:   99:void command_push(char * line, entry ** ptr);
+        -:  100:
+        -:  101:void command_append(char * line, entry ** ptr);
+        -:  102:
+        -:  103:void command_pick(char * line, entry ** ptr);
+        -:  104:
+        -:  105:void command_pluck(char * line, entry ** ptr);
+        -:  106:
+        -:  107:void command_pop(char * line, entry ** ptr);
+        -:  108:
+        -:  109:void command_drop(char * line, snapshot ** snapshots);
+        -:  110:
+        -:  111:void command_rollback(char * line, entry ** ptr, snapshot ** snapshots);
+        -:  112:
+        -:  113:void command_checkout(char * line, entry ** ptr, snapshot ** snapshots);
+        -:  114:
+        -:  115:void command_snapshot(entry ** ptr, snapshot ** snapshots);
+        -:  116:
+        -:  117:int minimum(entry * this_entry);
+        -:  118:
+        -:  119:void command_min(char * line,entry ** ptr);
+        -:  120:
+        -:  121:int maximum(entry * this_entry);
+        -:  122:
+        -:  123:void command_max(char * line, entry ** ptr);
+        -:  124:
+        -:  125:int sum(entry * this_entry);
+        -:  126:
+        -:  127:void command_sum(char * line,entry ** ptr);
+        -:  128:
+        -:  129:int length(entry * this_entry);
+        -:  130:
+        -:  131:void command_len(char * line, entry ** ptr);
+        -:  132:
+        -:  133:void command_rev(char * line, entry ** ptr);
+        -:  134:
+        -:  135:void command_uniq(char * line, entry ** ptr);
+        -:  136:
+        -:  137:void command_sort(char * line, entry ** ptr);
+        -:  138:
+        -:  139:int forward_references(entry * this_entry, char ** reference_keys, int size);
+        -:  140:
+        -:  141:int count_forward_references(entry * this_entry);
+        -:  142:
+        -:  143:void command_forward(char * line, entry ** ptr);
+        -:  144:
+        -:  145:int backward_references(entry * this_entry, char ** reference_keys, int size);
+        -:  146:
+        -:  147:int count_backward_references(entry * this_entry);
+        -:  148:
+        -:  149:void command_backward(char * line, entry ** ptr);
+        -:  150:
+        -:  151:void command_type(char * line, entry ** ptr);
+        -:  152:
+        -:  153:int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot_ptr);
+        -:  154:
+       26:  155:int main(void) {
+        -:  156:
+        -:  157:	char line[MAX_LINE];
+       26:  158:	entry * ptr = NULL;
+       26:  159:	snapshot * snapshots = NULL;
+        -:  160:
+        -:  161:	while (true) {
+      282:  162:		printf("> ");
+        -:  163:
+      282:  164:		if (NULL == fgets(line, MAX_LINE, stdin)) {
+    #####:  165:			printf("\n");
+    #####:  166:			command_bye();
+    #####:  167:			return 0;
+        -:  168:		}
+        -:  169:
+        -:  170:		//
+        -:  171:		// TODO
+        -:  172:		//
+        -:  173:		
+      282:  174:		if(command_interpreter(line, &ptr, &snapshots) == -1){
+       26:  175:			return 0;
+        -:  176:		}
+        -:  177:
+        -:  178:  	}
+        -:  179:	
+        -:  180:
+        -:  181:	return 0;
+        -:  182:}
+        -:  183:
+        -:  184:// comparator function for sorting simple entry values
+        5:  185:int cmpfunc(const void * a, const void * b){
+        5:  186:	const element * ea = a;
+        5:  187:	const element * eb = b;
+        5:  188:	return (ea->value - eb->value);
+        -:  189:}
+        -:  190:
+        -:  191:// comparator function for sorting references lexicographically
+       12:  192:int cmpalpha(const void * a, const void * b){
+       12:  193:	return(strcmp(*(char**)a,*(char**)b));
+        -:  194:}
+        -:  195:
+        -:  196:// this function takes in an entry that is being deleted and removes appropriate forward and backward references
+       16:  197:void delete_references(entry * this_entry){
+        -:  198:	entry * forward_ref;
+        -:  199:
+       20:  200:	for(int i = 0; i < this_entry->forward_size;i++){
+        4:  201:		forward_ref = this_entry->forward[i];
+        4:  202:		int skip = 0;
+       4*:  203:		for(int j = 0; j < forward_ref->backward_size; j++){
+        4:  204:			if(strcmp(forward_ref->backward[j]->key,this_entry->key)==0){
+        4:  205:				skip++;
+        -:  206:			}
+        4:  207:			if(forward_ref->backward_size <= skip+j ){
+        4:  208:				break;
+        -:  209:			}
+    #####:  210:			forward_ref->backward[j] = forward_ref->backward[j+skip];
+        -:  211:		}
+        4:  212:		forward_ref->backward_size-=skip;
+        4:  213:		forward_ref->backward = realloc(forward_ref->backward,sizeof(entry*)*(forward_ref->backward_size));
+        -:  214:	}
+       16:  215:}
+        -:  216:
+        -:  217:// this function find a key, given the character array standard input
+      337:  218:entry * find_key(char * line, entry * ptr){
+      337:  219:	char * key_to_find = strtok(line, " \n");
+        -:  220:	// head is always NULL entry
+      337:  221:	entry * iter = ptr;
+      506:  222:	while(iter){
+      441:  223:		if(strcmp(iter->key,key_to_find) == 0){
+      272:  224:			return iter;
+        -:  225:		}
+      169:  226:		iter = iter->prev;
+        -:  227:	}
+        -:  228:
+       65:  229:	return NULL;
+        -:  230:
+        -:  231:}
+        -:  232:
+        -:  233:// this function finds a key, given only the string value
+       26:  234:entry * find_key_alt(char * line, entry * ptr){
+        -:  235:	// head is always NULL entry
+       26:  236:	entry * iter = ptr;
+       48:  237:	while(iter){
+       48:  238:		if(strcmp(iter->key,line) == 0){
+       26:  239:			return iter;
+        -:  240:		}
+       22:  241:		iter = iter->prev;
+        -:  242:	}
+        -:  243:
+    #####:  244:	return NULL;
+        -:  245:
+        -:  246:}
+        -:  247:
+        -:  248:// deals with the linked list references when adding a new entry
+      119:  249:void list_add(entry ** last_entry_ptr, entry * new_entry){
+        -:  250:	
+      119:  251:	entry * last_entry = *last_entry_ptr;
+        -:  252:
+      119:  253:	if(*last_entry_ptr!=NULL){
+       66:  254:		last_entry->next = new_entry;
+        -:  255:	}
+        -:  256:
+      119:  257:	new_entry->prev = last_entry;
+      119:  258:	new_entry->next = NULL;
+      119:  259:	*last_entry_ptr = new_entry;
+      119:  260:	return;
+        -:  261:	
+        -:  262:
+        -:  263:}
+        -:  264:
+        -:  265:// this function finds a snapshot given the character array standard input
+       19:  266:snapshot * find_snapshot(char * line, snapshot * head){
+       19:  267:	int snapshot_to_find = atoi(strtok(line, " \n"));
+       19:  268:	snapshot * iter = head;
+       46:  269:	while(iter){
+       41:  270:		if(iter->id == snapshot_to_find){
+       14:  271:			return iter;
+        -:  272:		}
+       27:  273:		iter = iter->prev;
+        -:  274:	}
+        -:  275:
+        5:  276:	return NULL;
+        -:  277:}
+        -:  278:
+        -:  279:// this function checks if input is a number
+      371:  280:bool isnumber(char s[]){
+      834:  281:    for (int i = 0; s[i]!= '\0'; i++){
+      548:  282:		if(i==0 && s[i] == '-'){
+       32:  283:			continue;
+      516:  284:		}else if(isdigit(s[i]) == 0 && s[i]!= '\n'){
+       85:  285:			return false;
+        -:  286:		}
+        -:  287:              
+        -:  288:    }
+      286:  289:    return true;
+        -:  290:}
+        -:  291:
+        -:  292:// this function reverses simple entries
+        1:  293:element * reverse(element * these_values, int number){
+        -:  294:	int hold;
+        3:  295:	for(int i = 0, j = number -1; i < j; i++, j--){
+        2:  296:		hold = these_values[i].value;
+        2:  297:		these_values[i].value = these_values[j].value;
+        2:  298:		these_values[j].value = hold;
+        -:  299:	}
+        -:  300:
+        1:  301:	return these_values;
+        -:  302:}
+        -:  303:
+        -:  304:// this function removes consecutive duplicate values
+        1:  305:element * uniq(element * these_values, size_t * size){
+        -:  306:
+        1:  307:	int hold = these_values[0].value;
+        1:  308:	int new_length = 1;
+        -:  309:	int i,j;
+       14:  310:	for(i = 1, j = 1; i < *size; i++){
+       13:  311:		if(hold != these_values[i].value){
+        7:  312:			new_length++;
+        7:  313:			hold = these_values[i].value;
+        7:  314:			these_values[j].value = these_values[i].value;
+        7:  315:			j++;
+        -:  316:		}
+        -:  317:	}
+        -:  318:
+        1:  319:	these_values = realloc(these_values,sizeof(element)*new_length);
+        1:  320:	*size = new_length;
+        1:  321:	return these_values;
+        -:  322:}
+        -:  323:
+        -:  324:// this function removes a value from a given index
+       18:  325:void remove_value_from_index(entry * this_entry, int index){
+       18:  326:	element * these_values = this_entry->values;
+       18:  327:	int size_before_remove = this_entry->length;
+        -:  328:
+       18:  329:	int j = 0;
+        -:  330:	// if the value being plucked is an entry, remove it from the references
+       18:  331:	if(this_entry->values[index-1].type == 1){
+        8:  332:		entry * entry_to_remove = this_entry->values[index-1].entry;
+        -:  333:		// deal with forward references of deleted entry
+       16:  334:		for(int i = 0; i+j < this_entry->forward_size;i++){
+        8:  335:			if(strcmp(this_entry->forward[i]->key,entry_to_remove->key)==0){
+        8:  336:				j = 1;
+        -:  337:			}
+        8:  338:			if(i+j<this_entry->forward_size){
+        1:  339:				this_entry->forward[i] = this_entry->forward[i+j];
+        -:  340:			}
+        -:  341:		}
+        8:  342:		this_entry->forward_size--;
+        8:  343:		if(this_entry->forward_size>0){
+        1:  344:			this_entry->forward = realloc(this_entry->forward,sizeof(entry*)*this_entry->forward_size);
+        -:  345:		}else{
+        7:  346:			free(this_entry->forward);
+        7:  347:			this_entry->forward = malloc(sizeof(entry*));
+        -:  348:		}
+        -:  349:		// deal with backward references to deleted entry
+        8:  350:		j = 0;
+       17:  351:		for(int i = 0; i<entry_to_remove->backward_size;i++){
+        9:  352:			if(strcmp(entry_to_remove->backward[i]->key,this_entry->key)==0){
+        9:  353:				j = 1;
+        -:  354:			}
+        9:  355:			if(i+j<this_entry->forward_size){
+    #####:  356:				entry_to_remove->backward[i] = entry_to_remove->backward[i+j];
+        -:  357:			}	
+        -:  358:		}
+        8:  359:		entry_to_remove->backward_size--;
+        8:  360:		if(entry_to_remove->backward_size>0){
+        1:  361:			entry_to_remove->backward = realloc(entry_to_remove->backward,sizeof(entry*)*this_entry->backward_size);
+        -:  362:		}else{
+        7:  363:			free(entry_to_remove->backward);
+        7:  364:			entry_to_remove->backward = malloc(sizeof(entry*));
+        -:  365:		}
+        -:  366:		
+        -:  367:	}
+        -:  368:
+       18:  369:	j = 0;
+       60:  370:	for(int i = 0; i < size_before_remove; i++){
+       42:  371:		if(i == index-1){
+       18:  372:			i++;
+        -:  373:		}
+       42:  374:		if(i != size_before_remove){
+       33:  375:			these_values[j] = these_values[i];
+        -:  376:		}
+        -:  377:		
+       42:  378:		j++;
+        -:  379:	}
+        -:  380:
+       18:  381:	these_values = realloc(these_values, sizeof(element)*(size_before_remove-1));
+       18:  382:	this_entry->values = these_values;
+       18:  383:	this_entry->length--;
+        -:  384:	
+        -:  385:	// finally, if we have removed our only general entry, replace the type
+       18:  386:	if(this_entry->forward_size == 0){
+       17:  387:		this_entry->is_simple = true;
+        -:  388:	}
+       18:  389:	return ;
+        -:  390:}
+        -:  391:
+        -:  392:// this function strips the commands given as standard input so they may be interpreted and used by the program
+       95:  393:int strip_values(char * line, char * strip_values[]){
+       95:  394:	char * token = strtok(line, " ");
+       95:  395:	int number_of_values = -1; // because first value is the key
+      389:  396:	for(int i = 0; i < MAX_LINE; i++){
+      389:  397:		if(token == NULL){
+       95:  398:			break;
+        -:  399:		}
+      294:  400:		strip_values[i] = token;
+      294:  401:		token = strtok(NULL," ");
+      294:  402:		number_of_values++;
+        -:  403:	}
+       95:  404:	return number_of_values;
+        -:  405:}
+        -:  406:
+        -:  407:// this function prints the values for a given entry
+       30:  408:void print_values(entry this_entry){
+        -:  409:
+       30:  410:	element * these_values = this_entry.values;
+       30:  411:	int number = this_entry.length;
+       30:  412:	printf("[");
+       30:  413:	int i = 0;
+       30:  414:	if(i<number){
+      101:  415:		for(; i < number-1; i++){
+       71:  416:			if(these_values[i].type == 0){
+       55:  417:				printf("%d ", these_values[i].value);
+        -:  418:			}else{
+       16:  419:				printf("%s ", these_values[i].entry->key);
+        -:  420:			}
+        -:  421:			
+        -:  422:		}
+       30:  423:		if(these_values[i].type == 0){
+       27:  424:			printf("%d", these_values[i].value);
+        -:  425:		}else{
+        3:  426:			printf("%s", these_values[i].entry->key);
+        -:  427:		}
+        -:  428:	}
+        -:  429:	
+       30:  430:	printf("]\n");
+       30:  431:}
+        -:  432:
+        -:  433:// this function deals with forward and backward referencing when dealing with new values
+       66:  434:void deal_with_references(entry * main_entry, entry * sub_entry){
+        -:  435:
+        -:  436:	// increase the size of forward references
+       66:  437:	main_entry->forward_size++;
+        -:  438:
+        -:  439:	// we have a new reference, so reallocate forward memory
+       66:  440:	main_entry->forward = realloc(main_entry->forward,sizeof(entry*)*main_entry->forward_size);
+        -:  441:
+        -:  442:	// copy the memory across
+       66:  443:	main_entry->forward[main_entry->forward_size-1] = sub_entry;
+        -:  444:
+        -:  445:	// increase the size of backward references
+       66:  446:	sub_entry->backward_size++;
+        -:  447:
+        -:  448:	// we have a new reference, so reallocate forward memory
+       66:  449:	sub_entry->backward = realloc(sub_entry->backward,sizeof(entry*)*sub_entry->backward_size);
+        -:  450:
+        -:  451:	// copy the memory across
+       66:  452:	sub_entry->backward[sub_entry->backward_size-1] = main_entry;
+        -:  453:
+       66:  454:	return; 
+        -:  455:}
+        -:  456:
+        -:  457:// this function checks if the character array given as standard input contains valid values (numeric or a valid key name, no self-reference)
+       70:  458:bool valid_values(entry ** ptr, entry * this_entry, char * new_values[], int size){
+        -:  459:
+        -:  460:	// loop through and ensure this is a valid entry (First entry is the key we are assigning too)
+      244:  461:	for(int i = 1; i < size+1; i++){
+        -:  462:		// if its not a number
+      174:  463:		if(!isnumber(new_values[i])){
+        -:  464:			// if its not a key or is a self reference
+       34:  465:			if(find_key(new_values[i],*ptr)==NULL){
+    #####:  466:				printf("no such key\n\n");
+    #####:  467:				return false;
+       34:  468:			}else if(this_entry == find_key(new_values[i],*ptr)){
+    #####:  469:				printf("not permitted\n\n");
+    #####:  470:				return false;
+        -:  471:			}
+        -:  472:		}
+        -:  473:	}
+        -:  474:
+       70:  475:	return true;
+        -:  476:}
+        -:  477:
+        -:  478:// given a character array of values, include these values in the correct key, from a given index
+       62:  479:bool populate_values(entry ** ptr, entry * this_entry, char * new_values[], int index, bool first){
+        -:  480:	// boolean to store if this is a simple or general entry
+       62:  481:	bool simple = true;
+        -:  482:
+        -:  483:	// store the size of this entry
+       62:  484:	int size = this_entry->length;
+        -:  485:
+        -:  486:	// check if values are valid
+       62:  487:	bool valid  = valid_values(ptr,this_entry,new_values,size);
+       62:  488:	if(!valid){
+    #####:  489:		return false;
+        -:  490:	}
+        -:  491:
+        -:  492:	// if we have gone through all the values, and all are valid, add them to this entry
+        -:  493:	
+        -:  494:	// assign enough memory to store all the entries
+       62:  495:	element * these_values = malloc(sizeof(element)*size);
+        -:  496:	
+        -:  497:	// if we are appending values, copy the first values across
+       62:  498:	if(index>0){
+    #####:  499:		memcpy(these_values,this_entry->values,sizeof(element)*(index));
+        -:  500:	}
+        -:  501:
+        -:  502:	// start populating the new values
+        -:  503:
+        -:  504:	// assign memory for forward and backward references (will reallocate later)
+       62:  505:	if(first){
+       54:  506:		this_entry->backward = malloc(sizeof(entry*));
+       54:  507:		this_entry->backward_size = 0;
+        -:  508:	}else{
+        8:  509:		free(this_entry->forward);
+        -:  510:	}
+        -:  511:
+        -:  512:	
+       62:  513:	this_entry->forward = malloc(sizeof(entry*));
+       62:  514:	this_entry->forward_size = 0;
+        -:  515:
+        -:  516:	// variable to store any entries being added to this entry
+        -:  517:	entry * sub_entry;
+        -:  518:
+        -:  519:	// index to track place in the new entries
+       62:  520:	int j = 1;
+      223:  521:	for(int i = index; i < size; i++){
+        -:  522:		// if it is a number
+      161:  523:		if(isnumber(new_values[j])){
+      132:  524:			these_values[i].value = atoi(new_values[j]);
+      132:  525:			these_values[i].type = INTEGER;
+        -:  526:		}else{
+       29:  527:			sub_entry = find_key(new_values[j],*ptr);
+        -:  528:			// copy the subentry pointer to values of this entry
+       29:  529:			these_values[i].entry = sub_entry;
+        -:  530:			// set type to entry
+       29:  531:			these_values[i].type = ENTRY;
+        -:  532:
+        -:  533:			// this function updates backwards and forwards references appropriately
+       29:  534:			deal_with_references(this_entry,these_values[i].entry);
+       29:  535:			simple = false;
+        -:  536:		}
+      161:  537:		j++;
+        -:  538:	}
+        -:  539:
+       62:  540:	memcpy(this_entry->values,these_values,sizeof(element)*size);
+        -:  541:
+       62:  542:	this_entry->is_simple = simple;
+        -:  543:
+       62:  544:	free(these_values);
+        -:  545:
+       62:  546:	return true;
+        -:  547:}
+        -:  548:
+        -:  549:// this function appends values to an entry
+        5:  550:bool append(entry ** ptr, entry * this_entry, char * append_values[], int num_new){
+        -:  551:	// track if we append a general entry or not
+        5:  552:	bool simple = true;
+        -:  553:
+        -:  554:	// make sure all the append values are valid
+       10:  555:	for(int i = 1; i < num_new+1; i++){
+        -:  556:		// if its not a number
+        5:  557:		if(!isnumber(append_values[i])){
+        -:  558:			// if its not a key or is a self reference
+        4:  559:			if(find_key(append_values[i],*ptr)==NULL || this_entry == find_key(append_values[i],*ptr)){
+    #####:  560:				return false;
+        -:  561:			}
+        -:  562:			// have found an entry that is valid
+        4:  563:			simple = false;
+        -:  564:		}
+        -:  565:	}
+        -:  566:
+        -:  567:	// we now know all the append values are valid so may proceed
+        -:  568:
+        -:  569:	// this is the size of the entry before appending
+        5:  570:	int num_old = this_entry->length;
+        -:  571:
+        -:  572:	// this is the size after appending
+        5:  573:	int size_after_append = num_new + num_old;
+        -:  574:
+        -:  575:	// reallocate the memory to fit new size
+        5:  576:	this_entry->values = realloc(this_entry->values,sizeof(element)*size_after_append);
+        5:  577:	this_entry->length = size_after_append;
+        -:  578:	entry * sub_entry;
+        5:  579:	int j = 1;
+       10:  580:	for(int i = 0; i < num_new; i++){
+        -:  581:		// if it is a number
+        5:  582:		if(isnumber(append_values[j])){
+        1:  583:			this_entry->values[num_old+i].value = atoi(append_values[j]);
+        1:  584:			this_entry->values[num_old+i].type = INTEGER;
+        -:  585:		}else{
+        4:  586:			sub_entry = find_key(append_values[j],*ptr);
+        -:  587:			// copy the subentry pointer to values of this entry
+        4:  588:			this_entry->values[num_old+i].entry = sub_entry;
+        -:  589:			// set type to entry
+        4:  590:			this_entry->values[num_old+i].type = ENTRY;
+        -:  591:
+        -:  592:			// this function updates backwards and forwards references appropriately
+        4:  593:			deal_with_references(this_entry,this_entry->values[num_old+i].entry);
+        -:  594:		}
+        5:  595:		j++;
+        -:  596:	}
+        -:  597:
+        5:  598:	if(!simple){
+        4:  599:		this_entry->is_simple = simple;
+        -:  600:	}
+        -:  601:
+        5:  602:	return true;
+        -:  603:
+        -:  604:}
+        -:  605:
+        -:  606:// this function pushes values to the front of an entry
+        8:  607:bool push(entry ** ptr, entry * this_entry, char * push_values[], int num_new){
+        -:  608:
+        -:  609:	// track if we push a general entry or not
+        8:  610:	bool simple = true;
+        -:  611:
+        -:  612:	// make sure all the push values are valid
+       21:  613:	for(int i = 1; i < num_new+1; i++){
+        -:  614:		// if its not a number
+       13:  615:		if(!isnumber(push_values[i])){
+        -:  616:			// if its not a key or is a self reference
+        7:  617:			if(find_key(push_values[i],*ptr)==NULL || this_entry == find_key(push_values[i],*ptr)){
+    #####:  618:				return false;
+        -:  619:			}
+        -:  620:			// have found an entry that is valid
+        7:  621:			simple = false;
+        -:  622:		}
+        -:  623:	}
+        -:  624:
+        -:  625:	// we now know all push values are valid so may proceed
+        -:  626:
+        -:  627:	// this is the size of the entry before pushing
+        8:  628:	int num_old = this_entry->length;
+        -:  629:
+        -:  630:	// this is the size after pushing
+        8:  631:	int size_after_push = num_new + num_old;
+        -:  632:
+        -:  633:	// initialise a temp element array to store the old elements
+        8:  634:	element * old_values = malloc(sizeof(element)*num_old);
+        -:  635:
+        -:  636:	// copy across the old values
+       25:  637:	for(int i = 0; i < num_old; i++){
+       17:  638:		old_values[i] = this_entry->values[i];
+        -:  639:	}
+        -:  640:
+        -:  641:	// insert the new push values
+        -:  642:
+        -:  643:	// allocate memory for values after push
+        8:  644:	this_entry->values = realloc(this_entry->values,sizeof(element)*size_after_push);
+        8:  645:	this_entry->length = size_after_push;
+        -:  646:	entry * sub_entry;
+        8:  647:	int j = 1;
+       21:  648:	for(int i = 0; i < num_new; i++){
+        -:  649:		// if it is a number
+       13:  650:		if(isnumber(push_values[j])){
+        6:  651:			this_entry->values[num_new-1-i].value = atoi(push_values[j]);
+        6:  652:			this_entry->values[num_new-1-i].type = INTEGER;
+        -:  653:		}else{
+        7:  654:			sub_entry = find_key(push_values[j],*ptr);
+        -:  655:			// copy the subentry pointer to values of this entry
+        7:  656:			this_entry->values[num_new-1-i].entry = sub_entry;
+        -:  657:			// set type to entry
+        7:  658:			this_entry->values[num_new-1-i].type = ENTRY;
+        -:  659:
+        -:  660:			// this function updates backwards and forwards references appropriately
+        7:  661:			deal_with_references(this_entry,this_entry->values[i].entry);
+        -:  662:		}
+       13:  663:		j++;
+        -:  664:	}
+        -:  665:
+        -:  666:	// append the old values
+       25:  667:	for(int i = 0; i < num_old;i++){
+       17:  668:		this_entry->values[num_new+i] = old_values[i];
+        -:  669:	}
+        -:  670:
+        8:  671:	if(!simple){
+        5:  672:		this_entry->is_simple = simple;
+        -:  673:	}
+        -:  674:
+        8:  675:	free(old_values);
+        -:  676:
+        -:  677:
+        8:  678:	return true;
+        -:  679:	
+        -:  680:}
+        -:  681:
+        -:  682://  this function deletes an entry from the linked list
+        9:  683:bool list_delete(entry ** ptr, entry * delete_entry){
+        -:  684:	// if we are deleting the value currently pointed to by the pointer, update the pointer
+        9:  685:	if(*ptr == delete_entry){
+        7:  686:		*ptr = delete_entry->prev;
+        -:  687:	}
+        -:  688:	// if we can delete the current entry without causing an invalid state
+        9:  689:	if(delete_entry->backward_size==0){
+        -:  690:
+        -:  691:		// patch up the linkedlist after the delete
+        8:  692:		entry * next_entry = delete_entry->next;
+        8:  693:		entry * prev_entry = delete_entry->prev;
+        -:  694:
+        -:  695:		// if there is a previous entry CHECK THESE!!
+        8:  696:		if(prev_entry != NULL){
+        2:  697:			prev_entry->next = next_entry;
+        -:  698:		}
+        8:  699:		if(next_entry!=NULL){
+        1:  700:			next_entry->prev = prev_entry;
+        -:  701:		}
+        -:  702:		
+        -:  703:
+        -:  704:		// set pointers to null
+        8:  705:		delete_entry->next = NULL;
+        8:  706:		delete_entry->prev = NULL;
+        -:  707:
+        -:  708:		// delete references
+        8:  709:		delete_references(delete_entry);
+        -:  710:
+        -:  711:		// free allocated memory
+        8:  712:		free(delete_entry->backward);
+        8:  713:		free(delete_entry->forward);
+        8:  714:		free(delete_entry->values);
+        8:  715:		free(delete_entry);
+        8:  716:		return true;
+        -:  717:	}else{
+        1:  718:		return false;
+        -:  719:	}
+        -:  720:
+        -:  721:
+        -:  722:
+        -:  723:	
+        -:  724:}
+        -:  725:
+        -:  726://  this function ensures allocated memory is freed when no longer needed
+       35:  727:void list_free(entry * ptr){
+       35:  728:	entry * iter = ptr;
+        -:  729:	entry * current;
+       35:  730:	if(iter == NULL){
+        6:  731:		return;
+        -:  732:	}
+       94:  733:	while(iter){
+       65:  734:		current = iter;
+       65:  735:		iter = iter->prev;
+       65:  736:		free(current->backward);
+       65:  737:		free(current->forward);
+       65:  738:		free(current->values);
+       65:  739:		free(current);
+        -:  740:	}
+        -:  741:
+       29:  742:	return ;
+        -:  743:}
+        -:  744:
+        -:  745:// add a new snapshot 
+       22:  746:int snapshot_list_add(snapshot ** last_snapshot_ptr, entry * head_entries){
+       22:  747:	snapshot * new_snapshot = malloc(sizeof(snapshot));
+       22:  748:	snapshot * last_snapshot = * last_snapshot_ptr;
+        -:  749:
+        -:  750:	// if this is not the first snapshot
+       22:  751:	if(*last_snapshot_ptr!=NULL){
+       15:  752:		last_snapshot->next = new_snapshot;
+        -:  753:	}else{
+        -:  754:	}
+        -:  755:
+       22:  756:	new_snapshot->id = snapshot_id;
+       22:  757:	snapshot_id++;
+       22:  758:	new_snapshot->prev = last_snapshot;
+       22:  759:	new_snapshot->next = NULL;
+       22:  760:	new_snapshot->entries = head_entries;
+       22:  761:	*last_snapshot_ptr = new_snapshot;
+        -:  762:
+       22:  763:	return new_snapshot->id;
+        -:  764:}
+        -:  765:
+        -:  766:// delete a snapshot from the linked list
+       22:  767:void snapshot_list_delete(snapshot ** ptr, snapshot* delete_snapshot){
+        -:  768:	// if we are deleting the snapshot currently pointed to by the ptr, update ptr
+       22:  769:	if(*ptr == delete_snapshot){
+       18:  770:		*ptr = delete_snapshot->prev;
+        -:  771:	}
+        -:  772:
+       22:  773:	snapshot * next_snapshot = delete_snapshot->next;
+       22:  774:	snapshot * prev_snapshot = delete_snapshot->prev;
+        -:  775:
+       22:  776:	if(prev_snapshot != NULL){
+       11:  777:		prev_snapshot->next = next_snapshot;
+        -:  778:	}
+       22:  779:	if(next_snapshot!=NULL){
+        4:  780:		next_snapshot->prev = prev_snapshot;
+        -:  781:	}
+        -:  782:
+       22:  783:	entry * iter = delete_snapshot->entries;
+        -:  784:	entry * hold;
+       68:  785:	while(iter){
+       46:  786:		hold = iter->prev;
+       46:  787:		free(iter->forward);
+       46:  788:		free(iter->backward);
+       46:  789:		free(iter->values);
+       46:  790:		free(iter);
+       46:  791:		iter = hold;
+        -:  792:	}
+       22:  793:	free(delete_snapshot);
+        -:  794:
+       22:  795:}
+        -:  796:
+        -:  797:// free allocated memory for snapshots
+       26:  798:void snapshot_list_free(snapshot ** ptr){
+       26:  799:	snapshot * iter = *ptr;
+        -:  800:	snapshot * current;
+       26:  801:	if(iter == NULL){
+       19:  802:		return;
+        -:  803:	}
+       22:  804:	while(iter){
+       15:  805:		current = iter;
+       15:  806:		iter = iter->prev;
+       15:  807:		snapshot_list_delete(ptr,current);
+        -:  808:	}
+        -:  809:
+        7:  810:	return ;
+        -:  811:}
+        -:  812:
+        -:  813:// exit program
+       26:  814:void command_bye(){
+       26:  815:	printf("bye\n");
+       26:  816:}
+        -:  817:
+        -:  818:// print help
+    #####:  819:void command_help(){
+    #####:  820:	printf("%s\n", HELP);
+    #####:  821:}
+        -:  822:
+        -:  823:// list all keys in the current state
+        4:  824:void command_list_keys(entry ** ptr){
+        4:  825:	entry * iter = *ptr;
+        4:  826:	bool empty = true;
+       18:  827:	while(iter){
+       14:  828:		empty = false;
+       14:  829:		printf("%s\n",iter->key);
+       14:  830:		iter = iter->prev;
+        -:  831:	}
+        -:  832:
+        4:  833:	if(empty){
+    #####:  834:		printf("no keys\n");
+        -:  835:	}
+        -:  836:	
+        4:  837:	printf("\n");
+        4:  838:	return;
+        -:  839:}
+        -:  840:
+        -:  841:// list all entries in the current state
+       10:  842:void command_list_entries(entry ** ptr){
+       10:  843:	entry * iter = *ptr;
+       10:  844:	bool empty = true;
+       34:  845:	while(iter){
+       24:  846:		empty = false;
+       24:  847:		printf("%s ",iter->key);
+       24:  848:		print_values(*iter);
+       24:  849:		iter = iter->prev;
+        -:  850:	}
+        -:  851:
+       10:  852:	if(empty){
+        1:  853:		printf("no entries\n");
+        -:  854:	}
+        -:  855:
+       10:  856:	printf("\n");
+       10:  857:	return;
+        -:  858:}
+        -:  859:
+        -:  860:// list all snapshots in the current state
+       13:  861:void command_list_snapshots(snapshot ** snapshots){
+       13:  862:	snapshot * iter = *snapshots;
+       13:  863:	if(iter == NULL){
+    #####:  864:		printf("no snapshots\n");
+        -:  865:	}else{
+       48:  866:		while(iter){
+       35:  867:			printf("%d\n", iter->id);
+       35:  868:			iter = iter->prev;
+        -:  869:		}
+        -:  870:	}
+       13:  871:	printf("\n");
+       13:  872:	return ; 
+        -:  873:}
+        -:  874:
+        -:  875:// get a given key from the current state
+        9:  876:void command_get(char * line, entry ** ptr){
+        9:  877:	entry * this_entry = find_key(line,*ptr);
+        -:  878:
+        9:  879:	if(this_entry!=NULL){
+        6:  880:		print_values(*this_entry);
+        -:  881:	}else{
+        3:  882:		printf("no such key\n");
+        -:  883:	}
+        -:  884:
+        9:  885:	printf("\n");
+        -:  886:
+        9:  887:	return;
+        -:  888:
+        -:  889:}
+        -:  890:
+        -:  891:// delete a given key from the current state
+        3:  892:void command_del(char * line, entry ** ptr){
+        3:  893:	entry * this_entry = find_key(line,*ptr);
+        -:  894:
+        3:  895:	if(this_entry!=NULL){
+        3:  896:		if(list_delete(ptr,this_entry)){
+        2:  897:			printf("ok\n\n");
+        -:  898:		}else{
+        1:  899:			printf("not permitted\n\n");
+        -:  900:		}
+        -:  901:		
+        -:  902:	}else{
+    #####:  903:		printf("no such key\n\n");
+        -:  904:	}
+        3:  905:}
+        -:  906:
+        -:  907:// remove a given key from the current state and all snapshots
+        6:  908:void command_purge(char * line, entry ** entry_ptr, snapshot ** snapshot_ptr){
+        6:  909:	entry * this_entry = find_key(line,*entry_ptr);
+        -:  910:	
+        -:  911:	// create boolean to store whether this key exists in any current or previous state
+        6:  912:	bool is_a_current_key = false;
+        6:  913:	bool is_a_snapshot_key = false;
+        -:  914:
+        -:  915:	// check if key exists in current state 
+        6:  916:	if(this_entry != NULL){
+        4:  917:		is_a_current_key = true;
+        -:  918:	}
+        -:  919:
+        -:  920:	// check if key exists in any snapshots
+        6:  921:	snapshot * iter = *snapshot_ptr;
+       18:  922:	while(iter){
+       12:  923:		if(NULL != find_key(line,iter->entries)){
+        6:  924:			is_a_snapshot_key = true;
+        -:  925:		}
+       12:  926:		iter = iter->prev;
+        -:  927:	}
+        -:  928:
+        -:  929:	// if the key doesnt exist in any state
+        6:  930:	if(!is_a_current_key&&!is_a_snapshot_key){
+        2:  931:		printf("ok\n\n");
+        2:  932:		return ;
+        -:  933:	}
+        -:  934:
+        -:  935:	// if the key exists in a snapshot
+        4:  936:	if(is_a_snapshot_key){
+        3:  937:		iter = *snapshot_ptr;
+        -:  938:		entry * snapshot_entry;
+        -:  939:		// check if snapshots are still valid after removal
+        8:  940:		while(iter){
+        -:  941:			// find the entry in this snapshot
+        6:  942:			snapshot_entry = find_key(line,iter->entries);
+        -:  943:			// if the key exists in this snapshot
+        6:  944:			if(snapshot_entry!=NULL){
+        -:  945:				// if the snapshot has back references
+        6:  946:				if(snapshot_entry->backward_size!=0){
+        1:  947:					printf("not permitted\n\n");
+        1:  948:					return;
+        -:  949:				}
+        -:  950:			}
+        5:  951:			iter = iter->prev;
+        -:  952:		}
+        -:  953:
+        -:  954:		// if snapshots remain valid after removal, we may delete the entry from the snapshots
+        2:  955:		iter = *snapshot_ptr;
+        6:  956:		while(iter){
+        -:  957:			// find the entry in this snapshot
+        4:  958:			snapshot_entry = find_key(line,iter->entries);
+        -:  959:			// if the entry exists
+        4:  960:			if(snapshot_entry!=NULL){
+        4:  961:				list_delete(&iter->entries, snapshot_entry);
+        -:  962:			}
+        4:  963:			iter = iter->prev;
+        -:  964:		}
+        -:  965:	}
+        -:  966:	
+        -:  967:
+        -:  968:	// if key exists in current state
+        3:  969:	if(is_a_current_key){
+        -:  970:		// check if current state is valid after removal
+        3:  971:		if(this_entry->backward_size!=0){
+        1:  972:			printf("not permitted\n\n");
+        1:  973:			return;
+        -:  974:		}
+        -:  975:		
+        -:  976:		// if current state is valid after removal
+        2:  977:		list_delete(entry_ptr,this_entry);
+        -:  978:	}
+        -:  979:	
+        -:  980:
+        2:  981:	printf("ok\n\n");
+        -:  982:}
+        -:  983:
+        -:  984:// function to check if this is a valid key name
+       65:  985:bool valid_key(char * key_name){
+       65:  986:	if(strlen(key_name)>=MAX_KEY){
+        1:  987:		return false;
+        -:  988:	}
+       64:  989:	if(isalpha(key_name[0])==0){
+        1:  990:		return false;
+        -:  991:	}
+      149:  992:	for(int i = 0; i <strlen(key_name);i++){
+       87:  993:		if(isalnum(key_name[i])==0){
+        1:  994:			return false;
+        -:  995:		}
+        -:  996:	}
+       62:  997:	return true;
+        -:  998:}
+        -:  999:
+        -: 1000:// set a new entry, given some values
+       65: 1001:void command_set(char * line, entry ** ptr){
+        -: 1002:	// find the values to push to the key
+        -: 1003:	char *this_line[MAX_LINE];
+       65: 1004:	int length_of_line = strip_values(line,this_line);
+        -: 1005:
+        -: 1006:
+        -: 1007:	// check if key is valid
+       65: 1008:	if(!valid_key(this_line[0])){
+        3: 1009:		printf("key name not permitted\n\n");
+        3: 1010:		return;
+        -: 1011:	}
+        -: 1012:	
+        -: 1013:
+        -: 1014:	// see if this key already exists
+       62: 1015:	entry * this_entry = find_key(line,*ptr);
+        -: 1016:
+        -: 1017:	bool valid;
+        -: 1018:
+        -: 1019:	// if key doesnt exist, make a new key
+       62: 1020:	if(this_entry==NULL){
+        -: 1021:		// initialise entry struct
+       54: 1022:		entry * this_entry = malloc(sizeof(entry));
+        -: 1023:		
+        -: 1024:
+        -: 1025:		// set the key
+       54: 1026:		strcpy(this_entry->key,this_line[0]);
+        -: 1027:
+        -: 1028:		// set the values
+       54: 1029:		this_entry->values = malloc(sizeof(struct element)*(length_of_line));
+       54: 1030:		this_entry->length = length_of_line; // update this later to include entries
+        -: 1031:
+       54: 1032:		valid = populate_values(ptr,this_entry,this_line,0,true);
+        -: 1033:
+       54: 1034:		if(valid){
+        -: 1035:			// add this key to the linked list of keys
+       54: 1036:			list_add(ptr,this_entry);
+       54: 1037:			*ptr = this_entry;
+        -: 1038:		}else{
+    #####: 1039:			free(this_entry->values);
+    #####: 1040:			free(this_entry);
+        -: 1041:		}
+        -: 1042:		
+        -: 1043:	}else{
+        8: 1044:		valid = valid_values(ptr,this_entry,this_line,length_of_line);
+        -: 1045:
+        8: 1046:		if(valid){
+        8: 1047:			delete_references(this_entry);
+        8: 1048:			this_entry->values = realloc(this_entry->values,sizeof(element)*(length_of_line));
+        8: 1049:			this_entry->length = length_of_line;
+        -: 1050:
+        8: 1051:			populate_values(ptr,this_entry,this_line,0,false);
+        -: 1052:		}
+        -: 1053:	
+        -: 1054:	}
+        -: 1055:
+       62: 1056:	if(valid){
+       62: 1057:		printf("ok\n\n");
+        -: 1058:	}
+        -: 1059:	
+       62: 1060:	return;
+        -: 1061:
+        -: 1062:
+        -: 1063:}
+        -: 1064:
+        -: 1065:// push interpreter
+        8: 1066:void command_push(char * line, entry ** ptr){
+        -: 1067:	// find the values to push to the key
+        -: 1068:	char *push_values[MAX_LINE];
+        8: 1069:	int number_of_values = strip_values(line,push_values);
+        -: 1070:
+        -: 1071:
+        -: 1072:	// find the key to push to from linked list
+        8: 1073:	entry * push_entry = find_key(line,*ptr);
+        -: 1074:
+        -: 1075:	// push the values into the key
+        8: 1076:	if(push_entry!=NULL){
+        8: 1077:		if(push(ptr,push_entry,push_values,number_of_values)){
+        8: 1078:			printf("ok\n\n");
+        -: 1079:		}else{
+    #####: 1080:			printf("not permitted\n");
+        -: 1081:		}
+        -: 1082:		
+        -: 1083:		
+        -: 1084:	}else{
+    #####: 1085:		printf("no such key\n\n");
+        -: 1086:	}
+        8: 1087:}
+        -: 1088:
+        -: 1089:// append interpreter
+        5: 1090:void command_append(char * line, entry ** ptr){
+        -: 1091:	// find the values to append to the key
+        -: 1092:	char *append_values[MAX_LINE];
+        5: 1093:	int number_of_values = strip_values(line,append_values);
+        -: 1094:
+        -: 1095:	// find the key to append to from linked list
+        5: 1096:	entry * append_entry = find_key(line,*ptr);
+        -: 1097:	
+        -: 1098:	bool valid;
+        -: 1099:	// append the values into the key
+        5: 1100:	if(append_entry!=NULL){
+        -: 1101:		// 
+        5: 1102:		valid = append(ptr,append_entry,append_values,number_of_values);
+        -: 1103:		
+        5: 1104:		if(valid){
+        5: 1105:			printf("ok\n\n");
+        -: 1106:		}else{
+    #####: 1107:			printf("not a valid entry");
+        -: 1108:		}
+        -: 1109:		
+        -: 1110:		
+        -: 1111:	}else{
+    #####: 1112:		printf("no such key\n\n");
+        -: 1113:	}
+        5: 1114:}
+        -: 1115:
+        -: 1116:// pick interpreter
+        5: 1117:void command_pick(char * line, entry ** ptr){
+        -: 1118:	// find the value to pick from this key
+        -: 1119:	char *pick_index[MAX_LINE];
+        5: 1120:	strip_values(line,pick_index);
+        -: 1121:
+        -: 1122:	// find the key to pick from from the linked list
+        5: 1123:	entry * pick_entry = find_key(line,*ptr);
+        -: 1124:
+        -: 1125:	// pick the value from the given index from the key
+        5: 1126:	if(pick_entry!=NULL){
+        5: 1127:		int index = atoi(pick_index[1]);
+        5: 1128:		if(pick_entry->length < index || index <= 0){
+        2: 1129:			printf("index out of range\n");
+        -: 1130:		}else{
+        3: 1131:			if(pick_entry->values[index-1].type == 0){
+        3: 1132:				printf("%d\n", pick_entry->values[index-1].value);
+        -: 1133:			}else{
+    #####: 1134:				printf("%s\n", pick_entry->values[index-1].entry->key);
+        -: 1135:			}
+        -: 1136:		}
+        -: 1137:		
+        -: 1138:		
+        -: 1139:	}else{
+    #####: 1140:		printf("no such key\n");
+        -: 1141:	}
+        -: 1142:
+        5: 1143:	printf("\n");
+        5: 1144:	return;
+        -: 1145:}
+        -: 1146:
+        -: 1147:// pluck interpreter
+       12: 1148:void command_pluck(char * line, entry ** ptr){
+        -: 1149:	// find the value to pluck from this key
+        -: 1150:	char *pluck_index[MAX_LINE];
+       12: 1151:	strip_values(line,pluck_index);
+        -: 1152:
+        -: 1153:	// find the key to pluck from from the linked list
+       12: 1154:	entry * pluck_entry = find_key(line,*ptr);
+        -: 1155:
+        -: 1156:	// pluck the value from the given index from the key
+       12: 1157:	if(pluck_entry!=NULL){
+       12: 1158:		int index = atoi(pluck_index[1]);
+       12: 1159:		if(pluck_entry->length < index || index <= 0){
+        3: 1160:			printf("index out of range\n");
+        -: 1161:		}else{
+        9: 1162:			if(pluck_entry->values[index-1].type == 0){
+        6: 1163:				printf("%d\n", pluck_entry->values[index-1].value);
+        -: 1164:			}else{
+        3: 1165:				printf("%s\n", pluck_entry->values[index-1].entry->key);
+        -: 1166:			}
+        9: 1167:			remove_value_from_index(pluck_entry,index);
+        -: 1168:		}
+        -: 1169:		
+        -: 1170:		
+        -: 1171:	}else{
+    #####: 1172:		printf("no such key\n");
+        -: 1173:	}
+        -: 1174:
+       12: 1175:	printf("\n");
+       12: 1176:	return;
+        -: 1177:}
+        -: 1178:
+        -: 1179:// pop interpreter
+       10: 1180:void command_pop(char * line, entry ** ptr){
+        -: 1181:	// find the key to pop from from the linked list
+       10: 1182:	entry * pop_entry = find_key(line,*ptr);
+        -: 1183:
+        -: 1184:	// pop the value from the given index from the key
+       10: 1185:	if(pop_entry!=NULL){
+       10: 1186:		if(pop_entry->length == 0){
+        1: 1187:			printf("nil\n");
+        -: 1188:		}else{
+        9: 1189:			if(pop_entry->values[0].type == 0){
+        4: 1190:				printf("%d\n", pop_entry->values[0].value);
+        -: 1191:			}else{
+        5: 1192:				printf("%s\n", pop_entry->values[0].entry->key);
+        -: 1193:			}
+        9: 1194:			remove_value_from_index(pop_entry,1);
+        -: 1195:		}
+        -: 1196:		
+        -: 1197:		
+        -: 1198:	}else{
+    #####: 1199:		printf("no such key\n");
+        -: 1200:	}
+        -: 1201:
+       10: 1202:	printf("\n");
+       10: 1203:	return;
+        -: 1204:}
+        -: 1205:
+        -: 1206:// drop interpreter
+        7: 1207:void command_drop(char * line, snapshot ** snapshots){
+        -: 1208:	// find the snapshot to delete
+        7: 1209:	snapshot * this_snapshot = find_snapshot(line,*snapshots);
+        -: 1210:
+        7: 1211:	if(this_snapshot!=NULL){
+        5: 1212:		snapshot_list_delete(snapshots,this_snapshot);
+        5: 1213:		printf("ok\n");
+        -: 1214:	}else{
+        2: 1215:		printf("no such snapshot\n");
+        -: 1216:	}
+        7: 1217:	printf("\n");
+        -: 1218:
+        7: 1219:	return;
+        -: 1220:}
+        -: 1221:
+        -: 1222:// rollback interpreter
+        2: 1223:void command_rollback(char * line, entry ** ptr, snapshot ** snapshots){
+        2: 1224:	snapshot * this_snapshot = find_snapshot(line,*snapshots);
+        -: 1225:
+        2: 1226:	if(this_snapshot!=NULL){
+        2: 1227:		entry * ptrcpy = NULL;
+        -: 1228:
+        2: 1229:		entry * iter = this_snapshot->entries;
+        -: 1230:		// go through all the snapshot entries and set their values in the current state
+        6: 1231:		while(iter){
+        -: 1232:			// initialise entry struct
+        4: 1233:			entry * this_entry = malloc(sizeof(entry));
+        -: 1234:
+        -: 1235:			// copy the key
+        4: 1236:			strcpy(this_entry->key,iter->key);
+        -: 1237:
+        -: 1238:			// copy the values
+        4: 1239:			this_entry->values = malloc(sizeof(element)*iter->length);
+        4: 1240:			memmove(this_entry->values,iter->values,sizeof(element)*iter->length);
+        -: 1241:
+        -: 1242:			// copy the length
+        4: 1243:			this_entry->length = iter->length;
+        -: 1244:
+        -: 1245:			// copy is simple
+        4: 1246:			this_entry->is_simple = iter->is_simple;
+        -: 1247:
+        -: 1248:			//  assign memory for the references
+        4: 1249:			this_entry->backward = malloc(sizeof(entry*));
+        4: 1250:			this_entry->backward_size = 0;
+        4: 1251:			this_entry->forward = malloc(sizeof(entry*));
+        4: 1252:			this_entry->forward_size = 0;
+        -: 1253:
+        4: 1254:				list_add(&ptrcpy,this_entry);
+        4: 1255:				iter = iter->prev;
+        -: 1256:		}
+        -: 1257:
+        -: 1258:		// now go through and deal with all the references
+        2: 1259:		iter = ptrcpy;
+        -: 1260:		entry * sub_entry;
+        6: 1261:		while(iter){
+        -: 1262:
+        -: 1263:			// loop through all the entries and establish the references
+       14: 1264:			for(int i = 0; i < iter->length; i++){
+        -: 1265:				// if this entry is an entry, build the reference
+       10: 1266:				if(iter->values[i].type == 1){
+        2: 1267:					sub_entry = find_key_alt(iter->values[i].entry->key,ptrcpy);
+        2: 1268:					iter->values[i].entry = sub_entry;
+        2: 1269:					deal_with_references(iter,sub_entry);
+        -: 1270:				}
+        -: 1271:			}
+        4: 1272:			iter = iter->prev;
+        -: 1273:		}
+        -: 1274:
+        -: 1275:		
+        -: 1276:
+        -: 1277:		// delete all newer snapshots
+        2: 1278:		snapshot * iter_snapshots = *snapshots;
+        -: 1279:		snapshot * holder;
+        4: 1280:		while(this_snapshot->id != iter_snapshots->id){
+        2: 1281:			holder = iter_snapshots->prev;
+        2: 1282:			snapshot_list_delete(snapshots,iter_snapshots);
+        2: 1283:			iter_snapshots = holder;
+        -: 1284:
+        -: 1285:		}
+        -: 1286:
+        -: 1287:		// delete the current state as we are going to replace it
+        2: 1288:		list_free(*ptr);
+        2: 1289:		*ptr = NULL;
+        2: 1290:		*ptr = ptrcpy;
+        2: 1291:		printf("ok\n");
+        -: 1292:	}else{
+    #####: 1293:		printf("no such snapshot\n");
+        -: 1294:	}
+        2: 1295:	printf("\n");
+        -: 1296:
+        2: 1297:	return;
+        -: 1298:}
+        -: 1299:
+        -: 1300:// checkout interpreter
+       10: 1301:void command_checkout(char * line, entry ** ptr, snapshot ** snapshots){
+       10: 1302:	snapshot * this_snapshot = find_snapshot(line,*snapshots);
+       10: 1303:	if(this_snapshot!=NULL){
+        7: 1304:		entry * ptrcpy = NULL;
+        -: 1305:
+        7: 1306:		entry * iter = this_snapshot->entries;
+        -: 1307:		// go through all the snapshot entries and set their values in the current state
+       18: 1308:		while(iter){
+        -: 1309:			// initialise entry struct
+       11: 1310:			entry * this_entry = malloc(sizeof(entry));
+        -: 1311:
+        -: 1312:			// copy the key
+       11: 1313:			strcpy(this_entry->key,iter->key);
+        -: 1314:
+        -: 1315:			// copy the values
+       11: 1316:			this_entry->values = malloc(sizeof(element)*iter->length);
+       11: 1317:			memmove(this_entry->values,iter->values,sizeof(element)*iter->length);
+        -: 1318:
+        -: 1319:			// copy is simple
+       11: 1320:			this_entry->is_simple = iter->is_simple;
+        -: 1321:
+        -: 1322:			//  assign memory for the references
+       11: 1323:			this_entry->backward = malloc(sizeof(entry*));
+       11: 1324:			this_entry->backward_size = 0;
+       11: 1325:			this_entry->forward = malloc(sizeof(entry*));
+       11: 1326:			this_entry->forward_size = 0;
+        -: 1327:
+        -: 1328:			// copy the length
+       11: 1329:			this_entry->length = iter->length;
+        -: 1330:
+       11: 1331:			list_add(&ptrcpy,this_entry);
+       11: 1332:			iter = iter->prev;
+        -: 1333:		}
+        -: 1334:
+        -: 1335:		// now go through and deal with all the references
+        7: 1336:		iter = ptrcpy;
+        -: 1337:		entry * sub_entry;
+       18: 1338:		while(iter){
+        -: 1339:
+        -: 1340:			// loop through all the entries and establish the references
+       33: 1341:			for(int i = 0; i < iter->length; i++){
+        -: 1342:				// if this entry is an entry, build the reference
+       22: 1343:				if(iter->values[i].type == 1){
+        4: 1344:					sub_entry = find_key_alt(iter->values[i].entry->key,ptrcpy);
+        4: 1345:					iter->values[i].entry = sub_entry;
+        4: 1346:					deal_with_references(iter,sub_entry);
+        -: 1347:				}
+        -: 1348:			}
+       11: 1349:			iter = iter->prev;
+        -: 1350:		}
+        7: 1351:		printf("ok\n");
+        -: 1352:		// delete the current state as we are going to replace it
+        7: 1353:		list_free(*ptr);
+        7: 1354:		*ptr = NULL;
+        7: 1355:		*ptr = ptrcpy;
+        -: 1356:	}else{
+        3: 1357:		printf("no such snapshot\n");
+        -: 1358:	}
+       10: 1359:	printf("\n");
+        -: 1360:
+       10: 1361:	return;
+        -: 1362:}
+        -: 1363:
+        -: 1364:// snapshot interpreter
+       22: 1365:void command_snapshot(entry ** ptr, snapshot ** snapshots){
+        -: 1366:	// define a pointer to iterate through all the values in the current state
+       22: 1367:	entry * iter = *ptr;
+        -: 1368:
+       22: 1369:	entry * entry_ptr = NULL;
+        -: 1370:
+        -: 1371:
+        -: 1372:	// first we copy across all the entries, ignoring references
+       72: 1373:	while(iter){
+        -: 1374:		// initialise entry struct
+       50: 1375:		entry * this_entry = malloc(sizeof(entry));
+        -: 1376:
+        -: 1377:		// copy the key
+       50: 1378:		strcpy(this_entry->key,iter->key);
+        -: 1379:
+        -: 1380:		// copy the values
+       50: 1381:		this_entry->values = malloc(sizeof(element)*iter->length);
+       50: 1382:		memmove(this_entry->values,iter->values,sizeof(element)*iter->length);
+        -: 1383:
+        -: 1384:		//  assign memory for the references
+       50: 1385:		this_entry->backward = malloc(sizeof(entry*));
+       50: 1386:		this_entry->backward_size = 0;
+       50: 1387:		this_entry->forward = malloc(sizeof(entry*));
+       50: 1388:		this_entry->forward_size = 0;
+        -: 1389:
+        -: 1390:		// copy the length
+       50: 1391:		this_entry->length = iter->length;
+        -: 1392:
+        -: 1393:		// copy is simple
+       50: 1394:		this_entry->is_simple = iter->is_simple;
+        -: 1395:		
+        -: 1396:		// add to the snapshot list
+       50: 1397:		list_add(&entry_ptr,this_entry);
+       50: 1398:		iter = iter->prev;
+        -: 1399:	}
+        -: 1400:
+        -: 1401:	// now go through and deal with all the references
+       22: 1402:	iter = entry_ptr;
+        -: 1403:	entry * sub_entry;
+       72: 1404:	while(iter){
+        -: 1405:
+        -: 1406:		// loop through all the entries and establish the references
+      165: 1407:		for(int i = 0; i < iter->length; i++){
+        -: 1408:			// if this entry is an entry, build the reference
+      115: 1409:			if(iter->values[i].type == 1){
+       20: 1410:				sub_entry = find_key_alt(iter->values[i].entry->key,entry_ptr);
+       20: 1411:				iter->values[i].entry = sub_entry;
+       20: 1412:				deal_with_references(iter,sub_entry);
+        -: 1413:			}
+        -: 1414:		}
+       50: 1415:		iter = iter->prev;
+        -: 1416:	}
+        -: 1417:
+       22: 1418:	int id = snapshot_list_add(snapshots,entry_ptr);
+       22: 1419:	printf("saved as snapshot %d\n\n",id);
+       22: 1420:	return;
+        -: 1421:}
+        -: 1422:
+        -: 1423:// find the minimum value
+        5: 1424:int minimum(entry * this_entry){
+        -: 1425:	int min;
+        5: 1426:	if(this_entry->length == 0){
+    #####: 1427:		return 0;
+        -: 1428:	}
+        5: 1429:	if(this_entry->values[0].type == ENTRY){
+        1: 1430:		min = minimum(this_entry->values[0].entry);
+        -: 1431:	}else{
+        4: 1432:		min = this_entry->values[0].value;
+        -: 1433:	}
+        -: 1434:	int potential_min;
+       25: 1435:	for(int i = 1; i < this_entry->length; i++){
+       20: 1436:		if(this_entry->values[i].type == ENTRY){
+    #####: 1437:			potential_min = minimum(this_entry->values[i].entry);
+        -: 1438:		}else{
+       20: 1439:			potential_min = this_entry->values[i].value;
+        -: 1440:		}
+        -: 1441:
+       20: 1442:		if(potential_min<min){
+        7: 1443:			min = potential_min;
+        -: 1444:		}
+        -: 1445:	}
+        -: 1446:
+        5: 1447:	return min;
+        -: 1448:}
+        -: 1449:
+        -: 1450:// minimum interpreter
+        4: 1451:void command_min(char * line,entry ** ptr){
+        -: 1452:	// find the key to find the length of from from the linked list
+        4: 1453:	entry * min_entry = find_key(line,*ptr);
+        -: 1454:
+        4: 1455:	if(min_entry!=NULL){
+        4: 1456:		printf("%d\n", minimum(min_entry));
+        -: 1457:	}else{
+    #####: 1458:		printf("no such key\n");
+        -: 1459:	}
+        -: 1460:
+        4: 1461:	printf("\n");
+        4: 1462:	return;
+        -: 1463:}
+        -: 1464:
+        -: 1465:// find the maximum value
+        5: 1466:int maximum(entry * this_entry){
+        -: 1467:	int max;
+        5: 1468:	if(this_entry->length == 0){
+    #####: 1469:		return 0;
+        -: 1470:	}
+        5: 1471:	if(this_entry->values[0].type == ENTRY){
+    #####: 1472:		max = maximum(this_entry->values[0].entry);
+        -: 1473:	}else{
+        5: 1474:		max = this_entry->values[0].value;
+        -: 1475:	}
+        -: 1476:	int potential_max;
+       25: 1477:	for(int i = 1; i < this_entry->length; i++){
+       20: 1478:		if(this_entry->values[i].type == ENTRY){
+        1: 1479:			potential_max = maximum(this_entry->values[i].entry);
+        -: 1480:		}else{
+       19: 1481:			potential_max = this_entry->values[i].value;
+        -: 1482:		}
+        -: 1483:
+       20: 1484:		if(max<potential_max){
+        9: 1485:			max = potential_max;
+        -: 1486:		}
+        -: 1487:	}
+        -: 1488:
+        5: 1489:	return max;
+        -: 1490:}
+        -: 1491:
+        -: 1492:// maximum interpreter
+        4: 1493:void command_max(char * line, entry ** ptr){
+        -: 1494:	// find the key to find the length of from from the linked list
+        4: 1495:	entry * max_entry = find_key(line,*ptr);
+        -: 1496:
+        4: 1497:	if(max_entry!=NULL){
+        4: 1498:		printf("%d\n", maximum(max_entry));
+        -: 1499:	}else{
+    #####: 1500:		printf("no such key\n");
+        -: 1501:	}
+        -: 1502:
+        4: 1503:	printf("\n");
+        4: 1504:	return;
+        -: 1505:}
+        -: 1506:
+        -: 1507:// find the sum of the values for an entry
+       37: 1508:int sum(entry * this_entry){
+       37: 1509:	if(this_entry->length == 0){
+        1: 1510:		return 0;
+        -: 1511:	}
+       36: 1512:	int total_sum = 0;
+      127: 1513:	for(int i = 0; i < this_entry->length; i++){
+       91: 1514:		if(this_entry->values[i].type == ENTRY){
+       24: 1515:			total_sum += sum(this_entry->values[i].entry);
+        -: 1516:		}else{
+       67: 1517:			total_sum+=this_entry->values[i].value;
+        -: 1518:		}
+        -: 1519:	}
+        -: 1520:
+       36: 1521:	return total_sum;
+        -: 1522:}
+        -: 1523:
+        -: 1524:// sum interpreter
+       13: 1525:void command_sum(char * line,entry ** ptr){
+        -: 1526:	// find the key to find the sum of from from the linked list
+       13: 1527:	entry * sum_entry = find_key(line,*ptr);
+        -: 1528:
+       13: 1529:	if(sum_entry!=NULL){
+       13: 1530:		printf("%d\n", sum(sum_entry));
+        -: 1531:	}else{
+    #####: 1532:		printf("no such key\n");
+        -: 1533:	}
+        -: 1534:
+       13: 1535:	printf("\n");
+       13: 1536:	return;
+        -: 1537:}
+        -: 1538:
+        -: 1539:// find the number of values in an entry
+       33: 1540:int length(entry * this_entry){
+       33: 1541:	if(this_entry->is_simple){
+       17: 1542:		return this_entry->length;
+        -: 1543:	}
+        -: 1544:	
+       16: 1545:	int total = this_entry->length - this_entry->forward_size;
+       39: 1546:	for(int i = 0; i < this_entry->forward_size;i++){
+       23: 1547:		total += length(this_entry->forward[i]);
+        -: 1548:	}
+        -: 1549:
+       16: 1550:	return total;
+        -: 1551:}
+        -: 1552:
+        -: 1553:// length interpreter
+       10: 1554:void command_len(char * line, entry ** ptr){
+        -: 1555:	// find the key to find the length of from from the linked list
+       10: 1556:	entry * length_entry = find_key(line,*ptr);
+        -: 1557:
+       10: 1558:	if(length_entry!=NULL){
+       10: 1559:		printf("%d\n", length(length_entry));
+        -: 1560:	}else{
+    #####: 1561:		printf("no such key\n");
+        -: 1562:	}
+        -: 1563:
+       10: 1564:	printf("\n");
+       10: 1565:	return;
+        -: 1566:}
+        -: 1567:
+        -: 1568:// reverse interpreter
+        1: 1569:void command_rev(char * line, entry ** ptr){
+        -: 1570:	// find the key to rev from from the linked list
+        1: 1571:	entry * rev_entry = find_key(line,*ptr);
+        -: 1572:
+        1: 1573:	if(rev_entry!=NULL){
+        1: 1574:		printf("ok\n");
+        1: 1575:		rev_entry->values = reverse(rev_entry->values, rev_entry->length);
+        -: 1576:
+        -: 1577:	}else{
+    #####: 1578:		printf("no such key\n");
+        -: 1579:	}
+        -: 1580:
+        1: 1581:	printf("\n");
+        1: 1582:	return;
+        -: 1583:}
+        -: 1584:
+        -: 1585:// uniq interpreter
+        1: 1586:void command_uniq(char * line, entry ** ptr){
+        -: 1587:	// find the key to use from from the linked list
+        1: 1588:	entry * uniq_entry = find_key(line,*ptr);
+        -: 1589:
+        1: 1590:	if(uniq_entry!=NULL){
+        1: 1591:		printf("ok\n");
+        1: 1592:		element * values_to_uniq = uniq_entry->values;
+        1: 1593:		uniq_entry->values = uniq(values_to_uniq, &(uniq_entry->length));
+        -: 1594:	}else{
+    #####: 1595:		printf("no such key\n");
+        -: 1596:	}
+        -: 1597:
+        1: 1598:	printf("\n");
+        1: 1599:	return;
+        -: 1600:}
+        -: 1601:
+        -: 1602:// sort interpreter
+        1: 1603:void command_sort(char * line, entry ** ptr){
+        -: 1604:	// find the key to sort from from the linked list
+        1: 1605:	entry * sort_entry = find_key(line,*ptr);
+        -: 1606:
+        1: 1607:	if(sort_entry!=NULL){
+        1: 1608:		printf("ok\n");
+        1: 1609:		element * values_to_sort = sort_entry->values;
+        1: 1610:		qsort(values_to_sort,sort_entry->length,sizeof(element),cmpfunc);
+        -: 1611:	}else{
+    #####: 1612:		printf("no such key\n");
+        -: 1613:	}
+        -: 1614:
+        1: 1615:	printf("\n");
+        1: 1616:	return;
+        -: 1617:	
+        -: 1618:}
+        -: 1619:
+        -: 1620:// print the forward references of a given entry in lexicographic ordr
+       14: 1621:int forward_references(entry * this_entry, char ** reference_keys, int size){
+        -: 1622:
+      14*: 1623:	for(int i = 0; i <this_entry->forward_size;i++){
+    #####: 1624:		size = forward_references(this_entry->forward[i], reference_keys, size);
+        -: 1625:	}
+        -: 1626:
+       14: 1627:	size++;
+       14: 1628:	reference_keys[size-1] = this_entry->key;
+        -: 1629:
+       14: 1630:	return size;
+        -: 1631:}
+        -: 1632:
+        -: 1633:// counts the number of forward references
+       22: 1634:int count_forward_references(entry * this_entry){
+       22: 1635:	if(this_entry->forward_size == 0){
+       14: 1636:		return 1;
+        -: 1637:	}
+        8: 1638:	int total = 1;
+       22: 1639:	for(int i = 0; i < this_entry->forward_size;i++){
+       14: 1640:		total += count_forward_references(this_entry->forward[i]);
+        -: 1641:	}
+        -: 1642:
+        8: 1643:	return total;
+        -: 1644:}
+        -: 1645:
+        -: 1646:// forward reference interpreter
+       13: 1647:void command_forward(char * line, entry ** ptr){
+        -: 1648:
+        -: 1649:	// find the key to print all forward references for
+       13: 1650:	entry * this_entry = find_key(line,*ptr);
+        -: 1651:
+        -: 1652:	// if this key doesnt exist
+       13: 1653:	if(this_entry == NULL){
+    #####: 1654:		printf("no such key\n\n");
+    #####: 1655:		return;
+        -: 1656:	}
+        -: 1657:
+        -: 1658:	// if there are no forward references
+       13: 1659:	if(this_entry->forward_size == 0){
+        5: 1660:		printf("nil\n\n");
+        5: 1661:		return;
+        -: 1662:	}
+        -: 1663:
+        -: 1664:	// count all the forward references to assign the correct amount of memory
+        8: 1665:	int total = count_forward_references(this_entry)-1;
+        -: 1666:
+        -: 1667:	// initialise an array to store all of the reference value keys
+        8: 1668:	char ** reference_keys = malloc(sizeof(char *)*total);
+        -: 1669:
+        -: 1670:	// initialise a count to track how many references we have
+        8: 1671:	int size = 0;
+        -: 1672:
+        -: 1673:	// loop through all the top level forward entries
+       22: 1674:	for(int i = 0; i<this_entry->forward_size;i++){
+       14: 1675:		size = forward_references(this_entry->forward[i], reference_keys, size);
+        -: 1676:	}
+        -: 1677:	
+        -: 1678:	// sort in lexicographical order
+        8: 1679:	qsort(reference_keys,size,sizeof(char*),cmpalpha);
+        -: 1680:
+        -: 1681:	// print out the references
+        8: 1682:	int i = 0;
+        -: 1683:
+       14: 1684:	for(; i < size-1;i++){
+        -: 1685:		// we dont want to print duplicate values
+        6: 1686:		if(strcmp(reference_keys[i],reference_keys[i+1])!=0){
+        2: 1687:			printf("%s, ", reference_keys[i]);
+        -: 1688:		}
+        -: 1689:		
+        -: 1690:	}
+        8: 1691:	printf("%s\n\n", reference_keys[i]);
+        -: 1692:
+        8: 1693:	free(reference_keys);
+        8: 1694:	return;
+        -: 1695:	
+        -: 1696:}
+        -: 1697:
+        -: 1698:// finds all the backward references of an entry
+       10: 1699:int backward_references(entry * this_entry, char ** reference_keys, int size){
+        -: 1700:
+      10*: 1701:	for(int i = 0; i <this_entry->backward_size;i++){
+    #####: 1702:		size = backward_references(this_entry->backward[i], reference_keys, size);
+        -: 1703:	}
+        -: 1704:
+       10: 1705:	size++;
+       10: 1706:	reference_keys[size-1] = this_entry->key;
+        -: 1707:
+       10: 1708:	return size;
+        -: 1709:}
+        -: 1710:
+        -: 1711:// counts the number of backward references
+       16: 1712:int count_backward_references(entry * this_entry){
+       16: 1713:	if(this_entry->backward_size == 0){
+       10: 1714:		return 1;
+        -: 1715:	}
+        6: 1716:	int total = 1;
+       16: 1717:	for(int i = 0; i < this_entry->backward_size;i++){
+       10: 1718:		total += count_backward_references(this_entry->backward[i]);
+        -: 1719:	}
+        -: 1720:
+        6: 1721:	return total;
+        -: 1722:}
+        -: 1723:
+        -: 1724:// backwards reference interpreter
+       11: 1725:void command_backward(char * line, entry ** ptr){
+        -: 1726:		// find the key to print all backward references for
+       11: 1727:	entry * this_entry = find_key(line,*ptr);
+        -: 1728:
+        -: 1729:	// if this key doesnt exist
+       11: 1730:	if(this_entry == NULL){
+    #####: 1731:		printf("no such key\n\n");
+    #####: 1732:		return;
+        -: 1733:	}
+        -: 1734:
+        -: 1735:	// if there are no backward references
+       11: 1736:	if(this_entry->backward_size == 0){
+        5: 1737:		printf("nil\n\n");
+        5: 1738:		return;
+        -: 1739:	}
+        -: 1740:
+        -: 1741:	// count all the backward references to assign the correct amount of memory
+        6: 1742:	int total = count_backward_references(this_entry)-1;
+        -: 1743:
+        -: 1744:	// initialise an array to store all of the reference value keys
+        6: 1745:	char ** reference_keys = malloc(sizeof(char *)*total);
+        -: 1746:
+        -: 1747:	// initialise a count to track how many references we have
+        6: 1748:	int size = 0;
+        -: 1749:
+        -: 1750:	// loop through all the top level backward entries
+       16: 1751:	for(int i = 0; i<this_entry->backward_size;i++){
+       10: 1752:		size = backward_references(this_entry->backward[i], reference_keys, size);
+        -: 1753:	}
+        -: 1754:	
+        -: 1755:	// sort in lexicographical order
+        6: 1756:	qsort(reference_keys,size,sizeof(char*),cmpalpha);
+        -: 1757:
+        -: 1758:	// print out the references
+        6: 1759:	int i = 0;
+        -: 1760:
+       10: 1761:	for(; i < size-1;i++){
+        -: 1762:		// we dont want to print duplicate values
+        4: 1763:		if(strcmp(reference_keys[i],reference_keys[i+1])!=0){
+    #####: 1764:			printf("%s, ", reference_keys[i]);
+        -: 1765:		}
+        -: 1766:		
+        -: 1767:	}
+        6: 1768:	printf("%s\n\n", reference_keys[i]);
+        -: 1769:
+        6: 1770:	free(reference_keys);
+        -: 1771:}
+        -: 1772:
+        -: 1773:// prints the type of an entry (simple or general)
+        7: 1774:void command_type(char * line, entry ** ptr){
+        -: 1775:	// find the key to sort from from the linked list
+        7: 1776:	entry * type_entry = find_key(line,*ptr);
+        -: 1777:
+        7: 1778:	if(type_entry!=NULL){
+        7: 1779:		if(type_entry->is_simple){
+        4: 1780:			printf("simple");
+        -: 1781:		}else{
+        3: 1782:			printf("general");
+        -: 1783:		}
+        -: 1784:	}else{
+    #####: 1785:		printf("no such key");
+        -: 1786:	}
+        -: 1787:
+        7: 1788:	printf("\n\n");
+        7: 1789:}
+        -: 1790:
+        -: 1791:// interprets given command and calls appropriate function
+      282: 1792:int command_interpreter(char command[], entry ** entry_ptr, snapshot ** snapshot_ptr){
+        -: 1793:	char * line;
+      282: 1794:	if(strncasecmp(command,"bye",3)==0){
+       26: 1795:		list_free(*entry_ptr);
+       26: 1796:		snapshot_list_free(snapshot_ptr);
+       26: 1797:		command_bye();
+       26: 1798:		return -1;
+      256: 1799:	}else if(strncasecmp(command,"help",4)==0){
+    #####: 1800:		command_help();
+      256: 1801:	}else if(strncasecmp(command,"list keys",9)==0){
+        4: 1802:		command_list_keys(entry_ptr);
+      252: 1803:	}else if(strncasecmp(command,"list entries",12)==0){
+       10: 1804:		command_list_entries(entry_ptr);
+      242: 1805:	}else if(strncasecmp(command,"list snapshots",14)==0){
+       13: 1806:		command_list_snapshots(snapshot_ptr);
+      229: 1807:	}else if(strncasecmp(command,"get",3)==0){
+        9: 1808:		line = &command[0]+4;
+        9: 1809:		command_get(line,entry_ptr);
+      220: 1810:	}else if(strncasecmp(command,"del",3)==0){
+        3: 1811:		line = &command[0]+4;
+        3: 1812:		command_del(line,entry_ptr);
+      217: 1813:	}else if(strncasecmp(command,"purge",5)==0){
+        6: 1814:		line = &command[0]+6;
+        6: 1815:		command_purge(line,entry_ptr,snapshot_ptr);
+      211: 1816:	}else if(strncasecmp(command,"set",3)==0){
+       65: 1817:		line = &command[0]+4;
+       65: 1818:		command_set(line,entry_ptr);
+      146: 1819:	}else if(strncasecmp(command,"push",4)==0){
+        8: 1820:		line = &command[0]+5;
+        8: 1821:		command_push(line,entry_ptr);
+      138: 1822:	}else if(strncasecmp(command,"append",6)==0){
+        5: 1823:		line = &command[0]+7;
+        5: 1824:		command_append(line,entry_ptr);
+      133: 1825:	}else if(strncasecmp(command,"pick",4)==0){
+        5: 1826:		line = &command[0]+5;
+        5: 1827:		command_pick(line,entry_ptr);
+      128: 1828:	}else if(strncasecmp(command,"pluck",5)==0){
+       12: 1829:		line = &command[0]+6;
+       12: 1830:		command_pluck(line,entry_ptr);
+      116: 1831:	}else if(strncasecmp(command,"pop",3)==0){
+       10: 1832:		line = &command[0]+4;
+       10: 1833:		command_pop(line,entry_ptr);
+      106: 1834:	}else if(strncasecmp(command,"drop",4)==0){
+        7: 1835:		line = &command[0]+5;
+        7: 1836:		command_drop(line,snapshot_ptr);
+       99: 1837:	}else if(strncasecmp(command,"rollback",8)==0){
+        2: 1838:		line = &command[0]+9;
+        2: 1839:		command_rollback(line,entry_ptr,snapshot_ptr);
+       97: 1840:	}else if(strncasecmp(command,"checkout",8)==0){
+       10: 1841:		line = &command[0]+9;
+       10: 1842:		command_checkout(line,entry_ptr,snapshot_ptr);
+       87: 1843:	}else if(strncasecmp(command,"snapshot",8)==0){
+       22: 1844:		command_snapshot(entry_ptr,snapshot_ptr);
+       65: 1845:	}else if(strncasecmp(command,"min",3)==0){
+        4: 1846:		line = &command[0]+4;
+        4: 1847:		command_min(line,entry_ptr);
+       61: 1848:	}else if(strncasecmp(command,"max",3)==0){
+        4: 1849:		line = &command[0]+4;
+        4: 1850:		command_max(line,entry_ptr);
+       57: 1851:	}else if(strncasecmp(command,"sum",3)==0){
+       13: 1852:		line = &command[0]+4;
+       13: 1853:		command_sum(line,entry_ptr);
+       44: 1854:	}else if(strncasecmp(command,"len",3)==0){
+       10: 1855:		line = &command[0]+4;
+       10: 1856:		command_len(line,entry_ptr);
+       34: 1857:	}else if(strncasecmp(command,"rev",3)==0){
+        1: 1858:		line = &command[0]+4;
+        1: 1859:		command_rev(line,entry_ptr);
+       33: 1860:	}else if(strncasecmp(command,"uniq",4)==0){
+        1: 1861:		line = &command[0]+4;
+        1: 1862:		command_uniq(line,entry_ptr);
+       32: 1863:	}else if(strncasecmp(command,"sort",4)==0){
+        1: 1864:		line = &command[0]+5;
+        1: 1865:		command_sort(line,entry_ptr);
+       31: 1866:	}else if(strncasecmp(command,"forward",7)==0){
+       13: 1867:		line = &command[0]+8;
+       13: 1868:		command_forward(line,entry_ptr);
+       18: 1869:	}else if(strncasecmp(command,"backward",8)==0){
+       11: 1870:		line = &command[0]+9;
+       11: 1871:		command_backward(line,entry_ptr);
+        7: 1872:	}else if(strncasecmp(command,"type",4)==0){
+        7: 1873:		line = &command[0]+5;
+        7: 1874:		command_type(line,entry_ptr);
+        -: 1875:	}else{
+    #####: 1876:		printf("INVALID COMMAND: TYPE HELP FOR A LIST OF VALID COMMANDS\n\n");
+        -: 1877:	}
+        -: 1878:
+      256: 1879:	return 0;
+        -: 1880:}

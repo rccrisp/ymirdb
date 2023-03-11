@@ -1,0 +1,12 @@
+SET c 7
+SET b 3 5 c
+SET a 1 2 b
+DEL c
+DEL b
+DEL a
+DEL c
+DEL b
+DEL c
+DEL g
+PURGE g
+BYE

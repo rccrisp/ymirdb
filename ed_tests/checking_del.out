@@ -1,0 +1,40 @@
+> no such key
+
+> ok
+
+> [1]
+
+> ok
+
+> no such key
+
+> no keys
+
+> no entries
+
+> ok
+
+> ok
+
+> ok
+
+> a
+b
+c
+
+> a [1]
+b [2 3]
+c [4 5 6]
+
+> ok
+
+> ok
+
+> ok
+
+> no keys
+
+> no entries
+
+> bye
+

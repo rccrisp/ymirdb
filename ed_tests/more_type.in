@@ -1,0 +1,11 @@
+SET a 0
+TYPE a
+SET b 1
+TYPE b
+PUSH a b
+TYPE a
+TYPE b
+POP a
+TYPE a
+TYPE b
+BYE

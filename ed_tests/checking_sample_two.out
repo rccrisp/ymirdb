@@ -1,0 +1,30 @@
+> ok
+
+> ok
+
+> b
+a
+
+> b [2 3]
+a [1]
+
+> no snapshots
+
+> index out of range
+
+> 2
+
+> [2 3]
+
+> 3
+
+> [2]
+
+> ok
+
+> no such key
+
+> ok
+
+> bye
+

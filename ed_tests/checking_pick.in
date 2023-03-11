@@ -1,0 +1,11 @@
+PICK a 1
+SET a 3 2 1
+PICK a 4
+PICK a 3
+GET a
+PICK a 2
+GET a
+PICK a 1
+GET a
+PICK a 0
+BYE

@@ -1,0 +1,47 @@
+> ok
+
+> ok
+
+> b [4 a 6]
+a [1 2]
+
+> 3
+
+> 13
+
+> not permitted
+
+> no such key
+
+> ok
+
+> ok
+
+> ok
+
+> 7
+
+> 15
+
+> 18
+
+> ok
+
+> ok
+
+> ok
+
+> b, c
+
+> c
+
+> nil
+
+> nil
+
+> a
+
+> a, b
+
+> bye
+

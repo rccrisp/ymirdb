@@ -1,0 +1,20 @@
+SORT a
+SET a 1 2 3
+SORT a
+GET a
+SET b 1 1 1
+SORT b
+GET b
+SET c 1 2 3 3 3 4 5
+SORT c
+GET c
+SET d 1 2 3 1 2 3
+SORT d
+GET d
+SET e 1 2 2 3 2 2 1
+SORT e
+GET e
+SET f 1 1 2 1 1
+SORT f
+GET f
+BYE

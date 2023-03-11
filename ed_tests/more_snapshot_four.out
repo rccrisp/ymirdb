@@ -1,0 +1,356 @@
+> no keys
+
+> no entries
+
+> no snapshots
+
+> ok
+
+> ok
+
+> ok
+
+> ok
+
+> a
+b
+c
+d
+
+> a [1 b]
+b [2 c]
+c [3 d]
+d [4]
+
+> no snapshots
+
+> general
+
+> general
+
+> general
+
+> simple
+
+> 4
+
+> 3
+
+> 2
+
+> 1
+
+> b, c, d
+
+> c, d
+
+> d
+
+> nil
+
+> nil
+
+> a
+
+> a, b
+
+> a, b, c
+
+> saved as snapshot 1
+
+> ok
+
+> [4 -1]
+
+> ok
+
+> [-1 4]
+
+> ok
+
+> ok
+
+> e
+a
+b
+c
+d
+
+> e [0]
+a [1 b]
+b [2 c]
+c [3 d]
+d [-1 4 e]
+
+> 1
+
+> general
+
+> general
+
+> general
+
+> general
+
+> simple
+
+> 6
+
+> 5
+
+> 4
+
+> 3
+
+> 1
+
+> b, c, d, e
+
+> c, d, e
+
+> d, e
+
+> e
+
+> nil
+
+> nil
+
+> a
+
+> a, b
+
+> a, b, c
+
+> a, b, c, d
+
+> saved as snapshot 2
+
+> ok
+
+> ok
+
+> [4 -1]
+
+> ok
+
+> [-1 4]
+
+> ok
+
+> ok
+
+> e
+a
+b
+c
+d
+
+> e [0]
+a [1 b]
+b [2 c]
+c [3 d]
+d [-1 4 e]
+
+> 2
+1
+
+> general
+
+> general
+
+> general
+
+> general
+
+> simple
+
+> 6
+
+> 5
+
+> 4
+
+> 3
+
+> 1
+
+> b, c, d, e
+
+> c, d, e
+
+> d, e
+
+> e
+
+> nil
+
+> nil
+
+> a
+
+> a, b
+
+> a, b, c
+
+> a, b, c, d
+
+> saved as snapshot 3
+
+> ok
+
+> e
+a
+b
+c
+d
+
+> e [0]
+a [1 b]
+b [2 c]
+c [3 d]
+d [-1 4 e]
+
+> 3
+2
+1
+
+> general
+
+> general
+
+> general
+
+> general
+
+> simple
+
+> 6
+
+> 5
+
+> 4
+
+> 3
+
+> 1
+
+> b, c, d, e
+
+> c, d, e
+
+> d, e
+
+> e
+
+> nil
+
+> nil
+
+> a
+
+> a, b
+
+> a, b, c
+
+> a, b, c, d
+
+> not permitted
+
+> not permitted
+
+> not permitted
+
+> ok
+
+> ok
+
+> b [2 c]
+c [3 d]
+d [4]
+
+> ok
+
+> e [0]
+b [2 c]
+c [3 d]
+d [-1 4 e]
+
+> ok
+
+> e [0]
+b [2 c]
+c [3 d]
+d [-1 4 e]
+
+> not permitted
+
+> not permitted
+
+> ok
+
+> ok
+
+> c [3 d]
+d [4]
+
+> ok
+
+> e [0]
+c [3 d]
+d [-1 4 e]
+
+> ok
+
+> e [0]
+c [3 d]
+d [-1 4 e]
+
+> not permitted
+
+> ok
+
+> ok
+
+> d [4]
+
+> ok
+
+> e [0]
+d [-1 4 e]
+
+> ok
+
+> e [0]
+d [-1 4 e]
+
+> ok
+
+> ok
+
+> no entries
+
+> ok
+
+> e [0]
+
+> ok
+
+> e [0]
+
+> ok
+
+> ok
+
+> no entries
+
+> ok
+
+> no entries
+
+> ok
+
+> no entries
+
+> bye
+

@@ -1,0 +1,20 @@
+UNIQ a
+SET a 1 2 3
+UNIQ a
+GET a
+SET b 1 1 1
+UNIQ b
+GET b
+SET c 1 2 3 3 3 4 5
+UNIQ c
+GET c
+SET d 1 2 3 1 2 3
+UNIQ d
+GET d
+SET e 1 2 2 3 2 2 1
+UNIQ e
+GET e
+SET f 1 1 2 1 1
+UNIQ f
+GET f
+BYE
